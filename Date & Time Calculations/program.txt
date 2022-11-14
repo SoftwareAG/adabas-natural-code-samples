@@ -1,0 +1,63 @@
+                                                        
+* DTDIFF
+DEFINE DATA LOCAL
+1 #FROM (D)  INIT <D'04/06/2015'>
+1 #TO (D)    INIT <D'04/09/2015'>
+1 #DAYS (N3)
+END-DEFINE
+#DAYS := D'04/09/2015' - D'04/06/2015'
+WRITE #DAYS 'days between D"04/09/2015" and D"04/06/2015"'
+*
+#DAYS := #TO - #FROM
+WRITE #DAYS 'days between #FROM and #TO'
+*
+#DAYS := *DATX - D'04/06/2015'
+WRITE #DAYS 'days between *DATX and D"04/06/2015"'
+END
+
+DTDIFF results:
+
+   3 days between D'04/09/2015' and D'04/06/2015'
+   3 days between #FROM and #TO
+   3 days between *DATX and D'04/06/2015'
+
+
+* TMDIFF
+DEFINE DATA LOCAL
+1 #FROM (T)        INIT <E'04/05/2015 07:00:00'>
+1 #THRU (T)        INIT <E'04/07/2015 01:10:01'>
+1 #HOURS (T)       (HD='hh:mm:ss')
+1 #D (D)
+1 #DAYS (I1)       (HD='Days')
+END-DEFINE
+ASSIGN #HOURS = #THRU - #FROM     /* duration
+ASSIGN #D     = #HOURS            /* extract days
+ASSIGN #DAYS  = #D                /* D to numeric format
+DISPLAY #DAYS
+        #HOURS
+END
+
+TMDIFF results:
+
+Days hh:mm:ss
+---- --------
+ 
+   1 18:10:01
+
+
+* TMNEW
+DEFINE DATA LOCAL
+1 #PDT (T)  INIT <*TIMX> (HD='Pacific Time')
+1 #NDT (T)               (HD='Newfoundland Time')
+END-DEFINE
+COMPUTE #NDT = #PDT + T'03:30:00'     /* 3.5 hours
+DISPLAY #PDT (EM=YYYY/MM/DD^HH:II:SS)
+        #NDT (EM=YYYY/MM/DD^HH:II:SS)
+END
+
+TMNEW results:
+
+   Pacific Time      Newfoundland Time
+------------------- -------------------
+ 
+2015/04/09 00:19:03 2015/04/09 03:49:03            
