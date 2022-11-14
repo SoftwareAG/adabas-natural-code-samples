@@ -1,0 +1,167 @@
+                                                        
+Program 1 - Shift left
+
+DEFINE DATA LOCAL
+1 #M (I4)          CONST <5>
+1 #TBL (A3/#M)     INIT <'abc', 'def', 'ghi', 'jkl', 'mno'>
+END-DEFINE
+*
+WRITE 'Before:' #TBL (*)
+*
+ASSIGN #TBL (1 : #M - 1) = #TBL (2 : #M)
+RESET  #TBL (#M)
+WRITE ' After:' #TBL (*)
+END
+
+Program 1 Results:
+ 
+Before: abc def ghi jkl mno
+ After: def ghi jkl mno
+
+
+Program 2 - Shift right
+
+DEFINE DATA LOCAL
+1 #M (I4)          CONST <5>
+1 #TBL (A3/#M)     INIT <'abc', 'def', 'ghi', 'jkl', 'mno'>
+1 #TMP (A3/#M)
+*
+1 #I (I4)
+1 #T (I4)
+END-DEFINE
+WRITE 'Before:' #TBL (*)
+*
+RESET  #TMP (1)
+ASSIGN #TMP (2 : #M) = #TBL (1 : #M - 1)
+ASSIGN #TBL (*)      = #TMP (*)
+WRITE ' After:' #TBL (*)
+END
+
+Program 2 Results:
+ 
+Before: abc def ghi jkl mno
+ After:     abc def ghi jkl
+
+
+Program 3a - Sum using FOR
+
+DEFINE DATA LOCAL
+1 #MR (I4)     CONST <2>
+1 #MC (I4)     CONST <4>
+1 #N (I4/#MR, #MC) INIT (1, V) <1, 2, 3, 4>
+                        (2, V) <5, 6, 7, 8>
+1 #SUM (I4)
+1 #I (I4)
+1 #J (I4)
+END-DEFINE
+FOR #I = 1 #MR
+  FOR #J = 1 #MC
+    ADD #N (#I, #J) TO #SUM
+  END-FOR
+END-FOR
+WRITE '=' #SUM
+END
+
+
+Program 3b - Sum with single computation
+
+DEFINE DATA LOCAL
+1 #MR (I4)     CONST <2>
+1 #MC (I4)     CONST <4>
+1 #N (I4/#MR, #MC) INIT (1, V) <1, 2, 3, 4>
+                        (2, V) <5, 6, 7, 8>
+1 #SUM (I4)
+END-DEFINE
+ASSIGN #SUM = #N (*, *) + 0          /* <<<<<
+WRITE '=' #SUM
+END
+
+
+Program 4a - with null array elements
+
+DEFINE DATA LOCAL
+1 EMP    VIEW EMPLOYEES
+  2 PERSONNEL-ID
+  2 NAME
+  2 CITY
+  2 ADDRESS-LINE (5)
+END-DEFINE
+READ (4) EMP BY PERSONNEL-ID
+  DISPLAY 
+          PERSONNEL-ID
+          NAME
+          CITY
+          ADDRESS-LINE (*)
+END-READ
+END
+
+Program 4a Results:
+ 
+PERSONNEL         NAME                 CITY               ADDRESS
+   ID
+--------- -------------------- -------------------- --------------------
+ 
+11100102  SCHINDLER            HEPPENHEIM           BUCHENLANDWEG 84
+                                                    6148 HEPPENHEIM
+ 
+ 
+ 
+11100105  SCHIRM               DARMSTADT            SIEMENSSTR.4
+                                                    6100 DARMSTADT
+ 
+ 
+ 
+11100106  SCHMITT              DARMSTADT            WORMSERSTR.23
+                                                    6100 DARMSTADT
+ 
+ 
+ 
+11100107  SCHMIDT              HEPPENHEIM           AM ELFENGRUND 3
+                                                    6148 HEPPENHEIM
+ 
+ 
+ 
+
+Program 4b - without null array elements
+
+DEFINE DATA LOCAL
+1 EMP    VIEW EMPLOYEES
+  2 PERSONNEL-ID
+  2 NAME
+  2 CITY
+  2 ADDRESS-LINE (5)
+END-DEFINE
+READ (9) EMP BY PERSONNEL-ID
+  DISPLAY (ES=T)
+          PERSONNEL-ID
+          NAME
+          CITY
+          ADDRESS-LINE (*)
+END-READ
+END
+
+
+Program 4b Results:
+
+PERSONNEL         NAME                 CITY               ADDRESS
+   ID
+--------- -------------------- -------------------- --------------------
+ 
+11100102  SCHINDLER            HEPPENHEIM           BUCHENLANDWEG 84
+                                                    6148 HEPPENHEIM
+11100105  SCHIRM               DARMSTADT            SIEMENSSTR.4
+                                                    6100 DARMSTADT
+11100106  SCHMITT              DARMSTADT            WORMSERSTR.23
+                                                    6100 DARMSTADT
+11100107  SCHMIDT              HEPPENHEIM           AM ELFENGRUND 3
+                                                    6148 HEPPENHEIM
+11100108  SCHNEIDER            GRIESHEIM            DORNHEIMERWEG 12
+                                                    6100 GRIESHEIM
+11100109  SCHNEIDER            GRIESHEIM            DORNHEIMERWEG 23
+                                                    6100 GRIESHEIM
+11100110  BUNGERT              WEITERSTADT          GUTENBERGSTR. 36
+                                                    6108 WEITERSTADT
+11100111  THIELE               DARMSTADT            SCHILLERSTR. 33
+                                                    6100 DARMSTADT
+11100112  THOMA                OBERRAMSTADT         MOZARTSTR. 33
+                                                    6105 OBERRAMSTADT            
