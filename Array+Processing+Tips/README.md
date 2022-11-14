@@ -1,3 +1,11 @@
+It may not be necessary to code an explicit loop, such as FOR or REPEAT, to process an array.
+
+Here are simple methods to
+
+* shift elements to the left (pop-up)
+* shift elements to the right (push down)
+* sum a set of elements
+
 **Program 1 - Shift left/up**  
 Shifting up requires a single ASSIGN.
 
