@@ -1,4 +1,4 @@
-# adabas-natural-code-samples
+# Adabas Natural Code Samples
 Natural Code Samples contributed by the Natural developer community
 
 # Content
