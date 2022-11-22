@@ -1,0 +1,42 @@
+                                                        
+
+ DEFINE DATA LOCAL
+01 #OFFSET (I2) INIT<1>          /* OFFSET
+01 MYVIEW VIEW OF EMPLOYEES
+  02 NAME
+  02 LANG (#OFFSET:#OFFSET + 5)
+* ABOVE WILL BE LANG (1:6) FOR READ AND LANG (2:7) FOR UPDATE  
+  02 LANG (1:1) /* Can be before previous statement with no effect
+01 MYVIEW2 VIEW OF EMPLOYEES
+  02 LANG (1:6)
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+* BY NAME IN THE READ BELOW IS SIMPLY TO GET INTERESTING
+* DATA. READ PHYSICAL DATA IS BORING (TRY IT).
+*
+READ (1) MYVIEW BY NAME STARTING FROM 'SMITH'
+     WRITE 5T LANG (#OFFSET.#OFFSET:#OFFSET + 5) 35T '<== LANG (1:6) AFTER READ'
+     LANG(1.1) := '***'  /* NEW VALUE
+     #OFFSET := 2 /* "MOVE" 1:6 TO 2:7
+     WRITE 5T LANG (1.1) 35T '<== LANG (1.1) AFTER TWO ASSIGNS' /
+           5T LANG (#OFFSET.#OFFSET:#OFFSET + 4) 35T '<== LANG (2:6) AFTER TWO ASSIGNS'
+     UPDATE       /* SEE DISCUSSION IN ATTACHED PDF FILE
+     GET MYVIEW2 *ISN   /* TO SEE THAT IT WORKED
+     WRITE 5T MYVIEW2.LANG (1:6) 35T '<== AFTER UPDATE AND GET' / 5T '-' (55)
+     #OFFSET := 1 /* SET UP TO READ NEXT RECORD (BLOCK 1:6)  /* ONLY FOR MULTIPLE RECORDS
+END-READ
+
+And here is the output:
+
+   PAGE #   1                    DATE:    03/06/11
+    PROGRAM: ADDMU01              LIBRARY: SNIPPET
+ 
+    DAN FRE ENG                   <== LANG (1:6) AFTER READ
+    ***                           <== LANG (1.1) AFTER TWO ASSIGNS
+    FRE ENG                       <== LANG (2:6) AFTER TWO ASSIGNS
+    *** DAN FRE ENG               <== AFTER UPDATE AND GET
+    -------------------------------------------------------
+                                       
