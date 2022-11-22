@@ -1,0 +1,157 @@
+                                                        
+
+* Ralph Zbrog
+* LEN Consulting LLC
+*
+* Sample program to use the Source Work Area as a TEMP file
+* (ie  emulate a WORK file)
+*
+************************************************************************
+*
+DEFINE DATA LOCAL
+                                            /* As defined in USR2014P:
+1 C-SCRMAX           (I01)   CONST <10>     /* Maximum number of lines
+1 C-SCRLEN           (I02)   CONST <133>    /* Length of data area
+1 C-PRFLEN           (I01)   CONST <06>     /* Length of prefix area
+1 SHOW-PREFIX-AREA   (L)     CONST <FALSE>
+*
+1 CONTROL-BLOCK
+  2 ED-SESNUM        (B02)   /* Number of session (0-50)
+  2 ED-LOGFLAG       (A01)   /* Logical name in use
+  2 ED-LOGNAME       (A08)   /* Logical name of the session
+  2 ED-REQUEST       (A04)   /* Editor request
+  2 ED-LIBRARY       (A08)   /* Unused
+  2 ED-MEMBER        (A08)   /* Unused
+  2 ED-RECLEN        (B02)   /* Maximum length of each line
+  2 ED-PRFLEN        (B02)   /* Length of a prefix line on screen
+  2 ED-SCRLEN        (B02)   /* Length of a single line on screen
+  2 ED-SCRNUM        (B02)   /* Number of lines on screen
+  2 ED-SCRMAX        (B02)   /* Maximum number of lines on screen
+  2 ED-RENUM         (B01)   /* Unused
+  /*
+  2 ED-MCMND         (A50)   /* Main command: command line
+  2 ED-SCMND         (A08)   /* Secondary command: PF-key
+  2 ED-CAREA         (B02)   /* Cursor area
+  2 ED-CROW          (B02)   /* Cursor row
+  2 ED-CCLM          (B02)   /* Cursor column
+  /*
+  2 ED-RECTOP        (B02)   /* Unused
+  2 ED-NEW-RECTOP    (B04)   /* Line number of new first line on screen
+  2 ED-RECNUM        (B02)   /* Unused
+  2 ED-NEW-RECNUM    (B04)   /* Number of lines in the source area
+  2 ED-FILECHG       (B01)   /* Indicator if source area has been mod.
+  2 ED-SRAUSED       (B04)   /* Used source area in bytes
+  2 ED-SRAFREE       (B04)   /* Unused source area in bytes
+  2 ED-FLINE         (A80)   /* Message test. Explanation for
+                             /* ED-MSGNUM or ED-ERRNUM
+  2 ED-MSGNUM        (B02)   /* Message number
+  2 ED-ERRNUM        (B02)   /* Error number
+  2 ED-DUMMY         (A32)   /* Used for enhancements
+                   2 REDEFINE ED-DUMMY
+    3 ED-DSTYPE      (A01)   /* Type of session
+    3 ED-RECMAX      (B02)   /* Target session for CSES request
+*
+1 CB-ALIN                         /* Attributes of prefix area
+  2 CB-ALIN-V        (N01/1:C-SCRMAX)
+1 L-PREFIXES                      /* Prefix area
+  2 L-PREFIX-MAX     (1:C-SCRMAX)
+    3 L-PREFIX       (A06)        /* Length must be equal C-PRFLEN
+                   3 REDEFINE L-PREFIX
+      4 L-PREFIX-A1  (A01/1:C-PRFLEN)
+*
+1 CB-ADAT                         /* Attributes of data lines
+  2 CB-ADAT-V        (N01/1:C-SCRMAX)
+1 L-DATA-LINES                    /* Data lines
+  2 L-DATA-MAX       (1:C-SCRMAX)
+    3 L-DATA         (A133)       /* Length must be equal C-SCRLEN
+                   3 REDEFINE L-DATA
+      4 L-DATA-A1    (A01/1:C-SCRLEN)
+*
+1 C-SESNUM (B2)
+1 ERROR-NUMBER (N4)
+*
+************************************************************************
+*
+1 #I (I4)
+1 #ED-SCRNUM (I4)
+1 #RECNUM (I4)
+1 #LINES (P7)
+1 #WORK (A133)     1 REDEFINE #WORK    /* WORK record
+  2 #W (A2)
+  2 FILLER 1X
+  2 #ALPHA (A65/2)
+1 #WORDS (P7)
+END-DEFINE
+                                       /* Initialize the SWA
+SET CONTROL 'Z'                        /* Clear SWA
+FORMAT (3) LS=134
+DEFINE PRINTER (3) OUTPUT 'SOURCE'
+EJECT OFF (3)
+WRITE (3) NOTITLE '09 The quick brown fox jumps over the lazy dog....'
+                  '...+...6....+....7....+....8....+....9....+....0'
+                  '...+...1....+....2....+....3....+'
+WRITE (3) NOTITLE '07 A penny saved is a penny earned.'
+WRITE (3) NOTITLE '06 That"s all water under the bridge.'
+*
+*
+RESET  ED-SESNUM                       /* Open a free session
+ASSIGN ED-LOGFLAG = 'N'
+ASSIGN ED-DSTYPE  = 'N'                /* NATURAL SWA
+ASSIGN ED-RECLEN  = 133                /* Length must be equal C-SCRLEN
+ASSIGN ED-SCRMAX  = 10
+ASSIGN ED-SCRNUM  = 10
+ASSIGN ED-SCRLEN  = C-SCRLEN
+ASSIGN ED-PRFLEN  = C-PRFLEN
+*
+ASSIGN ED-REQUEST = 'OPEN'             /* Open session
+CALLNAT 'USR2014N' CONTROL-BLOCK
+                   CB-ALIN
+                   L-PREFIX-A1(*,*)
+                   CB-ADAT
+                   L-DATA-A1(*,*)
+IF  ED-ERRNUM <> 0
+  THEN
+    ERROR-NUMBER := ED-ERRNUM          /* Error number in decimal form
+    WRITE 'Error occurred during OPEN processing:' (I)
+        / '=' ERROR-NUMBER
+        / '=' ED-FLINE (AL=65)
+    STOP
+END-IF
+ASSIGN C-SESNUM = ED-SESNUM       /* Session number returned from OPEN
+ASSIGN #RECNUM  = ED-NEW-RECNUM   /* Number of lines in SWA
+*
+*
+ASSIGN ED-REQUEST = 'GETL'             /* Get lines to ...
+FOR #I = 1 #RECNUM                     /*   emulate READ WORK ...
+  ASSIGN ED-NEW-RECTOP = #I
+  CALLNAT 'USR2014N' CONTROL-BLOCK
+                     CB-ALIN
+                     L-PREFIX-A1(*,*)
+                     CB-ADAT
+                     L-DATA-A1(*,*)
+  ASSIGN #WORK = L-DATA (1)
+  DISPLAY
+          'SWA/Line' #I (EM=ZZ9)
+          '/Words'   #W
+          '/Line'    #ALPHA (*)
+  IF  #W IS (N2)
+    THEN
+      ADD 1 TO #LINES
+      ADD VAL (#W) TO #WORDS
+  END-IF
+END-FOR
+*
+*
+WRITE
+  /// #RECNUM (SG=F NL=3) 'source lines'
+   // #LINES  (SG=F NL=3) 'lines processed'
+    / #WORDS  (SG=F NL=3) 'words'
+*
+ASSIGN ED-REQUEST = 'CLSS'             /* Close session
+CALLNAT 'USR2014N' CONTROL-BLOCK
+                   CB-ALIN
+                   L-PREFIX-A1(*,*)
+                   CB-ADAT
+                   L-DATA-A1(*,*)
+SET CONTROL 'Z'                        /* Clear SWA
+END            
