@@ -30,7 +30,7 @@ Convert a Natural time value into microseconds.
 The copycodes are platform-independent. The copycodes perform similar functions as the APIs USR1009N and USR1023N. The copycodes are in general faster than the APIs. 
 When a Natural time is converted to microseconds with the copycode TIME2MIS, a negativ result can be obtained (dates before 1900). The API returns an error in this case. 
 
-> Statistics
+### Statistics
 A Natural program converts 1,000,000 times a store-clock value into a Natural time value. The test was running on z/OS and on Windows. 
 The values from different platforms should not be compared - my Windows is probably not the best.
 In a first run the API is used for the conversion, in the following the copycodes. The API always returns the microseconds, the Natural Time and the Natural date. 
