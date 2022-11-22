@@ -1,0 +1,162 @@
+                                                        
+===================================================================================
+* Program TIME-SMT
+* Convert: Store clock -> microseconds -> Natural time
+* Using time conversion copycodes
+DEFINE DATA LOCAL
+* Fields for COPYCODE
+1 SAG_B8 (B8)                        /* working field
+1 REDEFINE SAG_B8                    /* BEGIN REDEFINE: SAG_B8
+  2 SAG_B81 (B3)                     /* value 16**7 = 268435456
+  2 SAG_B82 (B3)                     /* value 16
+  2 SAG_B83A (B1)                    /* value 1/16
+  2 SAG_B83B (B1)                    /* value 0
+1 SAG_I41 (I4)                       /* working field
+1 SAG_I42 (I4)                       /* working field
+1 SAG_I43 (I4)                       /* working field
+
+* Timestamp
+1 START-TIME-STCK (B8)               /* Start time STCK
+1 END-TIME-STCK   (B8)               /* End time   STCK
+
+* Time in microseconds since 1900-01-01 00:00:00.0
+1 START-TIME-MIS  (P19)              /* Start time   mis
+1 END-TIME-MIS    (P19)              /* End time     mis
+1 ELA-TIME-MIS    (P19)              /* Elapsed time mis
+
+* Natural time fields, redefined as (P12)
+1 START-TIME-T  (T)                  /* Start time Natural T
+1 REDEFINE START-TIME-T
+  2 START-TIME-P (P12)
+1 END-TIME-T  (T)                    /* End time   Natural T
+1 REDEFINE END-TIME-T
+  2 END-TIME-P (P12)
+
+* Time in text format
+1 START-TIME-A    (A) DYNAMIC        /* Start time
+1 END-TIME-A      (A) DYNAMIC        /* End time
+1 ELA-TIME-A      (A19)              /* Elapsed time
+END-DEFINE
+* ---------------------------------------------------------------------
+* Start Time
+* ---------------------------------------------------------------------
+* Convert store clock to microseconds
+MOVE *TIMESTMP TO START-TIME-STCK
+INCLUDE STCK2MIS 'START-TIME-STCK' 'START-TIME-MIS'
+
+* Convert microseconds to Natural time
+INCLUDE MIS2TIME 'START-TIME-MIS' 'START-TIME-P'
+
+* Make the time readable
+MOVE EDITED START-TIME-T (EM=YYYY-MM-DD' 'HH:II:SS.T) TO START-TIME-A
+
+* Print the start time
+PRINT
+  'Start time (GMT) ....' START-TIME-A /
+  ' Store clock ........' START-TIME-STCK /
+  ' Microsec ...........' START-TIME-MIS (AD=L) /
+  ' Natural Time .......' START-TIME-P (AD=L) /
+* ---------------------------------------------------------------------
+* End Time
+* ---------------------------------------------------------------------
+* Convert store clock to microseconds
+MOVE *TIMESTMP TO END-TIME-STCK
+INCLUDE STCK2MIS 'END-TIME-STCK' 'END-TIME-MIS'
+
+* Convert Microseconds to Natural time
+INCLUDE MIS2TIME 'END-TIME-MIS' 'END-TIME-P'
+
+* Make the time readable
+MOVE EDITED END-TIME-T (EM=YYYY-MM-DD' 'HH:II:SS.T) TO END-TIME-A
+
+* Print end times
+PRINT
+  'End time (GMT) ......' END-TIME-A /
+  ' Store clock ........' END-TIME-STCK /
+  ' Microsec ...........' END-TIME-MIS (AD=L) /
+  ' Natural Time .......' END-TIME-P (AD=L) /
+* ---------------------------------------------------------------------
+* Elapsed Time
+* ---------------------------------------------------------------------
+ELA-TIME-MIS := END-TIME-MIS - START-TIME-MIS
+MOVE EDITED ELA-TIME-MIS (EM=Z(11)9'.'999999) TO ELA-TIME-A
+MOVE LEFT ELA-TIME-A TO ELA-TIME-A
+PRINT
+  'Elapsed time (sec) ..' ELA-TIME-A (AD=L)  /
+
+* This works also:
+* INCLUDE STCK2MIS '*TIMESTMP' 'START-TIME'
+END
+===================================================================================
+Result:
+Start time (GMT) .... 2015-11-13 15:24:38.2
+ Store clock ........ CFD7DF1194B21B11     
+ Microsec ........... 3656417078233889     
+ Natural Time ....... 636145610782         
+                                           
+End time (GMT) ...... 2015-11-13 15:24:38.2
+ Store clock ........ CFD7DF1194BE6C11     
+ Microsec ........... 3656417078234086     
+ Natural Time ....... 636145610782         
+                                           
+Elapsed time (sec) .. 0.000197             
+===================================================================================
+* Program TIME-TMS
+* Convert: Natural time -> microseconds -> Store clock
+* Using time conversion copycodes
+DEFINE DATA LOCAL
+* Fields for COPYCODE
+1 SAG_B8 (B8)                        /* working field
+1 REDEFINE SAG_B8                    /* BEGIN REDEFINE: SAG_B8
+  2 SAG_B81 (B3)                     /* value 16**7 = 268435456
+  2 SAG_B82 (B3)                     /* value 16
+  2 SAG_B83A (B1)                    /* value 1/16
+  2 SAG_B83B (B1)                    /* value 0
+1 SAG_I41 (I4)                       /* working field
+1 SAG_I42 (I4)                       /* working field
+1 SAG_I43 (I4)                       /* working field
+
+* Timestamp
+1 TIME-STCK (B8)               /* Start time STCK
+
+* Time in microseconds since 1900-01-01 00:00:00.0
+1 TIME-MIS  (P19)              /* Start time   mis
+
+* Natural time fields, redefined as (P12)
+1 TIME-T  (T)                  /* Start time Natural T
+1 REDEFINE TIME-T
+  2 TIME-P (P12)
+
+* Time in text format
+1 TIME-A    (A) DYNAMIC        /* Start time
+END-DEFINE
+* ---------------------------------------------------------------------
+* Current Time
+* ---------------------------------------------------------------------
+* Natural time
+MOVE *TIMX TO TIME-T
+
+* Convert Natural time to microseconds
+INCLUDE TIME2MIS 'TIME-P' 'TIME-MIS'
+
+* Convert microseconds to store clock
+INCLUDE MIS2STCK 'TIME-MIS' 'TIME-STCK'
+
+* Make the time readable
+MOVE EDITED TIME-T (EM=YYYY-MM-DD' 'HH:II:SS.T) TO TIME-A
+
+* Print the time
+PRINT
+  'Current time .......' TIME-A /
+  ' Store clock .......' TIME-STCK /
+  ' Microsec ..........' TIME-MIS (AD=L) /
+  ' Natural Time ......' TIME-P (AD=L) /
+END
+===================================================================================
+Result:
+Current time ....... 2015-11-13 16:08:49.8
+ Store clock ....... CFD7E8F24FB40000     
+ Microsec .......... 3656419729800000     
+ Natural Time ...... 636145637298         
+===================================================================================
+            
