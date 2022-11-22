@@ -1,0 +1,47 @@
+                                                        
+
+Example 1:
+
+* EOM: End of Month                     
+DEFINE DATA                             
+LOCAL                                   
+1 #DATE (D) INIT <*DATX>                 
+1 #DATEA (A8)                           
+1 REDEFINE #DATEA                       
+  2 YYYY (N4)                           
+  2 MM (N2)                             
+  2 DD (N2)                             
+END-DEFINE                               
+INPUT (AD=M) #DATE                       
+ADD 31 TO #DATE /* for current EOM only, otherwise prior EOM
+MOVE EDITED #DATE (EM=YYYYMMDD) TO #DATEA
+#DATEA.DD := 1   /* first of current month                       
+MOVE EDITED #DATEA TO #DATE (EM=YYYYMMDD)
+SUBTRACT 1 FROM #DATE    /* end of prior month               
+PRINT 'EOM:' #DATE                       
+END    
+
+
+
+Example 2:
+
+DEFINE DATA LOCAL                                                 
+1 #DATE (D)   INIT <D'01/28/2006'>                               
+1 #T (A8)     1 REDEFINE #T            /* Temp date               
+  2 #DD (N2)                                                     
+1 #D (D)                               /* For calculations       
+END-DEFINE                                                       
+*                                                                 
+INPUT (AD=M) #DATE                                               
+MOVE EDITED #DATE (EM=DDMMYYYY) TO #T                             
+IF  #DD < 28                                                     
+    ASSIGN #DD = 28                    /* Every month has 28     
+END-IF                                                           
+REPEAT UNTIL #DD = 1                   /* 'Search' for next month
+  MOVE EDITED #T TO #D (EM=DDMMYYYY)   /* Convert to D format     
+  ADD 1 TO #D                                                     
+  MOVE EDITED #D (EM=DDMMYYYY) TO #T   /* Convert to alpha       
+END-REPEAT                                                       
+SUBTRACT 1 FROM #D                     /* Last day of given month
+PRINT 'EOM:' #DATE #D                                             
+END               
