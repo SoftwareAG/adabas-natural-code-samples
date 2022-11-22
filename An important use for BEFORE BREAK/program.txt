@@ -1,0 +1,426 @@
+                                                        
+
+* THIS IS THE FIRST IN A SERIES OF THREE PROGRAMS
+* THAT SHOW AN IMPORTANT USE FOR BEFORE BREAK PROCESSING.
+
+* THIS FIRST PROGRAM IS NOT PARTICULARLY EXCITING.
+* WE ARE MERELY READING A SERIES OF RECORDS FROM
+* OUR FILE IN LOGICAL SEQUENCE BY NAME.
+*
+* AT THE BREAK OF THE NAME FIELD WE SIMPLY WRITE OUT THE
+* NAME THAT WAS JUST COMPLETED AND THE NAME THAT WILL
+* BE PROCESSED NEXT.
+*
+* THE "IF NAME NE OLD (NAME)" STATEMENT ELIMINATES A
+* DOUBLE PRINTING OF THE LAST NAME.
+* (COMMENT OUT THE "IF" AND THE "END-IF" AND RUN
+* TO SEE WHAT I MEAN).
+*
+DEFINE DATA LOCAL
+1 MYVIEW VIEW OF EMPLOYEES
+  2 NAME
+  2 FIRST-NAME
+  2 SALARY (1)
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+READ (15) MYVIEW IN LOGICAL SEQUENCE
+     BY NAME STARTING FROM 'JONES'
+*
+     AT BREAK OF NAME
+        WRITE // 10T 'END OF NAME' OLD (NAME)
+        IF NAME NE OLD (NAME)
+           WRITE   // 10T 'NEXT NAME IS' NAME
+           END-IF
+        NEWPAGE
+        END-BREAK
+*
+DISPLAY 5T NAME FIRST-NAME SALARY (1)
+END-READ
+*
+END
+
+-------------------------------------------------------
+Output from the program above:
+
+    PAGE #   1                    DATE:    03/16/11
+    PROGRAM: BEFORE05             LIBRARY: SNIPPET
+ 
+            NAME              FIRST-NAME        ANNUAL
+                                                SALARY
+    -------------------- -------------------- ----------
+ 
+    JONES                VIRGINIA                  46000
+    JONES                MARSHA                    50000
+    JONES                ROBERT                    31000
+    JONES                LILLY                     24000
+    JONES                EDWARD                    37600
+    JONES                MARTHA                    21000
+    JONES                LAUREL                    30000
+    JONES                KEVIN                      7000
+    JONES                GREGORY                    4800
+ 
+ 
+         END OF NAME JONES
+ 
+ 
+         NEXT NAME IS JOPER
+-----------------------------------------------------------
+    PAGE #   2                    DATE:    03/16/11
+    PROGRAM: BEFORE05             LIBRARY: SNIPPET
+ 
+            NAME              FIRST-NAME        ANNUAL
+                                                SALARY
+    -------------------- -------------------- ----------
+ 
+    JOPER                MANFRED                   24923
+ 
+ 
+         END OF NAME JOPER
+ 
+ 
+         NEXT NAME IS JOUSSELIN
+----------------------------------------------------------
+    PAGE #   3                    DATE:    03/16/11
+    PROGRAM: BEFORE05             LIBRARY: SNIPPET
+ 
+            NAME              FIRST-NAME        ANNUAL
+                                                SALARY
+    -------------------- -------------------- ----------
+ 
+    JOUSSELIN            DANIEL                     1036
+ 
+ 
+         END OF NAME JOUSSELIN
+ 
+ 
+         NEXT NAME IS JUBE
+---------------------------------------------------------
+    PAGE #   4                    DATE:    03/16/11
+    PROGRAM: BEFORE05             LIBRARY: SNIPPET
+ 
+            NAME              FIRST-NAME        ANNUAL
+                                                SALARY
+    -------------------- -------------------- ----------
+ 
+    JUBE                 GABRIEL                     783
+ 
+ 
+         END OF NAME JUBE
+ 
+ 
+         NEXT NAME IS JUNG
+--------------------------------------------------------
+    PAGE #   5                    DATE:    03/16/11
+    PROGRAM: BEFORE05             LIBRARY: SNIPPET
+ 
+            NAME              FIRST-NAME        ANNUAL
+                                                SALARY
+    -------------------- -------------------- ----------
+ 
+    JUNG                 ERNST                     24358
+ 
+ 
+         END OF NAME JUNG
+ 
+ 
+         NEXT NAME IS JUNKIN
+----------------------------------------------------------
+    PAGE #   6                    DATE:    03/16/11
+    PROGRAM: BEFORE05             LIBRARY: SNIPPET
+ 
+            NAME              FIRST-NAME        ANNUAL
+                                                SALARY
+    -------------------- -------------------- ----------
+ 
+    JUNKIN               JEREMY                     6800
+ 
+ 
+         END OF NAME JUNKIN
+ 
+ 
+         NEXT NAME IS KAISER
+-----------------------------------------------------------
+    PAGE #   7                    DATE:    03/16/11
+    PROGRAM: BEFORE05             LIBRARY: SNIPPET
+ 
+            NAME              FIRST-NAME        ANNUAL
+                                                SALARY
+    -------------------- -------------------- ----------
+ 
+    KAISER               REINER                    24358
+ 
+ 
+         END OF NAME KAISER       
+-----------------------------------------------------------
+
+Now we complicate matters by adding an IF...ESCAPE TOP clause
+to exclude certain records from being processed. We could also
+have used ACCEPT/REJECT. The "messed up" output is the same
+in both cases.
+
+* NOW FOR WHAT SHOULD BE A SIMPLE CHANGE. WE ONLY
+* WISH TO DISPLAY RECORDS IF THE SALARY IS GREATER THAN
+* OR EQUAL TO 24,000. 
+*
+* IN THIS PROGRAM WE ERRONEOUSLY ADDED JUST
+* A SIMPLE IF...ESCAPE TOP TO OUR PREVIOUS PROGRAM.
+*
+* IF YOU TAKE A LOOK AT THE OUTPUT BELOW YOU WILL
+* SEE WHAT A MESS WE CREATED.
+*
+* IN PARTICULAR, LOOK AT THE PAGES WITH JOPER-JOSSELIN
+* OR JOPER-JUBE ETC. NO OUTPUT ON THESE PAGES.
+* ASLO, THERE ARE NAMES THAT APPEAR AS "NEXT NAME"
+* WHICH NEVER APPEAR.
+*
+* THE PROBLEM IS QUITE SIMPLE. THE AT BREAK TEST IS
+* DONE BEFORE THE IF...ESCAPE TOP TEST. ALSO, ALL
+* THE RECORDS FOR A GIVEN NAME MAY FAIL OUR SALARY TEST.
+*
+DEFINE DATA LOCAL
+1 MYVIEW VIEW OF EMPLOYEES
+  2 NAME
+  2 FIRST-NAME
+  2 SALARY (1)
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+READ (15) MYVIEW IN LOGICAL SEQUENCE
+     BY NAME STARTING FROM 'JONES'
+*     
+      IF SALARY (1) LT 24000
+         ESCAPE TOP
+         END-IF
+*
+        AT BREAK OF NAME
+           WRITE // 10T 'END OF NAME' OLD (NAME)
+           IF NAME NE OLD (NAME)
+              WRITE   // 10T 'NEXT NAME IS' NAME
+              END-IF        
+            NEWPAGE
+        END-BREAK
+*
+DISPLAY 5T NAME FIRST-NAME SALARY (1)
+END-READ
+*
+END
+-------------------------------------------------------
+Output from the program above
+
+    PAGE #   1                    DATE:    03/16/11
+    PROGRAM: BEFORE06             LIBRARY: SNIPPET
+ 
+            NAME              FIRST-NAME        ANNUAL
+                                                SALARY
+    -------------------- -------------------- ----------
+ 
+    JONES                VIRGINIA                  46000
+    JONES                MARSHA                    50000
+    JONES                ROBERT                    31000
+    JONES                LILLY                     24000
+    JONES                EDWARD                    37600
+    JONES                LAUREL                    30000
+ 
+ 
+         END OF NAME JONES
+ 
+ 
+         NEXT NAME IS JOPER
+---------------------------------------------------------
+    PAGE #   2                    DATE:    03/16/11
+    PROGRAM: BEFORE06             LIBRARY: SNIPPET
+ 
+            NAME              FIRST-NAME        ANNUAL
+                                                SALARY
+    -------------------- -------------------- ----------
+ 
+    JOPER                MANFRED                   24923
+ 
+ 
+         END OF NAME JOPER
+ 
+ 
+         NEXT NAME IS JOUSSELIN
+---------------------------------------------------------
+    PAGE #   3                    DATE:    03/16/11
+    PROGRAM: BEFORE06             LIBRARY: SNIPPET
+ 
+            NAME              FIRST-NAME        ANNUAL
+                                                SALARY
+    -------------------- -------------------- ----------
+ 
+ 
+ 
+         END OF NAME JOPER
+ 
+ 
+         NEXT NAME IS JUBE
+----------------------------------------------------------
+    PAGE #   4                    DATE:    03/16/11
+    PROGRAM: BEFORE06             LIBRARY: SNIPPET
+ 
+            NAME              FIRST-NAME        ANNUAL
+                                                SALARY
+    -------------------- -------------------- ----------
+ 
+ 
+ 
+         END OF NAME JOPER
+ 
+ 
+         NEXT NAME IS JUNG
+--------------------------------------------------------
+    PAGE #   5                    DATE:    03/16/11
+    PROGRAM: BEFORE06             LIBRARY: SNIPPET
+ 
+            NAME              FIRST-NAME        ANNUAL
+                                                SALARY
+    -------------------- -------------------- ----------
+ 
+    JUNG                 ERNST                     24358
+ 
+ 
+         END OF NAME JUNG
+ 
+ 
+         NEXT NAME IS JUNKIN
+----------------------------------------------------------
+    PAGE #   6                    DATE:    03/16/11
+    PROGRAM: BEFORE06             LIBRARY: SNIPPET
+ 
+            NAME              FIRST-NAME        ANNUAL
+                                                SALARY
+    -------------------- -------------------- ----------
+ 
+ 
+ 
+         END OF NAME JUNG
+ 
+ 
+         NEXT NAME IS KAISER
+--------------------------------------------------------
+    PAGE #   7                    DATE:    03/16/11
+    PROGRAM: BEFORE06             LIBRARY: SNIPPET
+ 
+            NAME              FIRST-NAME        ANNUAL
+                                                SALARY
+    -------------------- -------------------- ----------
+ 
+    KAISER               REINER                    24358
+ 
+ 
+         END OF NAME KAISER       
+---------------------------------------------------------
+
+Now we will use BEFORE BREAK to correct our program:
+
+* HERE IS A SOLUTION TO THE PROBLEM SHOWN ABOVE IN BEFORE06.
+*
+* THE IF...ESCAPE TOP CLAUSE IS NOW WITHIN A
+* BEFORE BREAK CLAUSE, WHICH IS EXECUTED BEFORE
+* THE AT BREAK CLAUSE.
+*
+DEFINE DATA LOCAL
+1 MYVIEW VIEW OF EMPLOYEES
+  2 NAME
+  2 FIRST-NAME
+  2 SALARY (1)
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+READ (15) MYVIEW IN LOGICAL SEQUENCE
+     BY NAME STARTING FROM 'JONES'
+*
+       BEFORE BREAK PROCESSING
+              IF SALARY (1) LT 24000
+                 ESCAPE TOP
+                 END-IF
+       END-BEFORE
+*
+        AT BREAK OF NAME
+           WRITE // 10T 'END OF NAME' OLD (NAME)
+           IF NAME NE OLD (NAME)
+              WRITE   // 10T 'NEXT NAME IS' NAME
+              END-IF      
+           NEWPAGE
+        END-BREAK
+*
+DISPLAY 5T NAME FIRST-NAME SALARY (1)
+END-READ
+*
+END
+---------------------------------------------------
+Output from the program above:
+
+    PAGE #   1                    DATE:    03/16/11
+    PROGRAM: BEFORE07             LIBRARY: SNIPPET
+ 
+            NAME              FIRST-NAME        ANNUAL
+                                                SALARY
+    -------------------- -------------------- ----------
+ 
+    JONES                VIRGINIA                  46000
+    JONES                MARSHA                    50000
+    JONES                ROBERT                    31000
+    JONES                LILLY                     24000
+    JONES                EDWARD                    37600
+    JONES                LAUREL                    30000
+ 
+ 
+         END OF NAME JONES
+ 
+ 
+         NEXT NAME IS JOPER
+---------------------------------------------------------
+    PAGE #   2                    DATE:    03/16/11
+    PROGRAM: BEFORE07             LIBRARY: SNIPPET
+ 
+            NAME              FIRST-NAME        ANNUAL
+                                                SALARY
+    -------------------- -------------------- ----------
+ 
+    JOPER                MANFRED                   24923
+ 
+ 
+         END OF NAME JOPER
+ 
+ 
+         NEXT NAME IS JUNG
+----------------------------------------------------------
+    PAGE #   3                    DATE:    03/16/11
+    PROGRAM: BEFORE07             LIBRARY: SNIPPET
+ 
+            NAME              FIRST-NAME        ANNUAL
+                                                SALARY
+    -------------------- -------------------- ----------
+ 
+    JUNG                 ERNST                     24358
+ 
+ 
+         END OF NAME JUNG
+ 
+ 
+         NEXT NAME IS KAISER
+--------------------------------------------------------
+    PAGE #   4                    DATE:    03/16/11
+    PROGRAM: BEFORE07             LIBRARY: SNIPPET
+ 
+            NAME              FIRST-NAME        ANNUAL
+                                                SALARY
+    -------------------- -------------------- ----------
+ 
+    KAISER               REINER                    24358
+ 
+ 
+         END OF NAME KAISER   
+---------------------------------------------------------
+
+Note in the output from BEFORE07, there are no pages without records.
+Compare the four pages from BEFORE07 with the seven pages from BEFORE06.                       
