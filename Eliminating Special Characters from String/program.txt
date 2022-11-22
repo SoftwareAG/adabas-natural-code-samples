@@ -1,0 +1,107 @@
+                                                        
+Here is the program which compares three ways to eliminate special characters from an alpha string. 
+The first approach is what I term a Natbol approach. It examines every character. If a character 
+is an alpha character (as indicated by passing a MASK (A) test), the character is copied to a running 
+string. If not, the approach proceeds to the next character.
+
+The second approach was my first attempt to improve on the Natbol approach. In the output below it is 
+identified as the "New Way". As you can see from the numbers, the New Way only required about a third 
+the time of the Natbol approach.
+
+The third approach was added long after I posted the New Way. As indicated by the output, the 
+"Three EXAMINEs" approach is only about a third of the New Way approach.
+                                                                                
+ >                                       > +  Program     ELIM01   Lib XSTRO    
+ Top    ....+....1....+....2....+....3....+....4....+....5....+....6....+....7..
+   0010 DEFINE DATA LOCAL                                                       
+   0020 1 #A (A24) INIT <'QWE@#ASD%AJHKM'>                                      
+   0030 1 REDEFINE #A                                                           
+   0040   2 #ARRAY (A1/1:24)                                                    
+   0050 1 #ARRAY2 (A1/1:24)                                                     
+   0060 1 #LOOP (I4)                                                            
+   0070 1 #LOOP2 (I4)                                                           
+   0080 1 #SECPOINT (P3) INIT <1>                                               
+   0090 1 #PIECES (A24/1:24)                                                    
+   0100 1 #FINAL-STRING (A30)                                                   
+   0110 1 #CPU-START (I4)                                                       
+   0120 1 #CPU-ELAPSED (I4)                                                     
+   0130 END-DEFINE                                                              
+   0140 *                                                                       
+   0150 INCLUDE AATITLER                                                        
+   0160 *                                                                       
+   0170 MOVE *CPU-TIME TO #CPU-START                                            
+   0180 SETA. SETTIME                                                           
+   0190 FOR #LOOP = 1 TO 100000                                                 
+   0200    FOR #LOOP2 = 1 TO 24                                                 
+   0210    IF #ARRAY (#LOOP2) = MASK (A)                                        
+   0220    IGNORE                                                               
+   0230    ELSE                                                                 
+   0240    MOVE #ARRAY (#LOOP2) TO #ARRAY2 (#SECPOINT)                          
+   0250    ADD 1 TO #SECPOINT                                                   
+   0260    END-IF                                                               
+   0270    END-FOR                                                              
+   0280    MOVE 1 TO #SECPOINT                                                  
+   0290 END-FOR                                                                 
+   0300 COMPUTE #CPU-ELAPSED = *CPU-TIME - #CPU-START                           
+   0310 WRITE 5T 'LOOONG TIME' 20T *TIMD (SETA.) 30T #CPU-ELAPSED               
+   0320 *                                                                       
+   0330 MOVE *CPU-TIME TO #CPU-START                                            
+   0340 SETB. SETTIME                                                           
+   0350 FOR #LOOP = 1 TO 100000                                                 
+   0360 SEPARATE #A INTO #PIECES(*) WITH DELIMITER '@#%'                        
+   0370 COMPRESS #PIECES (*) INTO #FINAL-STRING                                 
+   0380 END-FOR                                                                 
+   0390 COMPUTE #CPU-ELAPSED = *CPU-TIME - #CPU-START                           
+   0400 WRITE 5T 'NEW WAY' 20T  *TIMD (SETB.)  30T #CPU-ELAPSED                           
+   0410 *                                                                       
+   0420 MOVE *CPU-TIME TO #CPU-START                                            
+   0430 SETD. SETTIME                                                           
+   0440 FOR #LOOP = 1 TO 100000                                                 
+   0450 EXAMINE #A FOR '@' DELETE                                               
+   0460 EXAMINE #A FOR '%' DELETE                                               
+   0470 EXAMINE #A FOR '#' DELETE                                               
+   0480 END-FOR                                                                 
+   0490 COMPUTE #CPU-ELAPSED = *CPU-TIME - #CPU-START                           
+   0500 WRITE 5T  'THREE EXAMINES' 20T *TIMD (SETD.)  30T #CPU-ELAPSED          
+   0510 *                                                                       
+   0520 MOVE *CPU-TIME TO #CPU-START                                            
+   0530 SETC. SETTIME                                                           
+   0540 FOR #LOOP = 1 TO 100000                                                 
+   0550 IGNORE                                                                  
+   0560 END-FOR                                                                 
+   0570 COMPUTE #CPU-ELAPSED = *CPU-TIME - #CPU-START                           
+   0580 WRITE 5T 'FOR LOOP' 20T *TIMD (SETC.)  30T #CPU-ELAPSED                 
+   0590 END                      
+
+
+Here is mainframe output:
+
+ MORE                                                                           
+     PAGE #   1                    DATE:    Mar 30, 2011                        
+     PROGRAM: ELIM01               LIBRARY: XSTRO                               
+                                                                                
+     LOOONG TIME         154          529                                       
+     NEW WAY              44          138                                       
+     THREE EXAMINES       10           42                                       
+     FOR LOOP              1            6                                       
+                                                                                
+                                                                                
+--------------------------------------------------------------------------------
+
+And here is PC output:
+
+    PAGE #   1                    DATE:    03/30/11
+    PROGRAM: ELIM01               LIBRARY: SNIPPET
+ 
+    LOOONG TIME       42         426
+    NEW WAY           12         117
+    THREE EXAMINES     5          51
+    FOR LOOP           0           4
+
+
+Summary:
+
+Even after doubling the number of characters to be deleted, the EXAMINE approach is clearly faster than even the New Way. 
+If you have code that will be executed repetitively, it is worthwhile to experiment a bit with alternative code. 
+The 'three examines' code was after the fact code because I had some spare time one day and it was snowing (blizzard intensity) out and I had no interest in shoveling my driveway.
+                                                                                
