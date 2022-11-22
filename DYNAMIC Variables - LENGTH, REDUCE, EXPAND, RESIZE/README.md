@@ -1,7 +1,7 @@
-This posting is a continuation of 'DYNAMIC Variable basics'. 
+This posting is a continuation of https://github.com/SoftwareAG/adabas-natural-code-samples/tree/main/DYNAMIC%20Variable%20basics. 
 The intent is to provide an understanding of the basics of DYNAMIC Variables in the hope that programmers will be more "comfortable" with their use, and begin to utilize them more than appears to be the case at present.
 
-In 'DYNAMIC Variable basics' we saw how \*LENGTH is affected by MOVE'ing various variables and constants to a DYNAMIC variable.
+In https://github.com/SoftwareAG/adabas-natural-code-samples/tree/main/DYNAMIC%20Variable%20basics we saw how \*LENGTH is affected by MOVE'ing various variables and constants to a DYNAMIC variable.
 
 To be brief, \*LENGTH reflects the "current" physical size of a DYNAMIC variable. As we noted, this size can include trailing blanks.
 
