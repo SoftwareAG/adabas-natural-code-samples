@@ -1,4 +1,4 @@
-This code sample adds **Case 4** to Steve Robinson's post "Eliminating Special Characters from String".
+This code sample adds **Case 4** to Steve Robinson's post https://github.com/SoftwareAG/adabas-natural-code-samples/tree/main/Eliminating%20Special%20Characters%20from%20String.
 From the fertile imagination of Paul Macgowan.
 
 **Case 5** added April 11, 2015.    
