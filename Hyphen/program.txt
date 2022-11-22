@@ -1,0 +1,79 @@
+                                                        
+Program 1:
+
+DEFINE DATA LOCAL
+1 #LONG (A200)
+END-DEFINE
+
+ASSIGN #LONG = 'When a literal string does not fit into a source line, '
+             - 'a hypen is used to continue it on the next line.'
+
+      REINPUT 'Due to indentation, this text string '
+            - 'must be continued onto another line.'
+
+END
+
+
+Program 2:
+
+DEFINE DATA LOCAL
+1 TUR    VIEW SAG-TOURS
+  2 CONTRACT-TYPE
+  2 CONTRACT-ID
+END-DEFINE
+R.
+READ TUR BY CONTRACT-TYPE-SP FROM "B"
+  IF  CONTRACT-TYPE > "B"
+    THEN
+      ESCAPE BOTTOM
+  END-IF
+  DISPLAY CONTRACT-TYPE
+          CONTRACT-ID
+END-READ
+WRITE / 'End:' CONTRACT-TYPE *COUNTER (R.)
+END
+
+
+Program 3:
+
+DEFINE DATA LOCAL
+1 TUR    VIEW SAG-TOURS
+  2 CONTRACT-TYPE
+  2 CONTRACT-ID
+1 #DEF-F
+  2 #TYPE (A1)
+  2 #ID (P11)       1 REDEFINE #DEF-F
+  2 #FROM (A7)
+1 #DEF-T
+  2 #TYPE (A1)
+  2 #ID (P11)       INIT <99999999999>
+                    1 REDEFINE #DEF-T
+  2 #TO (A7)
+END-DEFINE
+ASSIGN #DEF-F.#TYPE = #DEF-T.#TYPE
+                    = "B"
+R.
+READ TUR BY CONTRACT-TYPE-SP FROM #FROM
+                               TO #TO
+  DISPLAY CONTRACT-TYPE
+          CONTRACT-ID
+END-READ
+WRITE / 'End:' CONTRACT-TYPE *COUNTER (R.)
+END
+
+
+Program 4:
+
+DEFINE DATA LOCAL
+1 TUR    VIEW SAG-TOURS
+  2 CONTRACT-TYPE
+  2 CONTRACT-ID
+END-DEFINE
+R.
+READ TUR BY CONTRACT-TYPE-SP FROM "B" - H'000000000000'
+                               TO "B" - H'FF'
+  DISPLAY CONTRACT-TYPE
+          CONTRACT-ID
+END-READ
+WRITE / 'End:' CONTRACT-TYPE *COUNTER (R.)
+END            
