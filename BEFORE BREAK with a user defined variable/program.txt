@@ -1,0 +1,537 @@
+                                                        
+
+* AT BREAK IS NOT ONLY VALID FOR DATABASE FIELDS, IT IS ALSO VALID
+* FOR USER DEFINED VARIABLES. PROBLEM; NATURAL TESTS FOR
+* A BREAK BEFORE PROCESSING A LOOP
+* IF I TRY TO COMPUTE A USER DEFINED VARIABLE, IN THE LOOP, IT IS
+* TOO LATE TO TEST FOR A BREAK
+*
+* THE BEFORE BREAK PROCESSING COMMAND IS DESIGNED EXPRESSLY TO
+* OVERCOME THIS TIMING PROBLEM
+*
+* IN THE FOLLOWING EXAMPLE, I WANT TO EXAMINE THE EFFECT OF GIVING
+* EVERYONE A TEN PERCENT RAISE. I ALSO WANT TO SEE HOW MANY PEOPLE WILL
+* BE IN EVERY THOUSAND DOLLAR "BUCKET". BY USING BEFORE BREAK PROCESSING
+* I CAN GIVE EVERYONE THEIR RAISE BEFORE TESTING FOR A BREAK OF
+* #THOUSANDS.
+*
+* IF YOU REMOVE THE "BEFORE BREAK PROCESSING" AND THE 
+* END-BEFORE, YOU WILL SEE THE DIFFERENCE IN THE OUTPUT.
+*
+DEFINE DATA LOCAL
+1 PVIEW VIEW OF EMPLOYEES
+  2 NAME
+  2 FIRST-NAME
+  2 SALARY (1)
+1 #INCREASED-SALARY (N6)
+1 REDEFINE #INCREASED-SALARY
+  2 #THOUSANDS (N3)
+1 #LINE1 (A65)
+1 #LINE2 (A65)
+1 #COUNT (N5)
+1 #OLD   (N5)
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+READ (100) PVIEW IN PHYSICAL SEQUENCE
+END-ALL
+SORT BY SALARY(1) USING NAME FIRST-NAME
+*
+BEFORE BREAK PROCESSING
+       COMPUTE #INCREASED-SALARY = SALARY(1) * 1.1
+       END-BEFORE
+*
+AT BREAK OF #THOUSANDS
+   NEWPAGE
+   MOVE OLD (#THOUSANDS) TO #OLD
+   MOVE COUNT (NAME) TO #COUNT
+   COMPRESS 'THERE ARE' #COUNT 'PEOPLE WITH INCOME IN THE RANGE'
+   INTO #LINE1
+   COMPRESS #OLD 'TO' #THOUSANDS 'THOUSANDS OF DOLLARS' INTO #LINE2
+   WRITE 5/10 #LINE1 // 10T #LINE2
+   NEWPAGE
+   END-BREAK
+*
+DISPLAY NAME FIRST-NAME #INCREASED-SALARY
+END-SORT
+END
+------------------------------------------------------
+Here is the output from the program above. This is "good" output.
+
+
+    PAGE #   1                    DATE:    03/19/11
+    PROGRAM: BEFORE01             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+MOTTE                PATRICK                  761
+LISBONNE             FRANCINE                 761
+FERNANDEZ            EMMANUEL                 761
+SIMONIN              JEAN                     761
+KEMLIN               FRANCOIS                 761
+CROTTA               GILBERT                  761
+DELAUNEY             GERARD                   761
+KRUGER               MICHEL                   787
+BOUDOT               ROBERT                   793
+RAMPNOUX             ROBERT                   794
+GOIRAND              PHILIPPE                 800
+ESCOURROU            JULIEN                   800
+CARVIN               RAOUL                    805
+VEYRE                LUCIEN                   810
+LOTZ                 FRANCOISE                815
+LISBONNE             FRANCIS                  816
+MAYER                GENEVIEVE                817
+DEON                 GILBERT                  817
+---------------------------------------------------
+    PAGE #   2                    DATE:    03/19/11
+    PROGRAM: BEFORE01             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+GUENIOT              PIERRE                   818
+MAUBERT              CHRISTIANNE              819
+LOCHON               JEAN                     823
+SCHECK               ROGER                    831
+MAMPEY               NICOLE                   831
+ORHON                ROGER                    839
+GRIFFET              RAYMOND                  839
+CATILLON             MARCEL                   841
+YACKX-COLTEAU        JACQUELINE               844
+BOSI                 CLAUDE                   845
+DAVID                ANDRE                    847
+MORARD               CHRISTIAN                849
+AUBERT               JACQUES                  850
+PATAUT               JACQUES                  850
+GUENIOT              PIERRE                   851
+POREE                FRANCK                   851
+THIBERT              PIERRE                   851
+BLIGNY               MICHEL                   851
+-----------------------------------------------------
+    PAGE #   3                    DATE:    03/19/11
+    PROGRAM: BEFORE01             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+BESANCON             MARIUS                   851
+BROUTTA              SIMONE                   851
+ASTIER               ALAIN                    851
+TATIN                NICOLE                   851
+DUHAL                CHRISTIAN                851
+GUILLOIS             ROGER                    851
+JUBE                 GABRIEL                  861
+BAUMEL               JACQUES                  861
+LOUY                 PIERRE                   861
+MOREAU               RENE                     861
+DURAND               SUZANNE                  861
+HULOT                JEAN                     867
+BERCU                MARC                     882
+BOSLE                DOMINIQUE                884
+GREGOIRE             DANIEL                   886
+GUERRIER             ARMAND                   887
+MIGEON               GUY                      887
+GOETSCHEL            ALEXANDRE                893
+------------------------------------------------------
+    PAGE #   4                    DATE:    03/19/11
+    PROGRAM: BEFORE01             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+YOT                  RENE                     893
+MAILLAND             HENRI                    897
+PICAMOLES-REBERGA    JEAN-MICHEL              897
+MOTTE                PATRICK                  898
+CHEVRETTE            FRANCOISE                905
+MICOLET              RAYMONDE                 906
+BESSON               ROGER                    911
+CRISPIN              LUCIEN                   914
+MAES                 GEORGES                  914
+MONTEL               ROBERT                   926
+FOURNIER             RAYMOND                  932
+SCHNEIDER            ALFRED                   932
+LOUIS                GUY                      933
+CATILLON             MARCEL                   937
+D'ASCANIO            ORFEO                    940
+MORIN                BRUNO                    947
+XOLIN                CHRISTIAN                972
+GASET                JEAN                     979
+-----------------------------------------------------
+    PAGE #   5                    DATE:    03/19/11
+    PROGRAM: BEFORE01             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+GIDDE                MAURICE                  998
+----------------------------------------------------
+    PAGE #   6                    DATE:    03/19/11
+    PROGRAM: BEFORE01             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+ 
+ 
+ 
+ 
+         THERE ARE 73 PEOPLE WITH INCOME IN THE RANGE
+ 
+         0 TO 1 THOUSANDS OF DOLLARS
+------------------------------------------------------         
+    PAGE #   7                    DATE:    03/19/11
+    PROGRAM: BEFORE01             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+MOATI                JEAN-PIERRE             1037
+GIRME                GEORGES                 1111
+GODEFROY             ANNIE                   1127
+RAMAUGE              ANDRE                   1147
+DURAND               JACQUES                 1152
+FAURIE               HENRI                   1158
+ROLLET               GEORGES                 1164
+GRIN                 CLAUDE                  1171
+BRETON               JEAN-MARIE              1177
+ONILLON              JEAN-PIERRE             1177
+MOMMEJA              GUY                     1185
+GIGLEUX              JACQUES                 1191
+ROLLET               GEORGES                 1191
+CAHN                 RAYMOND                 1191
+FAYOLLET             RENE                    1200
+LENZ                 PHILIPPE                1205
+MAZUY                ROBERT                  1206
+BROCHETON            MICHELE                 1218
+-----------------------------------------------------
+    PAGE #   8                    DATE:    03/19/11
+    PROGRAM: BEFORE01             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+KREEBS               JACQUES                 1222
+VALLY                ALAIN                   1228
+KORAB-BRZOZOWSKI     BOGDAN                  1240
+TRAEGER              BERNARD                 1249
+------------------------------------------------------
+    PAGE #   9                    DATE:    03/19/11
+    PROGRAM: BEFORE01             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+ 
+ 
+ 
+ 
+         THERE ARE 22 PEOPLE WITH INCOME IN THE RANGE
+ 
+         1 TO 2 THOUSANDS OF DOLLARS
+-----------------------------------------------------         
+    PAGE #  10                    DATE:    03/19/11
+    PROGRAM: BEFORE01             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+REICH                MARC                    2217
+CAIZERGUES           CLAUDE                  2302
+RIVIERE              JEAN-LUC                2434
+LEGRIS               ROGER                   2550
+    PAGE #  11                    DATE:    03/19/11
+    PROGRAM: BEFORE01             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+ 
+ 
+ 
+ 
+         THERE ARE 4 PEOPLE WITH INCOME IN THE RANGE
+ 
+         2 TO 3 THOUSANDS OF DOLLARS
+------------------------------------------------------         
+    PAGE #  12                    DATE:    03/19/11
+    PROGRAM: BEFORE01             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+LAFON                CHRISTIANE              3147
+    PAGE #  13                    DATE:    03/19/11
+    PROGRAM: BEFORE01             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+ 
+ 
+ 
+ 
+         THERE ARE 1 PEOPLE WITH INCOME IN THE RANGE
+ 
+         3 TO 3 THOUSANDS OF DOLLARS               
+
+******************************************************************
+Now, here is code which has the suggested changes from the program above.
+
+* HERE IS THE SAME PROGRAM AS ABOVE, EXCEPT,
+* I HAVE COMMENTED OUT THE 
+* "BEFORE BREAK PROCESSING" AND THE END-BEFORE.
+* YOU WILL SEE THE DIFFERENCE IN THE OUTPUT.
+*
+DEFINE DATA LOCAL
+1 PVIEW VIEW OF EMPLOYEES
+  2 NAME
+  2 FIRST-NAME
+  2 SALARY (1)
+1 #INCREASED-SALARY (N6)
+1 REDEFINE #INCREASED-SALARY
+  2 #THOUSANDS (N3)
+1 #LINE1 (A65)
+1 #LINE2 (A65)
+1 #COUNT (N5)
+1 #OLD   (N5)
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+READ (100) PVIEW IN PHYSICAL SEQUENCE
+END-ALL
+SORT BY SALARY(1) USING NAME FIRST-NAME
+*
+**BEFORE BREAK PROCESSING
+       COMPUTE #INCREASED-SALARY = SALARY(1) * 1.1
+**     END-BEFORE
+*
+AT BREAK OF #THOUSANDS
+   NEWPAGE
+   MOVE OLD (#THOUSANDS) TO #OLD
+   MOVE COUNT (NAME) TO #COUNT
+   COMPRESS 'THERE ARE' #COUNT 'PEOPLE WITH INCOME IN THE RANGE'
+   INTO #LINE1
+   COMPRESS #OLD 'TO' #THOUSANDS 'THOUSANDS OF DOLLARS' INTO #LINE2
+   WRITE 5/10 #LINE1 // 10T #LINE2
+   NEWPAGE
+   END-BREAK
+*
+DISPLAY NAME FIRST-NAME #INCREASED-SALARY
+END-SORT
+END
+
+Note above I commented out the BEFORE BREAK and END-BEFORE
+-----------------------------------------------------------
+Now here is the "flawed" (incorrect) output from the program above.
+Compare the output with that above from BEFORE01.
+
+ 
+
+    PAGE #   1                    DATE:    03/19/11
+    PROGRAM: BEFORE02             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+MOTTE                PATRICK                  761
+LISBONNE             FRANCINE                 761
+FERNANDEZ            EMMANUEL                 761
+SIMONIN              JEAN                     761
+KEMLIN               FRANCOIS                 761
+CROTTA               GILBERT                  761
+DELAUNEY             GERARD                   761
+KRUGER               MICHEL                   787
+BOUDOT               ROBERT                   793
+RAMPNOUX             ROBERT                   794
+GOIRAND              PHILIPPE                 800
+ESCOURROU            JULIEN                   800
+CARVIN               RAOUL                    805
+VEYRE                LUCIEN                   810
+LOTZ                 FRANCOISE                815
+LISBONNE             FRANCIS                  816
+MAYER                GENEVIEVE                817
+DEON                 GILBERT                  817
+----------------------------------------------------
+    PAGE #   2                    DATE:    03/19/11
+    PROGRAM: BEFORE02             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+GUENIOT              PIERRE                   818
+MAUBERT              CHRISTIANNE              819
+LOCHON               JEAN                     823
+SCHECK               ROGER                    831
+MAMPEY               NICOLE                   831
+ORHON                ROGER                    839
+GRIFFET              RAYMOND                  839
+CATILLON             MARCEL                   841
+YACKX-COLTEAU        JACQUELINE               844
+BOSI                 CLAUDE                   845
+DAVID                ANDRE                    847
+MORARD               CHRISTIAN                849
+AUBERT               JACQUES                  850
+PATAUT               JACQUES                  850
+GUENIOT              PIERRE                   851
+POREE                FRANCK                   851
+THIBERT              PIERRE                   851
+BLIGNY               MICHEL                   851
+-----------------------------------------------------
+    PAGE #   3                    DATE:    03/19/11
+    PROGRAM: BEFORE02             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+BESANCON             MARIUS                   851
+BROUTTA              SIMONE                   851
+ASTIER               ALAIN                    851
+TATIN                NICOLE                   851
+DUHAL                CHRISTIAN                851
+GUILLOIS             ROGER                    851
+JUBE                 GABRIEL                  861
+BAUMEL               JACQUES                  861
+LOUY                 PIERRE                   861
+MOREAU               RENE                     861
+DURAND               SUZANNE                  861
+HULOT                JEAN                     867
+BERCU                MARC                     882
+BOSLE                DOMINIQUE                884
+GREGOIRE             DANIEL                   886
+GUERRIER             ARMAND                   887
+MIGEON               GUY                      887
+GOETSCHEL            ALEXANDRE                893
+----------------------------------------------------
+    PAGE #   4                    DATE:    03/19/11
+    PROGRAM: BEFORE02             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+YOT                  RENE                     893
+MAILLAND             HENRI                    897
+PICAMOLES-REBERGA    JEAN-MICHEL              897
+MOTTE                PATRICK                  898
+CHEVRETTE            FRANCOISE                905
+MICOLET              RAYMONDE                 906
+BESSON               ROGER                    911
+CRISPIN              LUCIEN                   914
+MAES                 GEORGES                  914
+MONTEL               ROBERT                   926
+FOURNIER             RAYMOND                  932
+SCHNEIDER            ALFRED                   932
+LOUIS                GUY                      933
+CATILLON             MARCEL                   937
+D'ASCANIO            ORFEO                    940
+MORIN                BRUNO                    947
+XOLIN                CHRISTIAN                972
+GASET                JEAN                     979
+---------------------------------------------------
+    PAGE #   5                    DATE:    03/19/11
+    PROGRAM: BEFORE02             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+GIDDE                MAURICE                  998
+MOATI                JEAN-PIERRE             1037
+--------------------------------------------------------
+    PAGE #   6                    DATE:    03/19/11
+    PROGRAM: BEFORE02             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+ 
+ 
+ 
+ 
+         THERE ARE 74 PEOPLE WITH INCOME IN THE RANGE
+ 
+         1 TO 1 THOUSANDS OF DOLLARS
+    ------------------------------------------------------     
+    PAGE #   7                    DATE:    03/19/11
+    PROGRAM: BEFORE02             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+GIRME                GEORGES                 1111
+GODEFROY             ANNIE                   1127
+RAMAUGE              ANDRE                   1147
+DURAND               JACQUES                 1152
+FAURIE               HENRI                   1158
+ROLLET               GEORGES                 1164
+GRIN                 CLAUDE                  1171
+BRETON               JEAN-MARIE              1177
+ONILLON              JEAN-PIERRE             1177
+MOMMEJA              GUY                     1185
+GIGLEUX              JACQUES                 1191
+ROLLET               GEORGES                 1191
+CAHN                 RAYMOND                 1191
+FAYOLLET             RENE                    1200
+LENZ                 PHILIPPE                1205
+MAZUY                ROBERT                  1206
+BROCHETON            MICHELE                 1218
+KREEBS               JACQUES                 1222
+-----------------------------------------------------
+    PAGE #   8                    DATE:    03/19/11
+    PROGRAM: BEFORE02             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+VALLY                ALAIN                   1228
+KORAB-BRZOZOWSKI     BOGDAN                  1240
+TRAEGER              BERNARD                 1249
+REICH                MARC                    2217
+-------------------------------------------------------
+    PAGE #   9                    DATE:    03/19/11
+    PROGRAM: BEFORE02             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+ 
+ 
+ 
+ 
+         THERE ARE 22 PEOPLE WITH INCOME IN THE RANGE
+ 
+         2 TO 2 THOUSANDS OF DOLLARS
+------------------------------------------------------         
+    PAGE #  10                    DATE:    03/19/11
+    PROGRAM: BEFORE02             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+CAIZERGUES           CLAUDE                  2302
+RIVIERE              JEAN-LUC                2434
+LEGRIS               ROGER                   2550
+LAFON                CHRISTIANE              3147
+-----------------------------------------------------
+    PAGE #  11                    DATE:    03/19/11
+    PROGRAM: BEFORE02             LIBRARY: SNIPPET
+ 
+        NAME              FIRST-NAME      #INCREASED-SALARY
+-------------------- -------------------- -----------------
+ 
+ 
+ 
+ 
+ 
+         THERE ARE 4 PEOPLE WITH INCOME IN THE RANGE
+ 
+         3 TO 3 THOUSANDS OF DOLLARS             
+**********************************************************
+
+You will note the RANGEs for BEFORE02 are incorrect (e.g. 2 to 2 above), while
+those from BEFORE01 are correct (e.g. 1 to 2). I should have altered my code to correctly 
+WRITE the last range for BEFORE01.            
