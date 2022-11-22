@@ -1,0 +1,171 @@
+                                                        
+
+* THIS PROGRAM DOES TWO THINGS.
+* FIRST, IT DEMONSTRATES THE EQUIVALENCE
+* OF ACCEPT/REJECT AND IF...ESCAPE TOP
+*
+* SECOND, IT SHOWS HOW THESE STATEMENTS CAN BE USED
+* IN CONJUNCTION WITH SYSTEM FUNCTIONS, TO ELIMINATE
+* CERTAIN RECORDS FROM BEING INCLUDED IN THE FUNCTIONS
+*
+DEFINE DATA LOCAL
+1 MYVIEW VIEW OF EMPLOYEES
+  2 NAME
+  2 FIRST-NAME
+  2 LEAVE-DUE
+1 #SUM (N3)  
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+* FIRST, WE WILL READ AND SUM ALL FIVE ALEXANDERS
+*
+READ MYVIEW BY NAME STARTING FROM 
+            'ALEXANDER' TO 'ALEXANDER'
+DISPLAY 5T FIRST-NAME LEAVE-DUE 
+*
+AT END OF DATA
+   WRITE / 5T 'SUM OF LEAVE DUE IS:' 
+              SUM (LEAVE-DUE) (NL=3)
+   END-ENDDATA
+END-READ
+*
+NEWPAGE
+*
+* NOW WE WILL SUM ONLY RECORDS THAT ARE NOT
+* GIL OR CHARLY.
+*
+* THE SUMMING IS DONE VIA AN ADD STATEMENT.
+* I FIND THAT MANY SHOPS HAVE CODE LIKE THIS SINCE
+* THEY DO NOT UNDERSTAND HOW TO USE ACCEPT/REJECT
+* AND IF...ESCAPE TOP TO ACCOMPLISH THE
+* REQUIRED EXCLUSION OF RECORDS FROM THE SUM FUNCTION.
+*
+READ MYVIEW BY NAME STARTING FROM 
+            'ALEXANDER' TO 'ALEXANDER'
+DISPLAY 5T FIRST-NAME LEAVE-DUE 
+IF FIRST-NAME NE 'GIL' AND FIRST-NAME NE 'CHARLY'
+   ADD LEAVE-DUE TO #SUM
+   END-IF
+*
+AT END OF DATA
+   WRITE / 5T 'SUM OF LEAVE DUE IS:' 
+              SUM (LEAVE-DUE) (NL=3)
+        // 5T 'SUM OF "QUALIFIED" ALEXANDERS'
+              #SUM  / 5T '(NOT GIL OR CHARLY)'    
+   END-ENDDATA
+END-READ
+*
+NEWPAGE
+*
+* AS NOTED IN THE DESCRIPTION (SEE THAT TAB)
+* RECORDS THAT DO NOT "REACH" THE END OF A LOOP
+* ARE NOT INCLUDED IN SYSTEM FUNCTIONS
+* SINCE GIL AND CHARLY RECORDS DO NOT REACH THE
+* END OF OUR LOOP, THEY ARE NOT INCLUDED IN THE SUM.
+*
+READ MYVIEW BY NAME STARTING FROM 
+            'ALEXANDER' TO 'ALEXANDER'
+DISPLAY 5T FIRST-NAME LEAVE-DUE 
+ACCEPT IF FIRST-NAME NE 'GIL' AND FIRST-NAME NE 'CHARLY'
+*
+AT END OF DATA
+   WRITE / 5T 'SUM OF "QUALIFIED" ALEXANDERS'
+              SUM (LEAVE-DUE) (NL=3)
+              / 5T '(NOT GIL OR CHARLY)'    
+   END-ENDDATA
+END-READ
+*
+NEWPAGE
+*
+* AS ABOVE, WE KEEP GIL AND CHARLY RECORDS FROM
+* REACHING THE END OF OUR LOOP, HENCE THEY
+* ARE NOT INCLUDED IN THE SUM.
+*
+READ MYVIEW BY NAME STARTING FROM 
+            'ALEXANDER' TO 'ALEXANDER'
+DISPLAY 5T FIRST-NAME LEAVE-DUE 
+IF FIRST-NAME EQ 'GIL' OR FIRST-NAME EQ 'CHARLY'
+   ESCAPE TOP
+   END-IF
+*
+AT END OF DATA
+   WRITE / 5T 'SUM OF "QUALIFIED" ALEXANDERS'
+              SUM (LEAVE-DUE) (NL=3)
+              / 5T '(NOT GIL OR CHARLY)'    
+   END-ENDDATA
+END-READ
+*
+END  
+
+
+    PAGE #   1                    DATE:    03/14/11
+    PROGRAM: SUM03X               LIBRARY: SNIPPET
+ 
+         FIRST-NAME      LEAVE
+                          DUE
+    -------------------- -----
+ 
+    PHIL                  23
+    STEPHEN               28
+    GIL                   34
+    CHARLY                11
+    HOLLY                 35
+ 
+    SUM OF LEAVE DUE IS:  131
+
+---------------------------------------------------
+    
+    PAGE #   2                    DATE:    03/14/11
+    PROGRAM: SUM03X               LIBRARY: SNIPPET
+ 
+         FIRST-NAME      LEAVE
+                          DUE
+    -------------------- -----
+ 
+    PHIL                  23
+    STEPHEN               28
+    GIL                   34
+    CHARLY                11
+    HOLLY                 35
+ 
+    SUM OF LEAVE DUE IS:  131
+ 
+    SUM OF 'QUALIFIED' ALEXANDERS   86
+    (NOT GIL OR CHARLY)
+
+---------------------------------------------------
+    
+    PAGE #   3                    DATE:    03/14/11
+    PROGRAM: SUM03X               LIBRARY: SNIPPET
+ 
+         FIRST-NAME      LEAVE
+                          DUE
+    -------------------- -----
+ 
+    PHIL                  23
+    STEPHEN               28
+    GIL                   34
+    CHARLY                11
+    HOLLY                 35
+ 
+    SUM OF 'QUALIFIED' ALEXANDERS   86
+    (NOT GIL OR CHARLY)
+
+---------------------------------------------------    
+    PAGE #   4                    DATE:    03/14/11
+    PROGRAM: SUM03X               LIBRARY: SNIPPET
+ 
+         FIRST-NAME      LEAVE
+                          DUE
+    -------------------- -----
+ 
+    PHIL                  23
+    STEPHEN               28
+    GIL                   34
+    CHARLY                11
+    HOLLY                 35
+ 
+    SUM OF 'QUALIFIED' ALEXANDERS   86
+    (NOT GIL OR CHARLY)                                        
