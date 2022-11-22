@@ -1,0 +1,302 @@
+DEFINE DATA  
+LOCAL  
+1 #PARMS  
+   2 #DBID (N5)  
+   2 #FILE (N5)  
+1 #CB  
+   2 CB-MODE (B2)      INIT <H'3000'>              /* Reserved  
+   2 CB-CMD (A2)       INIT <'LF'>                 /* Command code  
+   2 CB-CID (A4)                                   /* Command ID  
+   2 CB-FILE (B2)                                  /* 2 byte file number  
+   2 CB-DBID (B2)     2 REDEFINE CB-DBID           /* Data base ID  
+       3 CB-RSP (B2)                               /* Response code / 2 byte DBID  
+   2 CB-ISN (B4)                                   /* ISN  
+   2 CB-ISL (B4)                                   /* ISN lower limit  
+   2 CB-ISQ (B4)                                   /* ISN quantity  
+   2 CB-FBL (B2)       INIT <1>                    /* Format buffer length  
+   2 CB-RBL (B2)       INIT <10620>                /* Record buffer length  
+   2 CB-SBL (B2)       INIT <1>                    /* Search buffer length  
+   2 CB-VBL (B2)       INIT <1>                    /* Value   buffer length  
+   2 CB-IBL (B2)       INIT <1>                    /* ISN       buffer length  
+   2 CB-COP1 (A1)                                  /* Command option 1  
+   2 CB-COP2 (A1)      INIT <'S'>                  /* Command option 2  
+   2 CB-ADD1 (A8)                                  /* Additions 1  
+   2 CB-ADD2 (A4)                                  /* Additions 2  
+   2 CB-ADD3 (A8)                                  /* Additions 3  
+   2 CB-ADD4 (A8)                                  /* Additions 4  
+   2 CB-ADD5 (A8)                                  /* Additions 5  
+   2 CB-CT (A4)                                    /* Command time  
+   2 CB-UA (A4)         1 REDEFINE #CB             /* User area  
+   2 #CB-80 (A80)  
+*  
+1 USR1028  
+   2 #F (A1)               INIT <'I'>  
+   2 #N (P5)               INIT <2>  
+   2 #BITS (A1/8, 80)  
+   2 #BYTS (A1/80)  
+   2 #R (N4)  
+*  
+1 #RB (A1/32772)     1 REDEFINE #RB  
+   2 #LEN (I2)                                              /* Length  
+   2 #CNT (I2)                                              /* Count  
+   2 #FDT (A8/4096)                                         /* 32k  
+  
+1 #FB (A1)  
+1 #SB (A1)  
+1 #VB (A1)  
+1 #IB (A1)  
+1 #RC (I4)  
+*  
+1 #ENTRY (A8)           1 REDEFINE #ENTRY  
+   2 #IND (A1)                                              /* Entry type  
+                                     1 REDEFINE #ENTRY  
+   2 #FL  
+       3 FILLER 1X  
+       3 #FL-NAME (A2)  
+       3 #FL-OPT (A1)  
+       3 #FL-LVL (I1)  
+       3 #FL-LEN (I1)  
+       3 #FL-FMT (A1)  
+       3 #FL-NC (A1)  
+                                     1 REDEFINE #ENTRY  
+   2 #HY  
+       3 FILLER 1X  
+       3 #HY-NAME (A2)  
+       3 #HY-OPT (A1)  
+       3 #HY-NUM (I1)  
+       3 #HY-LEN (I1)  
+       3 #HY-FMT (A1)  
+       3 FILLER 1X  
+                                     1 REDEFINE #ENTRY  
+   2 #PH  
+       3 FILLER 1X  
+       3 #PH-NAME (A2)  
+       3 FILLER 1X  
+       3 #PH-PAR (A2)  
+       3 FILLER 2X  
+                                     1 REDEFINE #ENTRY  
+   2 #SU  
+       3 FILLER 1X  
+       3 #SB-NAME (A2)  
+       3 #SB-OPT (A1)  
+       3 #SB-PAR (A2)  
+       3 #SB-FM (I1)  
+       3 #SB-TO (I1)  
+                                     1 REDEFINE #ENTRY  
+   2 #SP  
+       3 FILLER 1X  
+       3 #SP-NAME (A2)  
+       3 #SP-OPT (A1)  
+       3 #SP-PAR (A2)  
+       3 #SP-FM (I1)  
+       3 #SP-TO (I1)  
+*  
+1 #DISP  
+   2 #FLD (A2)            (HD='Nm')  
+   2 #LVL (N2)            (HD='Lv')  
+   2 #FMT (A1)            (HD='F')  
+   2 #LEN (N3)            (HD='Len')  
+   2 #CMP (A2)            (HD='Cmp')  
+   2 #FM (N3)             (HD='Fm')  
+   2 #TO (N3)             (HD='To')  
+   2 #FLG (A1/11)     2 REDEFINE #FLG  
+       3 #D (A1)  
+       3 #F (A1)  
+       3 #M (A1)  
+       3 #N (A1)  
+       3 #E (A1)  
+       3 #P (A1)  
+       3 #S (A1)  
+       3 #U (A1)  
+       3 #V (A1)  
+       3 #O (A1)  
+       3 #C (A1)  
+                                     2 REDEFINE #FLG  
+       3 #DL (L)           (HD="DE" EM=' '/X)  
+       3 #FL (L)           (HD="FI" EM=' '/X)  
+       3 #ML (L)           (HD="MU" EM=' '/X)  
+       3 #NL (L)           (HD="NU" EM=' '/X)  
+       3 #EL (L)           (HD="PE" EM=' '/X)  
+       3 #PL (L)           (HD="PH" EM=' '/X)  
+       3 #SL (L)           (HD="SP" EM=' '/X)  
+       3 #UL (L)           (HD="UQ" EM=' '/X)  
+       3 #VL (L)           (HD="NC" EM=' '/X)  
+       3 #OL (L)           (HD="NN" EM=' '/X)  
+       3 #CL (L)           (HD="NV" EM=' '/X)  
+*  
+1 #TEMP (A2)  
+1 #TITLE (A25)  
+1 #EOP (A2)  
+1 #PS (N7)  
+*  
+1 #I (I4)  
+END-DEFINE  
+*  
+*  
+ASSIGN #PS = *PAGESIZE - 1  
+FORMAT KD=T PS=22  
+SET GLOBALS PS=#PS                           /* Nat6.2/4.2  
+SET KEY PF3 NAMED 'Quit'  
+*  
+REPEAT  
+   RESET *PAGE-NUMBER  
+   INPUT (AD=O IP=F)  
+                       *PROGRAM  
+               10T 'Adabas FDT' (I)  
+               60T *DAT4U  
+                       *TIME (AL=5)  
+         // 10T 'DBID:' #PARMS.#DBID (AD=MDL)  
+         // 10T ' Fnr:' #PARMS.#FILE (AD=MDL)  
+   IF   *PF-KEY = 'PF3'  
+       THEN  
+           STOP  
+   END-IF  
+   /*  
+   COMPRESS NUMERIC 'DBID'  
+                                     #PARMS.#DBID  
+                                     ' /'  
+                                     ' File'  
+                                     #PARMS.#FILE  
+                           INTO #TITLE  
+   /*  
+   RESET INITIAL #CB  
+   ASSIGN #CB.CB-DBID = #PARMS.#DBID  
+   ASSIGN #CB.CB-FILE = #PARMS.#FILE  
+   CALLNAT 'USR1043N' #CB-80  
+                                         #FB  
+                                         #RB (1)  
+                                         #SB  
+                                         #VB  
+                                         #IB  
+                                         #RC  
+   /*  
+   DECIDE ON FIRST #RC  
+       VALUE 48, 148  
+           REINPUT 'Selection error - Database not found' MARK *#PARMS.#DBID  
+       VALUE 17  
+           REINPUT 'Selection error - File not found' MARK *#PARMS.#FILE  
+       VALUE 0, 3  
+           IGNORE  
+       NONE  
+           REINPUT 'Internal Error - Adabas response code:1:', #RC  
+   END-DECIDE  
+   /*  
+   RESET #I  
+   REPEAT  
+       ADD 1 TO #I  
+       ASSIGN #ENTRY = #FDT (#I)  
+       RESET   #DISP  
+       DECIDE ON FIRST #ENTRY.#IND  
+           VALUE 'F'                                               /* Field  
+                       ASSIGN #DISP.#LVL               = #ENTRY.#FL-LVL  
+                       ASSIGN #DISP.#FLD               = #ENTRY.#FL-NAME  
+                       ASSIGN #DISP.#FMT               = #ENTRY.#FL-FMT  
+                       ASSIGN #DISP.#LEN               = #ENTRY.#FL-LEN  
+                       ASSIGN USR1028.#BYTS (1) = #ENTRY.#FL-OPT  
+                       ASSIGN USR1028.#BYTS (2) = #ENTRY.#FL-NC  
+                       RESET   USR1028.#BITS (*, *)  
+                       CALLNAT "USR1028N" USR1028  
+                       ASSIGN #DISP.#FLG (1:08) = USR1028.#BITS (1, 1:8)  
+                       ASSIGN #DISP.#FLG (9:11) = USR1028.#BITS (2, 6:8)  
+         VALUE 'H'                                               /* HyperDescriptor  
+                       ASSIGN #DISP.#FLD               = #TEMP  
+                                                                         = #ENTRY.#HY-NAME  
+                       ASSIGN #DISP.#FMT               = #ENTRY.#HY-FMT  
+                       ASSIGN #DISP.#LEN               = #ENTRY.#HY-LEN  
+                       ASSIGN #DISP.#FM                 = #ENTRY.#HY-NUM  
+                       ASSIGN USR1028.#BYTS (1) = #ENTRY.#HY-OPT  
+                       RESET   USR1028.#BITS (*, *)  
+                       CALLNAT "USR1028N" USR1028  
+                       ASSIGN #DISP.#N                   = USR1028.#BITS (1, 4)  
+                       ASSIGN #DISP.#E                   = USR1028.#BITS (1, 5)  
+                       ASSIGN #DISP.#M                   = USR1028.#BITS (1, 6)  
+                       ASSIGN #DISP.#U                   = USR1028.#BITS (1, 8)  
+           VALUE 'P'                                               /* PhoneticDescriptor  
+                       ASSIGN #DISP.#FLD               = #ENTRY.#PH-NAME  
+                       ASSIGN #DISP.#CMP               = #ENTRY.#PH-PAR  
+                       ASSIGN #DISP.#P                   = 1  
+           VALUE 'S'                                               /* SubDescriptor  
+                       ASSIGN #DISP.#FLD               = #TEMP  
+                                                                         = #ENTRY.#SB-NAME  
+                       ASSIGN #DISP.#CMP               = #ENTRY.#SB-PAR  
+                       ASSIGN #DISP.#FM                 = #ENTRY.#SB-FM  
+                       ASSIGN #DISP.#TO                 = #ENTRY.#SB-TO  
+                       ASSIGN USR1028.#BYTS (1) = #ENTRY.#SB-OPT  
+                       RESET   USR1028.#BITS (*, *)  
+                       CALLNAT "USR1028N" USR1028  
+                       ASSIGN #DISP.#D                   = USR1028.#BITS (1, 1)  
+                       ASSIGN #DISP.#N                   = USR1028.#BITS (1, 4)  
+                       ASSIGN #DISP.#E                   = USR1028.#BITS (1, 5)  
+                       ASSIGN #DISP.#M                   = USR1028.#BITS (1, 6)  
+                       ASSIGN #DISP.#U                   = USR1028.#BITS (1, 8)  
+           VALUE 'T'                                               /* SuperDescriptor  
+                       ASSIGN #DISP.#FLD               = #TEMP  
+                                                                         = #ENTRY.#SP-NAME  
+                       ASSIGN #DISP.#CMP               = #ENTRY.#SP-PAR  
+                       ASSIGN #DISP.#FM                 = #ENTRY.#SP-FM  
+                       ASSIGN #DISP.#TO                 = #ENTRY.#SP-TO  
+                       ASSIGN USR1028.#BYTS (1) = #ENTRY.#SP-OPT  
+                       RESET   USR1028.#BITS (*, *)  
+                       CALLNAT "USR1028N" USR1028  
+                       ASSIGN #DISP.#D                   = USR1028.#BITS (1, 1)  
+                       ASSIGN #DISP.#N                   = USR1028.#BITS (1, 4)  
+                       ASSIGN #DISP.#E                   = USR1028.#BITS (1, 5)  
+                       ASSIGN #DISP.#M                   = USR1028.#BITS (1, 6)  
+                       ASSIGN #DISP.#U                   = USR1028.#BITS (1, 8)  
+           VALUE H'00'                                           /* continuation element  
+                       ASSIGN #DISP.#FLD               = #TEMP  
+                       ASSIGN #DISP.#CMP               = #ENTRY.#SP-PAR  
+                       ASSIGN #DISP.#FM                 = #ENTRY.#SP-FM  
+                       ASSIGN #DISP.#TO                 = #ENTRY.#SP-TO  
+           VALUE ' '  
+                       NEWPAGE  
+                       ESCAPE BOTTOM                           /* End of FDT entries  
+           ANY  
+                       DISPLAY (ES=T)  
+                                       #DISP.#FLD (IS=T)  
+                                       #DISP.#LVL (EM=ZZ)  
+                                       #DISP.#FMT  
+                                       #DISP.#LEN (EM=ZZ)  
+                                       #DISP.#FL  
+                                       #DISP.#NL  
+                                       #DISP.#ML  
+                                       #DISP.#EL  
+                                       #DISP.#DL  
+                                       #DISP.#UL  
+                                       #DISP.#SL  
+                                       #DISP.#CMP  
+                                       #DISP.#FM   (EM=ZZ)  
+                                       #DISP.#TO   (EM=ZZ)  
+                                       #DISP.#PL  
+                                       #DISP.#CL  
+                                       #DISP.#OL  
+                                       #DISP.#VL  
+           NONE  
+                       IGNORE  
+       END-DECIDE  
+   END-REPEAT  
+END-REPEAT  
+*  
+WRITE TITLE LEFT  
+                   *PROGRAM  
+                   'Adabas FDT' (I)  
+                   #TITLE  
+           60T *DAT4U  
+                   *TIME (AL=5)  
+                   *PAGE-NUMBER (EM=Z9)  
+       /  
+*  
+AT END OF PAGE  
+   INPUT  
+               'Enter "X" for new selection; Press PF3 to Stop' #EOP (AD=M)  
+   IF   #EOP <> ' '  
+       THEN  
+           RESET #EOP  
+           ESCAPE BOTTOM  
+   END-IF  
+   IF   *PF-KEY = 'PF3'  
+       THEN  
+           STOP  
+   END-IF  
+END-ENDPAGE  
+END  
