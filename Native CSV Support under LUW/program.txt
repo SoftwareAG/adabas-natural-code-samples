@@ -1,0 +1,197 @@
+                                                        
+Program 1:
+=======
+
+OPTIONS TQMARK=OFF
+DEFINE DATA LOCAL
+1 #M (I4)     CONST <2>
+1 EMP    VIEW EMPLOYEES
+  2 PERSONNEL-ID
+  2 NAME
+  2 CURR-CODE (#M)
+  2 SALARY (#M)
+  2 LEAVE-TAKEN
+1 #CURR (A3/#M)
+1 #SAL (N9/#M)
+1 #C (A1)     CONST <','>
+1 #Q (A1)     CONST <'"'>
+END-DEFINE
+*
+DEFINE WORK FILE 1 'c:\Users\Ralph\Desktop\csv-test.txt'
+            TYPE "ASCII"
+*
+LIMIT 5
+READ EMP BY PERSONNEL-ID
+  AT START OF DATA
+    WRITE WORK 1 VARIABLE 'Personnel ID' #C
+                          'Surname'      #C
+                          'Currency'     #C
+                          'Salary'       #C
+                          'Leave Taken'
+  END-START
+  ASSIGN #CURR (*) = CURR-CODE (*)
+  ASSIGN #SAL  (*) = SALARY    (*)
+  WRITE WORK 1 VARIABLE #Q PERSONNEL-ID  #Q #C
+                        #Q NAME          #Q #C
+                        #Q #CURR (1)     #Q #C
+                        #Q #CURR (2)     #Q #C
+                           #SAL  (1)        #C
+                           #SAL  (2)        #C
+                           LEAVE-TAKEN
+  DISPLAY PERSONNEL-ID
+          NAME
+          CURR-CODE (*)
+          SALARY (*)
+          LEAVE-TAKEN
+END-READ
+END
+
+Program 1 report:
+
+PERSONNEL         NAME         CURRENCY   ANNUAL   LEAVE-TAKEN
+   ID                            CODE     SALARY
+--------- -------------------- -------- ---------- -----------
+ 
+11100102  SCHINDLER            EUR           24615  15
+                               EUR           23589
+11100105  SCHIRM               EUR           34871  20
+                               EUR           33846
+11100106  SCHMITT              EUR           26153   0
+                               EUR           24358
+11100107  SCHMIDT              EUR           18461  20
+                               EUR           16410
+11100108  SCHNEIDER            EUR           22564  12
+                               EUR           21538
+
+Simulated CSV file:
+
+Personnel ID,Surname,Currency,Salary,Leave Taken
+"11100102","SCHINDLER           ","EUR","EUR",000024615,000023589,15
+"11100105","SCHIRM              ","EUR","EUR",000034871,000033846,20
+"11100106","SCHMITT             ","EUR","EUR",000026153,000024358,00
+"11100107","SCHMIDT             ","EUR","EUR",000018461,000016410,20
+"11100108","SCHNEIDER           ","EUR","EUR",000022564,000021538,12
+
+
+Program 2:
+=======
+
+DEFINE DATA LOCAL
+1 EMP    VIEW EMPLOYEES
+  2 PERSONNEL-ID
+  2 NAME
+  2 CURR-CODE (2)
+  2 SALARY (2)
+  2 LEAVE-TAKEN
+END-DEFINE
+*
+DEFINE WORK FILE 1 'c:\Users\Ralph\Desktop\csv-test.csv'
+            TYPE "CSV"
+*
+LIMIT 5
+READ EMP BY PERSONNEL-ID
+  AT START OF DATA
+    WRITE WORK 1 VARIABLE 'Personnel ID'
+                          'Surname'
+                          'Currency'
+                          'Salary'
+                          'Leave Taken'
+  END-START
+  WRITE WORK 1 VARIABLE PERSONNEL-ID
+                        *TRIM (NAME, TRAILING)
+                        CURR-CODE (*)
+                        SALARY (*)
+                        LEAVE-TAKEN
+  DISPLAY PERSONNEL-ID
+          NAME
+          CURR-CODE (*)
+          SALARY (*)
+          LEAVE-TAKEN
+END-READ
+END
+
+True CSV file:
+
+Personnel ID;Surname;Currency;Salary;Leave Taken
+11100102;SCHINDLER;EUR;EUR;24615;23589;15
+11100105;SCHIRM;EUR;EUR;34871;33846;20
+11100106;SCHMITT;EUR;EUR;26153;24358;0
+11100107;SCHMIDT;EUR;EUR;18461;16410;20
+11100108;SCHNEIDER;EUR;EUR;22564;21538;12
+
+
+Program 3:
+=======
+
+DEFINE DATA LOCAL
+1 #M (I4)     CONST <2>
+1 #CSV
+  2 #ID (A8)
+  2 #NAME (A20)
+  2 #CURR (A3/#M)
+  2 #SAL (P9/#M)
+  2 #LEAVE (N2)
+1 #HDR (A20/5)
+END-DEFINE
+DEFINE WORK FILE 1 'c:\Users\Ralph\Desktop\csv-test.csv'
+            TYPE "CSV"
+*
+READ WORK 1 ONCE #HDR (*)
+READ WORK 1 #CSV
+  DISPLAY #CSV
+END-WORK
+END
+
+Program 3 report:
+
+                        #CSV
+ 
+  #ID           #NAME         #CURR    #SAL    #LEAVE
+-------- -------------------- ----- ---------- ------
+ 
+11100102 SCHINDLER            EUR        24615  15
+                              EUR        23589
+11100105 SCHIRM               EUR        34871  20
+                              EUR        33846
+11100106 SCHMITT              EUR        26153   0
+                              EUR        24358
+11100107 SCHMIDT              EUR        18461  20
+                              EUR        16410
+11100108 SCHNEIDER            EUR        22564  12
+                              EUR        21538
+
+
+Program 4:
+=======
+
+DEFINE DATA LOCAL
+1 #M (I4)     CONST <2>
+1 #CSV
+  2 #ID (A8)
+  2 #NAME (A20)
+  2 #CURR (A3/#M)
+  2 #SAL (P9/#M)
+  2 #LEAVE (N2)
+1 #HDR (A20/5)
+*
+1 #USR2011
+  2 FUNCTION        (A1)     INIT <"S">
+  2 WORK-NUM        (I1)     INIT <1>
+  2 WORK-FILE       (A253) /*INIT <'c:\Users\Ralph\Desktop\csv-test.txt'>
+  2 WORK-TYPE       (A1)   /*INIT <"B">
+  2 MAX-NUM         (I1)
+  2 RESPONSE        (I4)
+  2 EXTENDED-DATA   (A1/1)   INIT <H'00'>
+  2 WORK-ATTRIBUTES (A1000)
+  2 WORK-CODEPAGE   (A64)
+  2 WORK-PROPERTIES (A1000)  INIT <"SEPARATOR-COMMA">
+END-DEFINE
+DEFINE WORK FILE 1 'c:\Users\Ralph\Desktop\csv-test.txt'
+            TYPE "CSV"
+CALLNAT "USR2011N" #USR2011
+*
+READ WORK 1 ONCE #HDR (*)
+READ WORK 1 #CSV
+  DISPLAY #CSV
+END-WORK
+END            
