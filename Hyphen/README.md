@@ -13,7 +13,9 @@ The results indicate that no records of type B exist. The first record read is o
 
 Results:
 
+```bash
 End: M           1
+```
 
 But we happen to know that there are over 200 such records on file.  We realize that the second component of the SD is in packed-decimal format, so the first (and possibly several) bytes contains H'00'.  Our starting value contains a space in the first byte of the ID and this positions us at the next Type value in the file - M.
 
