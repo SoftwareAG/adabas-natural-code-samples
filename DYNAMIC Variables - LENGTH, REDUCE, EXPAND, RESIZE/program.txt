@@ -1,0 +1,222 @@
+                                                        
+* THIS PROGRAM SHOWS THE EFFECT OF MOVING 
+* CHARACTERS (TWO ASTERISKS) TO A DYNAMIC
+* VARIABLE, WITHIN THE BOUNDS OF THE
+* *LENGTH.
+*
+DEFINE DATA LOCAL
+1 #D (A) DYNAMIC 
+1 #A (A20) INIT <'QWERTASDFG'>
+1 #LENGTH (I2)
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+MOVE #A TO #D
+*
+EXAMINE #D FOR 'X' GIVING LENGTH #LENGTH
+*
+WRITE 5T '*LENGTH FOR #D IS:  ' *LENGTH (#D) /
+      5T '#LENGTH FOR #D IS:  ' #LENGTH 
+PRINT 5T 'VALUE OF #D IS:' #D   / 5T '-' (30) //
+*
+MOVE '**' TO SUBSTRING (#D,17,2)
+EXAMINE #D FOR 'X' GIVING LENGTH #LENGTH
+*
+WRITE 5T '-- AFTER MOVE TO SUBSTRING --' /
+WRITE 5T '*LENGTH FOR #D IS:  ' *LENGTH (#D) /
+      5T '#LENGTH FOR #D IS:  ' #LENGTH 
+PRINT 5T 'VALUE OF #D IS:' #D   / 5T '-' (30)   
+*
+END      
+------------------------------------------------------
+Here is the output for the program above.
+
+    PAGE #   1                    DATE:    04/05/11
+    PROGRAM: LENGTH03             LIBRARY: SNIPPET
+ 
+    *LENGTH FOR #D IS:            20
+    #LENGTH FOR #D IS:       10
+    VALUE OF #D IS: QWERTASDFG
+    -------------------------------------------
+ 
+ 
+    -- AFTER MOVE TO SUBSTRING --
+ 
+    *LENGTH FOR #D IS:            20
+    #LENGTH FOR #D IS:       18
+    VALUE OF #D IS: QWERTASDFG      **
+    ----------------------------------------------
+******************************************************
+Discussion of the output above.
+
+If you look at the output from the first "segment", 
+*LENGTH (#D) is twenty. Basically, this means that 
+#D is "sort of" like an A20 variable. 
+
+Therefore, there is no problem with the statement:
+
+         MOVE '**' TO SUBSTRING (#D,17,2)
+
+Just pretend #D is a non-dynamic variable formatted A20.
+As you can see from the second output "segment", the 
+two asterisks are where you would expect them to be, namely,
+the 17th and 18th positions of #D. 
+********************************************************
+Discussion of a program variation
+
+Suppose I altered just one statement in the program LENGTH03.
+Instead of the statement:  MOVE '**' TO SUBSTRING (#D,17,2)
+I coded MOVE '**' TO SUBSTRING (#D,22,2).
+
+As before, after the first "segment" of the program, #D would
+have *LENGTH = 20; in other words, it would behave just like an
+A20 formatted non-dynamic variable.
+
+Therefore, if I run the program, I would see the same first 
+segment of output namely:
+
+    PAGE #   1                    DATE:    04/05/11
+    PROGRAM: LENGTH03             LIBRARY: SNIPPET
+ 
+    *LENGTH FOR #D IS:            20
+    #LENGTH FOR #D IS:       10
+    VALUE OF #D IS: QWERTASDFG
+    -------------------------------------------
+
+
+Then, I would receive the following error message.
+
+
+
+NAT1326 Range specified with FROM/LENGTH clause is outside field.
+-------------------------------------------------------------------
+TEXT:
+  Range specified with FROM/LENGTH clause is outside field.
+EXPL:
+  Error in FROM/LENGTH clause of EXAMINE or SEPARATE statement:
+  - The FROM position is not within the field; or
+  - the specified LENGTH exceeds the length of the field; or
+  - the LENGTH value is negative.
+ACTN:
+  Check program and correct error.
+
+Not hard to understand the error message. #D is an A20 variable,
+and I am trying to move two asterisks into the 22nd and 23rd 
+positions of #D. Simply will not work.
+
+**************************************************************
+
+Now we will look at another slight variant of LENGTH03.
+
+* THIS PROGRAM SHOWS THE EFFECT OF MOVING 
+* CHARACTERS (TWO ASTERISKS) TO A DYNAMIC
+* VARIABLE, OUTSIDE THE BOUNDS OF THE
+* *LENGTH, BUT WITHIN THE "EXPANDED" LENGTH.
+*
+DEFINE DATA LOCAL
+1 #D (A) DYNAMIC 
+1 #A (A20) INIT <'QWERTASDFG'>
+1 #LENGTH (I2)
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+MOVE #A TO #D
+*
+EXAMINE #D FOR 'X' GIVING LENGTH #LENGTH
+*
+WRITE 5T '*LENGTH FOR #D IS:  ' *LENGTH (#D) /
+      5T '#LENGTH FOR #D IS:  ' #LENGTH 
+PRINT 5T 'VALUE OF #D IS:' #D   / 5T '-' (30) //
+*
+EXPAND DYNAMIC #D TO 30
+*
+WRITE 5T '-- AFTER EXPAND DYNAMIC --' /
+WRITE 5T '*LENGTH FOR #D IS:  ' *LENGTH (#D) /
+      5T '#LENGTH FOR #D IS:  ' #LENGTH / 5T '-' (30)
+*
+MOVE '**' TO SUBSTRING (#D,27,2)
+EXAMINE #D FOR 'X' GIVING LENGTH #LENGTH
+*
+WRITE 5T '-- AFTER MOVE TO SUBSTRING --' /
+WRITE 5T '*LENGTH FOR #D IS:  ' *LENGTH (#D) /
+      5T '#LENGTH FOR #D IS:  ' #LENGTH 
+PRINT 5T 'VALUE OF #D IS:' #D   / 5T '-' (30)   
+*
+END      
+------------------------------------------------
+What has changed in the program above? First, I
+have added:
+
+EXPAND DYNAMIC #D TO 30
+*
+WRITE 5T '-- AFTER EXPAND DYNAMIC --' /
+WRITE 5T '*LENGTH FOR #D IS:  ' *LENGTH (#D) /
+      5T '#LENGTH FOR #D IS:  ' #LENGTH / 5T '-' (30)
+*
+
+and changed the following statement to:
+           MOVE '**' TO SUBSTRING (#D,27,2)
+whereas in LENGTH03 the statement was:
+           MOVE '**' TO SUBSTRING (#D,17,2)
+
+------------------------------------------------
+Here is our output from LENGTH04 above:
+
+    PAGE #   1                    DATE:    04/05/11
+    PROGRAM: LENGTH04             LIBRARY: SNIPPET
+ 
+    *LENGTH FOR #D IS:            20
+    #LENGTH FOR #D IS:       10
+    VALUE OF #D IS: QWERTASDFG
+    ------------------------------
+
+    -- AFTER EXPAND DYNAMIC --
+ 
+    *LENGTH FOR #D IS:            20
+    #LENGTH FOR #D IS:       10
+    ------------------------------
+----------------------------------------------------
+This was followed by the same NAT1326 error message
+we saw above.
+
+The reason for this last program was to demonstrate that 
+the EXPAND statement did not change Natural's perspective
+of #D. The *LENGTH for #D after the EXPAND statement is still
+20, not 30 (as can be seen above).
+
+Time to understand what EXPAND, RESIZE and REDUCE really do.
+In the buffer area where DYNAMIC variables are stored, there 
+are "reserved areas" for every DYNAMIC variable.
+
+These are NOT, repeat, NOT, the same thing as *LENGTH. 
+Adding to a DYNAMIC variables "reserved area" simply ensures
+that there is a contiguous area set aside for that variable.
+
+This "reserved area", MAY, at a later time, DISAPPEAR. If a different
+existing DYNAMIC variable, with say an *LENGTH of 72, has a text string of
+length 51,837 moved to it, and if there is not a lot of room
+left in the buffer area, Natural will "appropriate" reserved areas 
+from other DYNAMIC variable to make room for the expanded variable. 
+Natural will NEVER appropriate space from the *LENGTH of a DYNAMIC variable.
+
+To repeat an earlier comment, it is *LENGTH that most resembles
+a format (e.g. A500) for a non-dynamic variable. 
+
+There really is no similarity between an expanded size set via
+EXPAND or RESIZE and a format for a non-dynamic variable.
+
+A source of confusion
+---------------------
+
+Note that if you use REDUCE or EXPAND (to a smaller size), it may
+seem as if the reduced size is like a format size. Not really.
+What is happening is that when you specify a REDUCE size that is less than 
+*LENGTH, you are also changing *LENGTH. It once again is *LENGTH
+which resembles the format of a non-dynamic variable.
+
+
+                                        
