@@ -21,6 +21,7 @@ But we happen to know that there are over 200 such records on file.  We realize 
 
 Results:
 
+```bash
 Page    11
  
 CONTRACT-TYPE CONTRACT-ID
@@ -40,7 +41,7 @@ B                2202
 B                2205
  
 End: B         202
-
+```
 
 And finally to the point of this posting.
 
