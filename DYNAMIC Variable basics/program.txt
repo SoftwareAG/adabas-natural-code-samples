@@ -1,0 +1,193 @@
+                                                        
+
+* THE PURPOSE OF THIS PROGRAM IS TO DEMONSTRATE
+* WHAT THE SYSTEM VARIABLE *LENGTH ACTUALLY CONTAINS
+* GIVEN VARIOUS MOVE'S TO A DYNAMIC VARIABLE.
+*
+DEFINE DATA LOCAL
+1 #D (A) DYNAMIC 
+1 #A (A20) INIT <'QWERTASDFG'>
+1 #D2 (A) DYNAMIC
+1 #LENGTH (I2)
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+MOVE 'ABC' TO #D
+*
+WRITE 5T 'AFTER: MOVE "ABC" TO #D' /
+      5T '*LENGTH FOR #D IS:  ' *LENGTH (#D) /
+PRINT 5T 'VALUE OF #D IS NOW:' #D / 5T '-' (30)
+*
+MOVE 'ABC    ' TO #D
+*
+WRITE 5T 'AFTER: MOVE "ABC    " TO #D' /
+      5T '*LENGTH FOR #D IS:  ' *LENGTH (#D) /
+PRINT 5T 'VALUE OF #D IS NOW:' #D / 5T '-' (30)
+*
+MOVE #A TO #D
+*
+WRITE 5T 'AFTER: MOVE #A TO #D' /
+      5T '*LENGTH FOR #D IS:  ' *LENGTH (#D) /
+PRINT 5T 'VALUE OF #D IS NOW:' #D / 5T '-' (30)
+*
+MOVE #D TO #D2
+*
+WRITE 5T 'AFTER: MOVE #D TO #D2' /
+      5T '*LENGTH FOR #D2 IS:  ' *LENGTH (#D2) /
+PRINT 5T 'VALUE OF #D2 IS:' #D2 / 5T '-' (30)
+*
+END
+
+----------------------------------------------------
+Output from the program above:    
+ 
+    PAGE #   1                    DATE:    04/02/11
+    PROGRAM: LENGTH02             LIBRARY: SNIPPET
+ 
+    AFTER: MOVE 'ABC' TO #D
+    *LENGTH FOR #D IS:             3
+ 
+    VALUE OF #D IS NOW: ABC
+    ------------------------------
+    AFTER: MOVE 'ABC    ' TO #D
+    *LENGTH FOR #D IS:             7
+ 
+    VALUE OF #D IS NOW: ABC
+    ------------------------------
+    AFTER: MOVE #A TO #D
+    *LENGTH FOR #D IS:            20
+ 
+    VALUE OF #D IS NOW: QWERTASDFG
+    ------------------------------
+    AFTER: MOVE #D TO #D2
+    *LENGTH FOR #D2 IS:            20
+ 
+    VALUE OF #D2 IS: QWERTASDFG
+    ------------------------------
+-----------------------------------------------
+
+Discussion of the output above:
+
+When we MOVE 'ABC' TO #D, Natural creates an "internal variable"
+with format A3, and value ABC. When this is MOVE'd to #D, the 
+length of the internal variable becomes the value for the *LENGTH
+of #D.
+
+In the second segment, when we MOVE 'ABC    ' to #D, Natural has
+created an internal variable of format A7 with value of ABC followed
+by four blanks. As above, the length of the internal variable becomes
+the value for the *LENGTH of #D. 
+
+In the third segment, when we MOVE #A TO #D, the length of #A
+becomes the *LENGTH of #D.
+
+Finally, in the fourth segment, when we MOVE #D TO #D2, the *LENGTH
+for #D becomes the *LENGTH for #D2.
+
+
+*****************************************************
+
+* THE PURPOSE OF THIS PROGRAM IS TO CONVEY SOME
+* BASIC INFORMATION REGARDING DYNAMIC VARIABLES.
+* IN PARTICULAR, WE WILL LOOK AT *LENGTH, AND CONTRAST IT
+* WITH THE GIVING LENGTH FROM AN EXAMINE.
+*
+* THEN, WE WILL LOOK AT THE STATEMENT REDUCE TO SEE IT'S
+* EFFECT ON *LENGTH.
+*
+DEFINE DATA LOCAL
+1 #D (A) DYNAMIC 
+1 #A (A20) INIT <'QWERTASDFG'>
+1 #LENGTH (I2)
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+MOVE #A TO #D
+*
+EXAMINE #D FOR 'X' GIVING LENGTH #LENGTH
+*
+WRITE 5T '*LENGTH FOR #D IS:  ' *LENGTH (#D) /
+      5T '#LENGTH FOR #D IS:  ' #LENGTH 
+PRINT 5T 'VALUE OF #D IS:' #D   / 5T '-' (30)   
+*
+REDUCE DYNAMIC #D TO 15
+EXAMINE #D FOR 'X' GIVING LENGTH #LENGTH
+*
+WRITE 5T 'AFTER REDUCE DYNAMIC #D TO 15' /
+      5T '*LENGTH FOR #D IS:  ' *LENGTH (#D) /
+      5T '#LENGTH FOR #D IS:  ' #LENGTH 
+PRINT 5T 'VALUE OF #D IS STILL:' #D / 5T '-' (30)
+*
+REDUCE DYNAMIC #D TO 7
+EXAMINE #D FOR 'X' GIVING LENGTH #LENGTH
+*
+WRITE 5T 'AFTER REDUCE DYNAMIC #D TO 7' /
+      5T '*LENGTH FOR #D IS:  ' *LENGTH (#D) /
+      5T '#LENGTH FOR #D IS:  ' #LENGTH 
+PRINT 5T 'VALUE OF #D IS NOW:' #D / 5T '-' (30)
+*
+EXPAND DYNAMIC #D TO 15
+EXAMINE #D FOR 'X' GIVING LENGTH #LENGTH
+*
+WRITE 5T 'AFTER EXPAND DYNAMIC #D TO 15' /
+      5T '*LENGTH FOR #D IS:  ' *LENGTH (#D) /
+      5T '#LENGTH FOR #D IS:  ' #LENGTH 
+PRINT 5T 'VALUE OF #D IS STILL:' #D 
+*
+END      
+----------------------------------------------------
+Here is the output from the program above
+
+    PAGE #   1                    DATE:    04/02/11
+    PROGRAM: LENGTH01             LIBRARY: SNIPPET
+ 
+    *LENGTH FOR #D IS:            20
+    #LENGTH FOR #D IS:       10
+    VALUE OF #D IS: QWERTASDFG
+    ------------------------------
+    AFTER REDUCE DYNAMIC #D TO 15
+    *LENGTH FOR #D IS:            15
+    #LENGTH FOR #D IS:       10
+    VALUE OF #D IS STILL: QWERTASDFG
+    ------------------------------
+    AFTER REDUCE DYNAMIC #D TO 7
+    *LENGTH FOR #D IS:             7
+    #LENGTH FOR #D IS:        7
+    VALUE OF #D IS NOW: QWERTAS
+    ------------------------------
+    AFTER EXPAND DYNAMIC #D TO 15
+    *LENGTH FOR #D IS:             7
+    #LENGTH FOR #D IS:        7
+    VALUE OF #D IS STILL: QWERTAS
+-----------------------------------------------------
+Now a discussion of the output above.
+
+First Segment.
+As we observed in our discussion of LENGTH02, when we MOVE #A
+TO #D, the format (A20) for #A dictates the *LENGTH, hence the value 20.
+The EXAMINE...GIVING LENGTH ignores trailing blanks, hence #LENGTH
+is 10, the number of chracaters in #A and #D.
+
+Second Segment.
+As will be discussed in a future posting, REDUCE will effect
+*LENGTH if the target value is less than than the existing *LENGTH.
+In our case, the existing *LENGTH was 20, the target value for the REDUCE
+was fifteen, hence the new *LENGTH is 15. Note that #LENGTH is unchanged
+as is the value of #D.
+
+Third Segment.
+As per the discussion of the Second Segment, the new *LENGTH for #D,
+after the REDUCE, is 7. This reduction also changes the value of 
+#D to QWERTAS. Basically what happened is sort of the equivalent of
+MOVE'ing an alpha variable with a ten character value to an alpha
+variable which is defined as A7, leading to a three character truncation.
+
+Fourth Segment. 
+EXPAND will never increase *LENGTH, thus it is still 7. Needless to
+say, #LENGTH is also still seven, and the value for #D is still QWERTAS.
+In a future posting we will discuss exactly what REDUCE, EXPAND,
+and RESIZE do.                                        
