@@ -1,0 +1,108 @@
+DEFINE DATA LOCAL
+1 #LOOP-MAX                (I4)  CONST <100000>
+1 #XLATE                   (A2/1:3) CONST <'#~','@~','%~'>
+1 #BC                      (A1/3) CONST <'#','@','%'>
+1 #A                       (A24) INIT <'QWE@#ASD%AJHKM'>
+1 REDEFINE #A
+  2 #ARRAY                 (A1/1:24)
+1 #ARRAY2                  (A1/1:24)
+1 #CASE                    (I1)
+1 #CASE-NAME               (A20/0:5) INIT
+  (0) <'"EMPTY" LOOP'>
+  (1) <'LOOONG TIME'>
+  (2) <'NEW WAY'>
+  (3) <'THREE EXAMINES'>
+  (4) <'EXAMINE TRANSLATE'>
+  (5) <'EXAMINE with array'>
+1 #CPU-ELAPSED             (I4)
+1 #CPU-START               (I4)
+1 #FINAL-STRING            (A30)
+1 #LOOP                    (I4)
+1 #LOOP2                   (I4)
+1 #PIECES                  (A24/1:24)
+1 #SECPOINT                (P3)  INIT <1>
+END-DEFINE
+*
+FORMAT SG=ON ZP=ON
+*
+#CASE := 0
+#CPU-START := *CPU-TIME
+SET0. SETTIME
+FOR #LOOP = 1 TO #LOOP-MAX
+  RESET INITIAL #A
+END-FOR
+#CPU-ELAPSED := *CPU-TIME - #CPU-START
+DISPLAY 5T #CASE #CASE-NAME(#CASE) *TIMD(SET0.) #CPU-ELAPSED
+*
+#CASE := 1
+#CPU-START := *CPU-TIME
+SET1. SETTIME
+FOR #LOOP = 1 TO #LOOP-MAX
+  RESET INITIAL #A
+  FOR #LOOP2 = 1 TO 24
+    IF #ARRAY (#LOOP2) = MASK (A)
+      IGNORE
+    ELSE
+      #ARRAY2 (#SECPOINT) := #ARRAY (#LOOP2)
+      ADD 1 TO #SECPOINT
+    END-IF
+  END-FOR
+  #SECPOINT := 1
+END-FOR
+#CPU-ELAPSED := *CPU-TIME - #CPU-START
+DISPLAY 5T #CASE #CASE-NAME(#CASE) *TIMD(SET1.) #CPU-ELAPSED
+*
+#CASE := 2
+#CPU-START := *CPU-TIME
+SET2. SETTIME
+FOR #LOOP = 1 TO #LOOP-MAX
+  RESET INITIAL #A
+  SEPARATE #A INTO #PIECES(*) WITH DELIMITER '@#%'
+  COMPRESS #PIECES (*) INTO #FINAL-STRING
+END-FOR
+#CPU-ELAPSED := *CPU-TIME - #CPU-START
+DISPLAY 5T #CASE #CASE-NAME(#CASE) *TIMD(SET2.) #CPU-ELAPSED
+*
+#CASE := 3
+#CPU-START := *CPU-TIME
+SET3. SETTIME
+FOR #LOOP = 1 TO #LOOP-MAX
+  RESET INITIAL #A
+  EXAMINE #A FOR '@' DELETE
+  EXAMINE #A FOR '%' DELETE
+  EXAMINE #A FOR '#' DELETE
+END-FOR
+#CPU-ELAPSED := *CPU-TIME - #CPU-START
+DISPLAY 5T #CASE #CASE-NAME(#CASE) *TIMD(SET3.) #CPU-ELAPSED
+*
+#CASE := 4
+#CPU-START := *CPU-TIME
+SET4. SETTIME
+FOR #LOOP = 1 TO #LOOP-MAX
+  RESET INITIAL #A
+  EXAMINE #A TRANSLATE USING #XLATE(*)
+  EXAMINE #A FOR '~' DELETE
+END-FOR
+#CPU-ELAPSED := *CPU-TIME - #CPU-START
+DISPLAY 5T #CASE #CASE-NAME(#CASE) *TIMD(SET4.) #CPU-ELAPSED
+*
+#CASE := 5
+#CPU-START := *CPU-TIME
+SET5. SETTIME                                                           
+FOR #LOOP = 1 TO #LOOP-MAX                                                 
+  EXAMINE #A FOR #BC (*) DELETE                                               
+END-FOR                                                                 
+#CPU-ELAPSED := *CPU-TIME - #CPU-START                           
+DISPLAY 5T #CASE #CASE-NAME(#CASE) *TIMD(SET5.) #CPU-ELAPSED
+END
+
+
+    #CASE      #CASE-NAME        TIMD   #CPU-ELAPSED
+    ----- -------------------- -------- ------------
+ 
+       0  'EMPTY' LOOP                0           3
+       1  LOOONG TIME                19         190
+       2  NEW WAY                     7          69
+       3  THREE EXAMINES              1          14
+       4  EXAMINE TRANSLATE           1          10
+       5  EXAMINE with array          1           7            
