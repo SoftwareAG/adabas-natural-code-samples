@@ -1,0 +1,30 @@
+                                                        
+define data local
+1 #anumber   (P20)
+1 #i         (p2)
+1 #j         (p20)
+1 #k         (p20)
+1 #l         (p20) init <1152921504606846976> /* 1000000000000000 in Hex
+1 #bin       (b1)
+1 #bina      (a2)
+1 redefine #bina
+  2 #fil1    (a1)
+  2 #binx    (a1)
+1 #bin-val   (a16)
+1 redefine #bin-val
+  2 #bin-arr (a1/1:16)
+1 #binconv   (b8)
+end-define
+input 'Number to convert to binary' #anumber 
+for #i 1 16
+  divide #l into #anumber giving #j remainder #k
+  #anumber := #k
+  compute #l := #l / 16 
+  move #j to #bin
+  move edited #bin(em=hh) to #bina 
+  #bin-arr(#i) := #binx 
+end-for
+move edited #bin-val to #binconv(em=h(16)) 
+write 'Converted to binary' #binconv
+end
+            
