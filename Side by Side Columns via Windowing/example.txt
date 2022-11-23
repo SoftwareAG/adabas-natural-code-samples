@@ -1,0 +1,278 @@
+
+ >                                       > +  Program     SALES03  Lib XSTRO    
+ Top    ....+....1....+....2....+....3....+....4....+....5....+....6....+....7..
+   0010 * THE CODE IN THIS PROGRAM SHOWS ONE WAY TO                             
+   0020 * DISPLAY NON CONTIGUOUS COLUMNS OF A                                   
+   0030 * REPORT SIDE BY SIDE                                                   
+   0040 *                                                                       
+   0050 * RUN THE PROGRAM AND FOLLOW THE INSTRUCTIONS                           
+   0060 * USE PF3 AND PF4 TO SHOW JAN-JUN OR JULY-DEC                           
+   0070 *                                                                       
+   0080 * POSITION CURSOR WHERE YOU WANT THE TOP LEFT                           
+   0090 * OF THE WINDOW. PRESS PF2                                              
+   0100 *                                                                       
+   0110 * USE PF7 AND PF8 TO "SCROLL" THROUGH THE MONTHS                        
+   0120 * IN THE WINDOW.                                                        
+   0130 *                                                                       
+   0140 * OPTIONALLY, POSITION CURSOR AGAIN AND USE                             
+   0150 * PF2 TO CREATE A SECOND WINDOW.                                        
+   0160 * USE PF7 AND PF8 TO SCROLL IN SECOND WINDOW                            
+   0170 *                                                                       
+   0180 DEFINE DATA LOCAL                                                       
+   0190 1 #MONTHS (A12/1:12)                                                    
+   0200   INIT <'JANUARY','FEBRUARY','MARCH','APRIL','MAY',                     
+   0210         'JUNE',' JULY','AUGUST','SEPTEMBER',                            
+   0220         'OCTOBER','NOVEMBER','DECEMBER'>                                
+   0230 1 #LOOP (P5)                                                            
+   0240 END-DEFINE                                                              
+   0250 *                                                                       
+   0260 FORMAT LS=180                                                           
+   0270 *                                                                       
+   0280 SET CONTROL 'M-24'                                                      
+   0290 *                                                                       
+   0300 SET KEY PF2='%W000,000FC12L15#'                                         
+   0310         PF8='%W>13'    PF4='%W>'                                        
+   0320         PF7='%W<13'    PF3='%W<'                                        
+   0330         PF9='%WB'                                                       
+   0340 *                                                                       
+   0350 FOR #LOOP = 1 TO 10                                                     
+   0360 WRITE NOTITLE #MONTHS (*)                                               
+   0370 END-FOR                                                                 
+   0380 *                                                                       
+   0390 WRITE // 5T 'STEP 1: USE PF3 & PF4 TO TOGGLE'                           
+   0400       / 13T 'BACK AND FORTH BETWEEN JAN-JUN (PF3) AND JULY-DEC (PF4)'   
+   0410        / 5T 'STEP 2: MOVE CURSOR TO POSITION TOP LEFT OF BOX'           
+   0420       // 5T 'STEP 3: PF2 TO FORM BOX'                                   
+   0430        / 5T 'STEP 4: PF8 TO SCROLL RIGHT; PF7 TO SCROLL LEFT'           
+   0440        / 5T 'STEP 5: OPTIONAL - MOVE CURSOR, PF2 FOR SECOND WINDOW'     
+   0450       // 5T 'PF9 TO END WINDOW'                                         
+   0460 END        
+
+Here is the first screen you see.
+
+                                                             
+ MORE                                                                           
+ JANUARY      FEBRUARY     MARCH        APRIL        MAY          JUNE          
+ JANUARY      FEBRUARY     MARCH        APRIL        MAY          JUNE          
+ JANUARY      FEBRUARY     MARCH        APRIL        MAY          JUNE          
+ JANUARY      FEBRUARY     MARCH        APRIL        MAY          JUNE          
+ JANUARY      FEBRUARY     MARCH        APRIL        MAY          JUNE          
+ JANUARY      FEBRUARY     MARCH        APRIL        MAY          JUNE          
+ JANUARY      FEBRUARY     MARCH        APRIL        MAY          JUNE          
+ JANUARY      FEBRUARY     MARCH        APRIL        MAY          JUNE          
+ JANUARY      FEBRUARY     MARCH        APRIL        MAY          JUNE          
+ JANUARY      FEBRUARY     MARCH        APRIL        MAY          JUNE          
+                                                                                
+                                                                                
+     STEP 1: USE PF3 & PF4 TO TOGGLE                                            
+             BACK AND FORTH BETWEEN JAN-JUN (PF3) AND JULY-DEC (PF4)            
+     STEP 2: MOVE CURSOR TO POSITION TOP LEFT OF BOX                            
+                                                                                
+     STEP 3: PF2 TO FORM BOX                                                    
+     STEP 4: PF8 TO SCROLL RIGHT; PF7 TO SCROLL LEFT                            
+     STEP 5: OPTIONAL - MOVE CURSOR, PF2 FOR SECOND WINDOW                      
+                                                                                
+     PF9 TO END WINDOW                                                          
+
+I positioned the cursor between January and February and hit PF2.
+
+IMPORTANT. When positioning the cursor, move it with the arrows so that the top left of the box will be at the top line of the screen.
+
+Also IMPORTANT. Before running the program I issued the command %T=3270.
+In 3270 mode, Ã¢â‚¬Å“framingÃ¢â‚¬ï¿½ of windows is done with characters, as shown below.
+If you are in 3279 mode, you will see windows framed with reverse video Ã¢â‚¬Å“bandsÃ¢â‚¬ï¿½.
+                                                                                
+                                                                                
+ MORE       +------------+                                                      
+ JANUARY    | JANUARY    | MARCH        APRIL        MAY          JUNE          
+ JANUARY    | JANUARY    | MARCH        APRIL        MAY          JUNE          
+ JANUARY    | JANUARY    | MARCH        APRIL        MAY          JUNE          
+ JANUARY    | JANUARY    | MARCH        APRIL        MAY          JUNE          
+ JANUARY    | JANUARY    | MARCH        APRIL        MAY          JUNE          
+ JANUARY    | JANUARY    | MARCH        APRIL        MAY          JUNE          
+ JANUARY    | JANUARY    | MARCH        APRIL        MAY          JUNE          
+ JANUARY    | JANUARY    | MARCH        APRIL        MAY          JUNE          
+ JANUARY    | JANUARY    | MARCH        APRIL        MAY          JUNE          
+ JANUARY    | JANUARY    | MARCH        APRIL        MAY          JUNE          
+            +------------+                                                      
+                                                                                
+     STEP 1: USE PF3 & PF4 TO TOGGLE                                            
+             BACK AND FORTH BETWEEN JAN-JUN (PF3) AND JULY-DEC (PF4)            
+     STEP 2: MOVE CURSOR TO POSITION TOP LEFT OF BOX                            
+                                                                                
+     STEP 3: PF2 TO FORM BOX                                                    
+     STEP 4: PF8 TO SCROLL RIGHT; PF7 TO SCROLL LEFT                            
+     STEP 5: OPTIONAL - MOVE CURSOR, PF2 FOR SECOND WINDOW                      
+                                                                                
+     PF9 TO END WINDOW                                                          
+--------------------------------------------------------------------------------
+Next, I used PF8 repeatedly to show the next month, until I arrived at August.                                                                                
+                                                                                
+ MORE       +------------+                                                      
+ JANUARY    | AUGUST     | MARCH        APRIL        MAY          JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL        MAY          JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL        MAY          JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL        MAY          JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL        MAY          JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL        MAY          JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL        MAY          JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL        MAY          JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL        MAY          JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL        MAY          JUNE          
+            +------------+                                                      
+                                                                                
+     STEP 1: USE PF3 & PF4 TO TOGGLE                                            
+             BACK AND FORTH BETWEEN JAN-JUN (PF3) AND JULY-DEC (PF4)            
+     STEP 2: MOVE CURSOR TO POSITION TOP LEFT OF BOX                            
+                                                                                
+     STEP 3: PF2 TO FORM BOX                                                    
+     STEP 4: PF8 TO SCROLL RIGHT; PF7 TO SCROLL LEFT                            
+     STEP 5: OPTIONAL - MOVE CURSOR, PF2 FOR SECOND WINDOW                      
+                                                                                
+     PF9 TO END WINDOW                                                          
+--------------------------------------------------------------------------------
+                                                                                
+I next moved the cursor between April and June and hit PF2. 
+This created the second window you see below.
+
+ MORE       +------------+                        +------------+                
+ JANUARY    | AUGUST     | MARCH        APRIL     | JANUARY    |  JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL     | JANUARY    |  JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL     | JANUARY    |  JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL     | JANUARY    |  JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL     | JANUARY    |  JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL     | JANUARY    |  JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL     | JANUARY    |  JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL     | JANUARY    |  JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL     | JANUARY    |  JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL     | JANUARY    |  JUNE          
+            +------------+                        +------------+                
+                                                                                
+     STEP 1: USE PF3 & PF4 TO TOGGLE                                            
+             BACK AND FORTH BETWEEN JAN-JUN (PF3) AND JULY-DEC (PF4)            
+     STEP 2: MOVE CURSOR TO POSITION TOP LEFT OF BOX                            
+                                                                                
+     STEP 3: PF2 TO FORM BOX                                                    
+     STEP 4: PF8 TO SCROLL RIGHT; PF7 TO SCROLL LEFT                            
+     STEP 5: OPTIONAL - MOVE CURSOR, PF2 FOR SECOND WINDOW                      
+                                                                                
+     PF9 TO END WINDOW                                                          
+--------------------------------------------------------------------------------
+                                                                                
+Next I used PF8 again to place November in the second window.
+
+ MORE       +------------+                        +------------+                
+ JANUARY    | AUGUST     | MARCH        APRIL     | NOVEMBER   |  JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL     | NOVEMBER   |  JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL     | NOVEMBER   |  JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL     | NOVEMBER   |  JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL     | NOVEMBER   |  JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL     | NOVEMBER   |  JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL     | NOVEMBER   |  JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL     | NOVEMBER   |  JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL     | NOVEMBER   |  JUNE          
+ JANUARY    | AUGUST     | MARCH        APRIL     | NOVEMBER   |  JUNE          
+            +------------+                        +------------+                
+                                                                                
+     STEP 1: USE PF3 & PF4 TO TOGGLE                                            
+             BACK AND FORTH BETWEEN JAN-JUN (PF3) AND JULY-DEC (PF4)            
+     STEP 2: MOVE CURSOR TO POSITION TOP LEFT OF BOX                            
+                                                                                
+     STEP 3: PF2 TO FORM BOX                                                    
+     STEP 4: PF8 TO SCROLL RIGHT; PF7 TO SCROLL LEFT                            
+     STEP 5: OPTIONAL - MOVE CURSOR, PF2 FOR SECOND WINDOW                      
+                                                                                
+     PF9 TO END WINDOW                                                          
+--------------------------------------------------------------------------------
+                                                                                
+                                                                                
+I next hit PF9 to remove all the windows. This will allow me to start another Ã¢â‚¬Å“setÃ¢â‚¬ï¿½ of comparisons between the months.
+
+ MORE                                                                           
+ JANUARY      FEBRUARY     MARCH        APRIL        MAY          JUNE          
+ JANUARY      FEBRUARY     MARCH        APRIL        MAY          JUNE          
+ JANUARY      FEBRUARY     MARCH        APRIL        MAY          JUNE          
+ JANUARY      FEBRUARY     MARCH        APRIL        MAY          JUNE          
+ JANUARY      FEBRUARY     MARCH        APRIL        MAY          JUNE          
+ JANUARY      FEBRUARY     MARCH        APRIL        MAY          JUNE          
+ JANUARY      FEBRUARY     MARCH        APRIL        MAY          JUNE          
+ JANUARY      FEBRUARY     MARCH        APRIL        MAY          JUNE          
+ JANUARY      FEBRUARY     MARCH        APRIL        MAY          JUNE          
+ JANUARY      FEBRUARY     MARCH        APRIL        MAY          JUNE          
+                                                                                
+                                                                                
+     STEP 1: USE PF3 & PF4 TO TOGGLE                                            
+             BACK AND FORTH BETWEEN JAN-JUN (PF3) AND JULY-DEC (PF4)            
+     STEP 2: MOVE CURSOR TO POSITION TOP LEFT OF BOX                            
+                                                                                
+     STEP 3: PF2 TO FORM BOX                                                    
+     STEP 4: PF8 TO SCROLL RIGHT; PF7 TO SCROLL LEFT                            
+     STEP 5: OPTIONAL - MOVE CURSOR, PF2 FOR SECOND WINDOW                      
+                                                                                
+     PF9 TO END WINDOW                                                          
+--------------------------------------------------------------------------------
+ 
+
+I next hit PF4 which revealed a design Ã¢â‚¬Å“flawÃ¢â‚¬ï¿½. 
+I should have repeated the instructions on the right side of the screen.
+Fortunately, I remembered what all the PF keys do. 
+Your users would appreciate the extra copy of the instructions.
+Anyway, PF4 did what it was supposed to. I was now looking at July Ã¢â‚¬â€œ December.                                                                               
+                                                                                
+ MORE                                                                           
+ JULY        AUGUST       SEPTEMBER    OCTOBER      NOVEMBER     DECEMBER       
+ JULY        AUGUST       SEPTEMBER    OCTOBER      NOVEMBER     DECEMBER       
+ JULY        AUGUST       SEPTEMBER    OCTOBER      NOVEMBER     DECEMBER       
+ JULY        AUGUST       SEPTEMBER    OCTOBER      NOVEMBER     DECEMBER       
+ JULY        AUGUST       SEPTEMBER    OCTOBER      NOVEMBER     DECEMBER       
+ JULY        AUGUST       SEPTEMBER    OCTOBER      NOVEMBER     DECEMBER       
+ JULY        AUGUST       SEPTEMBER    OCTOBER      NOVEMBER     DECEMBER       
+ JULY        AUGUST       SEPTEMBER    OCTOBER      NOVEMBER     DECEMBER       
+ JULY        AUGUST       SEPTEMBER    OCTOBER      NOVEMBER     DECEMBER       
+ JULY        AUGUST       SEPTEMBER    OCTOBER      NOVEMBER     DECEMBER       
+                                                                                
+--------------------------------------------------------------------------------
+                                                                                
+
+I moved the cursor between August and October and hit PF2.
+January now appears in a window.
+
+                                                                                
+ MORE                 +------------+                                            
+ JULY        AUGUST   | JANUARY    |   OCTOBER      NOVEMBER     DECEMBER       
+ JULY        AUGUST   | JANUARY    |   OCTOBER      NOVEMBER     DECEMBER       
+ JULY        AUGUST   | JANUARY    |   OCTOBER      NOVEMBER     DECEMBER       
+ JULY        AUGUST   | JANUARY    |   OCTOBER      NOVEMBER     DECEMBER       
+ JULY        AUGUST   | JANUARY    |   OCTOBER      NOVEMBER     DECEMBER       
+ JULY        AUGUST   | JANUARY    |   OCTOBER      NOVEMBER     DECEMBER       
+ JULY        AUGUST   | JANUARY    |   OCTOBER      NOVEMBER     DECEMBER       
+ JULY        AUGUST   | JANUARY    |   OCTOBER      NOVEMBER     DECEMBER       
+ JULY        AUGUST   | JANUARY    |   OCTOBER      NOVEMBER     DECEMBER       
+ JULY        AUGUST   | JANUARY    |   OCTOBER      NOVEMBER     DECEMBER       
+                      +------------+                                            
+
+                                                                                
+--------------------------------------------------------------------------------
+                                                                               
+
+I next moved the cursor between October and December and created a second
+window, which initially had January inside the window. I then used PF8 to
+put June in the window.
+
+                                                                                
+ MORE                 +------------+             +------------+                 
+ JULY        AUGUST   | JANUARY    |   OCTOBER   | JUNE       |  DECEMBER       
+ JULY        AUGUST   | JANUARY    |   OCTOBER   | JUNE       |  DECEMBER       
+ JULY        AUGUST   | JANUARY    |   OCTOBER   | JUNE       |  DECEMBER       
+ JULY        AUGUST   | JANUARY    |   OCTOBER   | JUNE       |  DECEMBER       
+ JULY        AUGUST   | JANUARY    |   OCTOBER   | JUNE       |  DECEMBER       
+ JULY        AUGUST   | JANUARY    |   OCTOBER   | JUNE       |  DECEMBER       
+ JULY        AUGUST   | JANUARY    |   OCTOBER   | JUNE       |  DECEMBER       
+ JULY        AUGUST   | JANUARY    |   OCTOBER   | JUNE       |  DECEMBER       
+ JULY        AUGUST   | JANUARY    |   OCTOBER   | JUNE       |  DECEMBER       
+ JULY        AUGUST   | JANUARY    |   OCTOBER   | JUNE       |  DECEMBER       
+                      +------------+             +------------+                 
+                                                                                
+
+That was the end of my playing for this session.
+                                                                                                                        

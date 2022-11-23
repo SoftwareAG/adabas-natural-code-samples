@@ -1,0 +1,46 @@
+* THE CODE IN THIS PROGRAM SHOWS ONE WAY TO                             
+* DISPLAY NON CONTIGUOUS COLUMNS OF A                                   
+* REPORT SIDE BY SIDE                                                   
+*                                                                       
+* RUN THE PROGRAM AND FOLLOW THE INSTRUCTIONS                           
+* USE PF3 AND PF4 TO SHOW JAN-JUN OR JULY-DEC                           
+*                                                                       
+* POSITION CURSOR WHERE YOU WANT THE TOP LEFT                           
+* OF THE WINDOW. PRESS PF2                                              
+*                                                                       
+* USE PF7 AND PF8 TO "SCROLL" THROUGH THE MONTHS                        
+* IN THE WINDOW.                                                        
+*                                                                       
+* OPTIONALLY, POSITION CURSOR AGAIN AND USE                             
+* PF2 TO CREATE A SECOND WINDOW.                                        
+* USE PF7 AND PF8 TO SCROLL IN SECOND WINDOW                            
+*                                                                       
+DEFINE DATA LOCAL                                                       
+1 #MONTHS (A12/1:12)                                                    
+  INIT <'JANUARY','FEBRUARY','MARCH','APRIL','MAY',                     
+        'JUNE',' JULY','AUGUST','SEPTEMBER',                            
+        'OCTOBER','NOVEMBER','DECEMBER'>                                
+1 #LOOP (P5)                                                            
+END-DEFINE                                                              
+*                                                                       
+FORMAT LS=180                                                           
+*                                                                       
+SET CONTROL 'M-24'                                                      
+*                                                                       
+SET KEY PF2='%W000,000FC12L15#'                                         
+        PF8='%W>13'    PF4='%W>'                                        
+        PF7='%W<13'    PF3='%W<'                                        
+        PF9='%WB'                                                       
+*                                                                       
+FOR #LOOP = 1 TO 10                                                     
+WRITE NOTITLE #MONTHS (*)                                               
+END-FOR                                                                 
+*                                                                       
+WRITE // 5T 'STEP 1: USE PF3 & PF4 TO TOGGLE'                           
+      / 13T 'BACK AND FORTH BETWEEN JAN-JUN (PF3) AND JULY-DEC (PF4)'   
+       / 5T 'STEP 2: MOVE CURSOR TO POSITION TOP LEFT OF BOX'           
+      // 5T 'STEP 3: PF2 TO FORM BOX'                                   
+       / 5T 'STEP 4: PF8 TO SCROLL RIGHT; PF7 TO SCROLL LEFT'           
+       / 5T 'STEP 5: OPTIONAL - MOVE CURSOR, PF2 FOR SECOND WINDOW'     
+      // 5T 'PF9 TO END WINDOW'                                         
+END        
