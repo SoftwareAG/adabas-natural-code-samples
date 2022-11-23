@@ -1,0 +1,256 @@
+                                                        
+
+* THIS PROGRAM ACTUALLY HAS NOTHING TO DO WITH
+* READ WORK FILE. HOWEVER IT DOES SHOW HOW NATURAL
+* NORMALLY DEALS WITH GROUP ARRAYS. 
+*
+* IN SUBSEQUENT PROGRAMS WE WILL LOOK AT THE USE OF
+* GROUP ARRAYS WITH READ WORK FILE RECORD AND
+* READ WORK FILE.
+*
+DEFINE DATA LOCAL
+1 #GROUP (3)
+  2 #A (A3) INIT <'A1A','A2A','A3A'>
+  2 #B (A3) INIT <'B1B','B2B','B3B'>
+1 REDEFINE #GROUP
+  2 #STRING (A18)
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+WRITE 2/10 'HERE IS OUTPUT FROM #GROUP (*)'
+      // 10T #GROUP (*) / 10T '-'(30)
+      / 10T 'HERE IS OUTPUT FROM #A (*) #B (*)'
+      // 10T #A (*) #B (*) / 10T '-' (30)
+      / 10T 'HERE IS #STRING, WHICH IS A MEMORY "DUMP"'
+      // 10T #STRING
+*
+END
+------------------------------------------------------
+Here is the output from the above program.
+
+    PAGE #   1                    DATE:    03/19/11
+    PROGRAM: GROUP10              LIBRARY: SNIPPET
+ 
+ 
+         HERE IS OUTPUT FROM #GROUP (*)
+ 
+         A1A A2A A3A B1B B2B B3B
+         ------------------------------
+         HERE IS OUTPUT FROM #A (*) #B (*)
+ 
+         A1A A2A A3A B1B B2B B3B
+         ------------------------------
+         HERE IS #STRING, WHICH IS A MEMORY 'DUMP'
+ 
+         A1AB1BA2AB2BA3AB3B
+----------------------------------------------------
+Now a discussion re the output above
+
+Group Names (and Group Array Names) are basically abbreviations.
+When Natural "sees" WRITE #GROUP (*), it "replaces" #GROUP (*)
+with #A (*) #B (*), which in turn becomes #A (1:3) #B (1:3).
+
+Hence the output you see above for #GROUP (*) and #A (*) #B (*).
+
+If you look back at the program, #STRING (A18) is a REDEFINE
+of #GROUP (*), hence this shows a memory dump of #GROUP (*).
+Note that the group is stored "occurrence wise", that is,
+#GROUP (1) #GROUP (2) #GROUP (3).
+------------------------------------------------------
+
+The following program is somewhat similar to the last program.
+However, instead of a simple WRITE statement, we will have
+a WRITE WORK FILE. This will be followed by a READ WORK FILE,
+and finally a WRITE statement.
+
+
+
+* THIS PROGRAM SHOWS A WRITE WORK FILE USING 
+* GROUP ARRAY NOTATION FOLLOWED BY A READ
+* WORK FILE WITH THE SAME NOTATION.
+*
+DEFINE DATA LOCAL
+1 #GROUP (3)
+  2 #A (A3) INIT <'A1A','A2A','A3A'>
+  2 #B (A3) INIT <'B1B','B2B','B3B'>
+1 REDEFINE #GROUP
+  2 #STRING (A18)
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+WRITE WORK FILE 3 #GROUP (*)
+*
+READ WORK FILE 3 ONCE #GROUP (*)
+*
+WRITE 2/10 'HERE IS OUTPUT FROM #GROUP (*)'
+      // 10T #GROUP (*) / 10T '-'(30)
+      / 10T 'HERE IS OUTPUT FROM #A (*) #B (*)'
+      // 10T #A (*) #B (*) / 10T '-' (30)
+      / 10T 'HERE IS #STRING, WHICH IS A MEMORY "DUMP"'
+      // 10T #STRING
+*
+END
+---------------------------------------------------
+Here is the output from the program above
+
+ 
+    PAGE #   1                    DATE:    03/19/11
+    PROGRAM: GROUP11              LIBRARY: SNIPPET
+ 
+ 
+         HERE IS OUTPUT FROM #GROUP (*)
+ 
+         A1A A2A A3A B1B B2B B3B
+         ------------------------------
+         HERE IS OUTPUT FROM #A (*) #B (*)
+ 
+         A1A A2A A3A B1B B2B B3B
+         ------------------------------
+         HERE IS #STRING, WHICH IS A MEMORY 'DUMP'
+ 
+         A1AB1BA2AB2BA3AB3B
+
+---------------------------------------------------
+And now a discussion of the output and program above.
+
+The statement: WRITE WORK FILE 3 #GROUP (*) is "interpreted" by Natural as:
+	       WRITE WORK FILE 3 #A (*) #B (*) which is the same as:
+	       WRITE WORK FILE 3 #A (1:3) #B (1:3)
+
+Similarly, READ WORK FILE 3 ONCE #GROUP (*) becomes 
+           READ WORK FILE 3 #A (1:3) #B (1:3)	
+
+Thus we write out the data and read it back into the same exact locations.
+
+As you can see from the output above, the Memory Dump matches that from
+the program GROUP10 above.
+----------------------------------------------------------------------
+This next program is identical to the last program except,
+The READ WORK FILE has been replaced by a READ WORK FILE RECORD.
+
+How do these two statements differ? READ WORK FILE is designed to
+permit the transfer of various fields from a work file record to
+various user defined variables. As part of this statement, Natural
+checks to ensure that the formats of the user defined variables 
+match the values being read in. Thus, Natural prevents a numeric 
+field from receiving characters other than numeric digits.
+
+By contrast, READ WORK FILE RECORD is designed to transfer an
+entire record without consideration of fields. 
+There is no checking for valid data. More importantly,
+for purposes of the program discussion below, an entire work file
+record is placed, in its entirety, in one place in
+Natural. How is this done? In Structured and Mixed Modes (that is,
+if there is a DEFINE DATA clause), the "target argument" for 
+a READ WORK FILE RECORD must either be a single variable, or a
+single Group Name (or Group Array).
+
+Regardless of which is specified, Natural only really pays attention
+to the starting position for the argument. This will be important when
+we discuss the output below. 
+
+
+--------------------------------------------------------------
+* THIS PROGRAM SHOWS A WRITE WORK FILE 
+* USING GROUP ARRAY NOTATION FOLLOWED BY A READ
+* WORK FILE 'RECORD' WITH THE SAME NOTATION.
+*
+DEFINE DATA LOCAL
+1 #GROUP (3)
+  2 #A (A3) INIT <'A1A','A2A','A3A'>
+  2 #B (A3) INIT <'B1B','B2B','B3B'>
+1 REDEFINE #GROUP
+  2 #STRING (A18)
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+WRITE WORK FILE 3 #GROUP (*)
+*
+READ WORK FILE 3 ONCE RECORD #GROUP (*)
+*
+WRITE 2/10 'HERE IS OUTPUT FROM #GROUP (*)'
+      // 10T #GROUP (*) / 10T '-'(30)
+      / 10T 'HERE IS OUTPUT FROM #A (*) #B (*)'
+      // 10T #A (*) #B (*) / 10T '-' (30)
+      / 10T 'HERE IS #STRING, WHICH IS A MEMORY "DUMP"'
+      // 10T #STRING
+*
+END
+-----------------------------------------------------
+Here is the output for the program above.
+
+ 
+    PAGE #   1                    DATE:    03/19/11
+    PROGRAM: GROUP12              LIBRARY: SNIPPET
+ 
+ 
+         HERE IS OUTPUT FROM #GROUP (*)
+ 
+         A1A A3A B2B A2A B1B B3B
+         ------------------------------
+         HERE IS OUTPUT FROM #A (*) #B (*)
+ 
+         A1A A3A B2B A2A B1B B3B
+         ------------------------------
+         HERE IS #STRING, WHICH IS A MEMORY 'DUMP'
+ 
+         A1AA2AA3AB1BB2BB3B
+
+-----------------------------------------------------
+Here is the discussion of the output above.
+
+Okay, what happened? Look at the strange sequence of
+values shown above.
+
+#A (1) has the expected value (A1A). After that everything
+seems to have gone pretty crazy. #A (2) has A3A, which of course 
+is what we would expect for #A (3), which has B2B. 
+
+The explanation is really quite simple.
+
+As we discussed above (program GROUP11), the WRITE WORK FILE 3 #GROUP(*)
+statement is transformed into WRITE WORK FILE 3 #A(1:3) #B (1:3). Hence,
+the value on the record is: A1AA2AA3AB1BB2BB3B
+
+Now for the fun, the statement READ WORK FILE 3 ONCE RECORD #GROUP (*)
+is not treated in the same way. #GROUP (*) is not transformed at all.
+Instead, Natural just uses the starting address for #GROUP (*) as the 
+address to deposit the work file record.
+
+Thus, as you can see in the output above, #STRING (which has the same
+starting address as #GROUP (*)) has the same data string as the record,
+namely: A1AA2AA3AB1BB2BB3B.
+
+BUT, in memory, Natural knows it has #GROUP (1:3) which is:
+	#A (1) #B (1) #A (2) #B (2) #A (3) #B (3)
+
+If you "match" the data string in memory with the variables as
+Natural knows them, you can see that :
+
+		A1A is in #A (1)
+                A2A is in #B (1)
+                A3A is in #A (2)
+                B1B is in #B (2)
+                B2B is in #A (3)
+                B3B is in #B (3)
+
+Summary:
+
+READ WORK FILE and READ WORK FILE RECORD differ dramatically when
+a Group Array is specified. Do NOT simply replace a READ WORK FILE
+with a READ WORK FILE RECORD in order to make you program more
+efficient.
+
+First, check to see if the argument of the READ WORK FILE RECORD would 
+be a Group Array. If so, you likely have a problem. Also, if you have 
+a Group Array in the middle of a WRITE WORK FILE, and a simple variable
+in the READ WORK FILE RECORD, you likely will have a problem.
+
+Be careful with Group Arrays; they are very powerful "tools" but,
+require careful study before implementation.                                        
