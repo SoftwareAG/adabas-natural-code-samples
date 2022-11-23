@@ -1,0 +1,90 @@
+Program 1:
+
+DEFINE DATA LOCAL
+1 #MC (I4)         CONST <15>
+1 #MM (I4)         CONST <12>
+1 #DAYS (N2/#MM)   INIT <31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31>
+1 #MONTH (A9/#MM)  INIT <'January', 'February', 'March', 'April', 'May',
+                         'June', 'July', 'August', 'September',
+                         'October', 'November', 'December'>
+*
+1 #COL (A2/#MC)    INIT <"BK", "BL", "BR", "CY", "GR", "GY", "MA", "OR",
+                         "PI", "PU", "RE", "TU", "WH", "YE">
+1 #COLOR (A9/#MC)  INIT <'Black', 'Blue', 'Brown', 'Cyan', 'Gray',
+                         'Green', 'Magenta', 'Orange', 'Pink', 'Purple',
+                         'Red', 'Turquoise', 'White', 'Yellow'>
+END-DEFINE
+DISPLAY #MONTH (*) #DAYS (*)
+        #COL (*)   #COLOR (*)
+END
+
+
+Program 2:
+
+DEFINE DATA LOCAL
+1 #MC (I4)         CONST <15>
+1 #MM (I4)         CONST <12>
+1 #MTBL (A11/#MM)  INIT <'31' - 'January'
+                        ,'28' - 'February'
+                        ,'31' - 'March'
+                        ,'30' - 'April'
+                        ,'31' - 'May'
+                        ,'30' - 'June'
+                        ,'31' - 'July'
+                        ,'31' - 'August'
+                        ,'30' - 'September'
+                        ,'31' - 'October'
+                        ,'30' - 'November'
+                        ,'31' - 'December'
+                        >
+                   1 REDEFINE #MTBL
+  2 #ENTRY (#MM)
+    3 #DAYS (N2)
+    3 #MONTH (A9)
+1 #CTBL (A11/#MC)  INIT <"BK" - 'Black'
+                        ,"BL" - 'Blue'
+                        ,"BR" - 'Brown'
+                        ,"CY" - 'Cyan'
+                        ,"GR" - 'Gray'
+                        ,"GY" - 'Green'
+                        ,"MA" - 'Magenta'
+                        ,"OR" - 'Orange'
+                        ,"PI" - 'Pink'
+                        ,"PU" - 'Purple'
+                        ,"RE" - 'Red'
+                        ,"TU" - 'Turquoise'
+                        ,"WH" - 'White'
+                        ,"YE" - 'Yellow'
+                        >
+                   1 REDEFINE #CTBL
+  2 #ENTRY (#MC)
+    3 #COL (A2)
+    3 #COLOR (A9)
+END-DEFINE
+DISPLAY #MONTH (*) #DAYS (*)
+        #COL (*)   #COLOR (*)
+END
+
+
+Program 3:
+
+DEFINE DATA LOCAL
+1 #M (I4)          CONST <5>
+1 #TBL (A22/#M)    INIT <'00001' - "D" - H'00' - 'Development'
+                        ,'00010' - "U" - H'00' - 'UAT'
+                        ,'00128' - "T" - H'01' - 'Web Test'
+                        ,'00250' - "P" - H'00' - 'Production'
+                        ,'00777' - "S" - H'01' - 'Sandbox'
+                        >
+                   1 REDEFINE #TBL
+  2 #ENTRY (#M)
+    3 #DBID (N5)
+    3 #ENV (A1)
+    3 #DBA-ONLY (L)
+    3 #DESC (A15)
+END-DEFINE
+DISPLAY #DBID (*) (SG=F)
+        #ENV (*)
+        #DBA-ONLY (*)
+        #DESC (*)
+END            
