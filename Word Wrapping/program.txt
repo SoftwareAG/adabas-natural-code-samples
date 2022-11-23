@@ -1,0 +1,70 @@
+                                                        
+
+define data local
+1 #a10(a10/1:5)
+end-define
+callnat 'wordwrpn' 'xxx xxxxxxxxx xxxx xxxx xxx' #a10(*)
+display #a10(*)
+end
+
+
+
+* Module: wordwrpn
+*
+define data parameter
+1 #input-parameter
+  2 #string (A)     DYNAMIC BY VALUE
+1 #output-parameter
+  2 #array  (A/1:V) DYNAMIC BY VALUE RESULT  /* no x-array possible here
+local
+*
+1 #startlength    (I4)
+1 #idx-array      (I4)
+1 #i4             (I4)
+*
+end-define
+*
+if *OCC(#array) = 0 or *LENGTH(#string) = 0
+  escape module
+end-if
+*
+#startlength := *LENGTH(#array(1)) + 1
+*
+repeat1.
+repeat while #string ne " "
+  if *LENGTH(#string) < #startlength
+    #i4:= *LENGTH(#string)
+  else
+    for1.
+    for #i4 = #startlength to 1 step -1
+      if substr(#string,#i4,1) = " "
+        escape bottom(for1.)
+      end-if
+    end-for
+    if #i4 = 0  /* no space found
+      #i4:= #startlength - 1
+    end-if
+  end-if
+*
+* if output-array is full --> append "..." on last occurance
+*
+  if #idx-array = *UBOUND(#array)
+    if #startlength <= 4
+      #array(#idx-array) := "..."
+    else
+      #i4 := #startlength - 4
+      resize dynamic #array(#idx-array) to #i4
+      compress #array(#idx-array) "..." into #array(#idx-array)
+        leaving no
+    end-if
+    escape bottom(repeat1.)
+  end-if
+*
+  add 1 to #idx-array
+  move substr(#string,1,#i4) to #array(#idx-array)
+  move " " to substr(#string,1,#i4)
+*  move left #string to #string
+  #string := *trim(#string)
+end-repeat
+*
+end            
