@@ -4,14 +4,12 @@ Analyse a Natural data area (LDA, PDA or GDA) and build a table of relative fiel
 This table may be displayed to show a map of the data area or used for further processing.
 
 The NDA suite comprises: 
+|  Name | Description |
+|--------------------------|--------------------------|
 |  NDATABLE | Subprog to build a table of field offsets for an LDA, GDA or PDA |
-|--------------------------|--------------------------|
 |  NDAMAP   |   Program to display this info, showing the start byte and end byte positions for each field |
-|--------------------------|--------------------------|
 |  NDAFILE  |    Program to selectively list seq. records defined by an LDA |
-|--------------------------|--------------------------|
 |  GDASHOW  | Program to display contents of GDA (calls USR0080N which comes from SYSEXT library) |
-|--------------------------|--------------------------|
 
 Start by stowing NDATABLE and NDAMAP. You should then be able to invoke NDAMAP online or in batch, and get a display of the structure of any Natural data area you provide.
 If you have any problems, see first the comments at the top of the code.
