@@ -1,0 +1,71 @@
+* Program ..... PRIM
+* Author ...... Lukas Hundemer
+* Last edit ... 2006-08-07
+* Copyright ... Software AG 2006. All rights reserved.
+*
+* Description
+* Calculate prim numbers until a given max value (I4)
+*
+DEFINE DATA
+LOCAL
+1 #PRIM   (I4/ *)    /* prim numbers
+1 #I (I4)
+1 #NUM (I4)          /* check this number
+1 #COUNT (I4)        /* prim counter
+1 #DIM   (I4)        /* current dimension of the array
+1 #B4-MAX (B4) INIT<H'7FFFFFFF'>  /* highest positiv b4
+1 #I4-MAX (I4)
+1 #VAL (I4)
+1 #REM (I4)
+END-DEFINE
+
+MOVE #B4-MAX TO #I4-MAX
+#I4-MAX := #I4-MAX - 2 /* check against this
+* #I4-MAX := 1000000 /* lhutest
+
+INPUT 'Calculate prim numbers until :' #I4-MAX (AD=M)
+DIVIDE #I4-MAX INTO 2 GIVING #VAL REMAINDER #REM
+SUBTRACT #REM FROM #I4-MAX /* take next lower odd
+
+
+#DIM := 1000
+EXPAND OCCURRENCES OF ARRAY #PRIM TO (1:#DIM)
+* set '2 is prime'
+#NUM := 1
+#COUNT := 1
+#PRIM (#COUNT) := 2
+write '        Nbr       Prime '
+WRITE #COUNT #PRIM (#COUNT)
+
+REPEAT
+  IF #NUM > #I4-MAX /* end reached
+    ESCAPE BOTTOM
+  END-IF
+  ADD 2 TO #NUM  /* next number, take every second
+  FOR #I := 1 TO #COUNT
+    DIVIDE #PRIM (#I) INTO #NUM GIVING #VAL REMAINDER #REM
+*     WRITE '=' #I '=' #COUNT '='  #PRIM (#COUNT) '='  #NUM '='  #VAL '='  #REM
+    IF #PRIM (#I) > #VAL /* no divisor till square root
+      ADD 1 TO #COUNT  /* we found another prim
+      IF #COUNT > #DIM
+        ADD 1000 TO #DIM  /* increase the array
+        EXPAND OCCURRENCES OF ARRAY #PRIM TO (1:#DIM)
+        #VAL := #COUNT - 1
+        WRITE #VAL #PRIM (#VAL)
+      END-IF
+      #PRIM (#COUNT) := #NUM
+      WRITE #COUNT #PRIM (#COUNT)
+      ESCAPE BOTTOM
+    END-IF
+    IF #REM = 0 /* no prim
+      ESCAPE BOTTOM
+    END-IF
+  END-FOR
+END-REPEAT
+WRITE / 'Number of prims:' #COUNT /
+  'Biggest prim:   ' #PRIM (#COUNT)
+* INPUT 'Number of prims:' #COUNT (AD=M) /
+*   'Biggest prim:   ' #PRIM (#COUNT)  (AD=M)
+
+END
+            

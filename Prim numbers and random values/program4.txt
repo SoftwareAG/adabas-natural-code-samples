@@ -1,0 +1,22 @@
+* Program ..... DICE06
+* Author ...... Lukas Hundemer
+* Last edit ... 2006-08-07
+* Copyright ... Software AG 2006. All rights reserved.
+*
+* Description
+* Throw a standard dice (1-6) and count the occurences
+*
+DEFINE DATA LOCAL
+1 #I (I4)
+1 #NUM (I4 / 6)
+1 #DICE (I4)
+END-DEFINE
+write '        Nbr !  Dice !     1     2     3     4     5     6'
+write '------------+-------+-------------------------------------'
+FOR #I = 1 TO 1000
+  #DICE := DICE (<6>)
+  ADD 1 TO #NUM (#DICE)
+  WRITE #I '!' #DICE (NL=4) '!'  #NUM(*)  (NL=4)
+END-FOR
+END
+            

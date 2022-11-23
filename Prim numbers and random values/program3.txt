@@ -1,0 +1,30 @@
+* Program ..... DEAL1
+* Author ...... Lukas Hundemer
+* Last edit ... 2006-05-25
+* Copyright ... Software AG 2006. All rights reserved.
+*
+* Description
+* Mix numbers randomly like dealing cards
+*
+DEFINE DATA
+LOCAL
+1 #P-MAX (I4)     /* number of entries
+1 #P-NUM (I4 / *) /* random numbers from 1 to #P-MAX
+1 #RSP (I4)                /*
+1 #I (I4)
+1 #J (I4)
+1 #MAX1 (I4)
+1 #NUM (I4)
+1 #NUM1 (I4)
+1 #NEXT (I4 / 0:*)
+1 #DICE (I4)
+1 #DICE1 (I4)
+END-DEFINE
+MOVE 20 TO #P-MAX
+EXPAND OCCURRENCES OF ARRAY #P-NUM TO (1:#P-MAX)
+CALLNAT 'DEAL' #P-MAX  #P-NUM (*) #RSP
+FOR #I = 1 TO #P-MAX
+  WRITE #I #P-NUM(#I)
+END-FOR
+END
+            

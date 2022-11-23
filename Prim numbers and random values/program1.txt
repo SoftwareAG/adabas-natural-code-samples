@@ -1,0 +1,21 @@
+* Function .... DICE
+* Author ...... Lukas Hundemer
+* Last edit ... 2006-07-20
+* Copyright ... Software AG 2006. All rights reserved.
+*
+* Description
+* Returns random number from 1 to #P_MAX
+* Recommanded #P_MAX <= 2147483629
+*
+* Example 
+* For standard dice use DICE(<6>)
+*
+DEFINE FUNCTION DICE
+  RETURNS    (I4)
+DEFINE DATA
+PARAMETER
+1 #P_MAX (I4) BY VALUE
+END-DEFINE
+DICE := #P_MAX * RAND(<>) + 1.0
+END-FUNCTION
+END            

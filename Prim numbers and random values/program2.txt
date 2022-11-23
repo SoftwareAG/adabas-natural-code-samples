@@ -1,0 +1,75 @@
+* Function .... RAND
+* Author ...... Lukas Hundemer
+* Last edit ... 2006-07-20
+* Copyright ... Software AG 2006. All rights reserved.
+*
+* Description
+* Returns random number 0 <= RAND < 1
+*
+* Note
+* It uses the independent variable +RAND when called multiple times
+*
+* Example
+* WRITE RAND(<>)
+*
+DEFINE FUNCTION RAND
+  RETURNS    (F8)
+DEFINE DATA
+LOCAL
+1 #PRIM (I4) INIT <2147483629>  /* big I4 prim number, 2 is prim element
+1 #P1 (I4)  /* p-1
+1 #PH (I4)  /* (p-1)/2
+1 #VAL (I4)
+1 #VAL1 (I4)
+1 #STCL (B8)
+1 REDEFINE #STCL
+  2 #S1 (B2)
+  2 #T4 (I4)  /* random start if required
+  2 REDEFINE #T4
+    3 #T4A (B3)
+    3 #T1 (B1)  /* 0 - 255 random repeat
+  2 #S2 (B2)
+1 #R2 (I2)
+1 REDEFINE #R2
+  2 #R21 (B1)
+  2 #R22 (B1)
+1 #I (I4)
+1 #F (F8)
+INDEPENDENT
+1 +RAND (I4)
+END-DEFINE
+#P1 := #PRIM - 1
+#PH := #P1 / 2
+MOVE *TIMESTMP TO #STCL
+IF +RAND = 0  /* first call
+  MOVE #T4 TO #VAL  /* random time
+  IF #VAL >= #P1  /* mod p-1
+    #VAL := #VAL - #P1
+  ELSE
+    REPEAT
+      IF #VAL >= 0
+        ESCAPE BOTTOM
+      ELSE
+        #VAL := #VAL + #P1
+      END-IF
+    END-REPEAT
+  END-IF
+  +RAND := #VAL + 1   /* range 1 to p-1
+END-IF
+#VAL := +RAND
+RESET #R22
+MOVE #T1 TO #R21  /* get unsigned (i1)
+FOR #I = 1 TO #R2 /* ** rand(i1)
+  IF #VAL > #PH  /*   2 * #val > p
+    #VAL1 := #PRIM - #VAL /* avoid overflow
+    #VAL := #VAL - #VAL1 /* = v-(p-v) = 2v-p = 2v (mod p)
+  ELSE
+    ADD #VAL TO #VAL
+  END-IF
+END-FOR
+MOVE #VAL TO +RAND
+#F := #VAL - 1
+RAND := #F / #P1
+END-FUNCTION
+END
+            
