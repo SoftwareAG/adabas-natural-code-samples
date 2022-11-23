@@ -1,0 +1,559 @@
+                                                        
+
+                                                                                 
+This "system" consists of three programs and a Global Data Area. Global Variables could be employed instead of a Global Data Area (using DEFINE DATA INDEPENDENT).
+
+The three programs consist of:
+
+A "driver" program, which starts the system.
+
+Two "output" programs, each of which generates output to just one side of the screen.
+------------------------------------------------------------------------------------------------------------------------
+
+This is the "driver" program. Basically, it RESETs four Global Variables, which are used to keep track of the page numbers and position within the file we are processing. Since we are READ'ing by ISN, the ISN suffices.
+
+However, if for example, we were reading through a file in Logical Sequence by NAME, we would also keep track of +LEFT-NAME and +RIGHT-NAME, which would be used in conjunction with the REPOSITION option.
+
+                                                                                
+ >                                       > +  Program     LEFTRITE Lib XSTRO    
+ All    ....+....1....+....2....+....3....+....4....+....5....+....6....+....7..
+   0010 DEFINE DATA GLOBAL                                                      
+   0020   USING MYGLOBE                                                         
+   0030   END-DEFINE                                                            
+   0040 *                                                                       
+   0050   SET CONTROL 'QS'                                                      
+   0060 *                                                                       
+   0070 RESET +LEFT-PAGE +RIGHT-PAGE +LEFT-ISN +RIGHT-ISN                       
+   0080 *                                                                       
+   0090 INPUT 22/10 'PF5 TO SCROLL RIGHT , PF3 SCROLLS LEFT'                    
+   0100 FETCH 'LEFT'                                                            
+   0110 END                                                                     
+
+--------------------------------------------------------------------------------
+
+Here is the LEFT program. The SET CONTROL statement at line 0120 positions the window on the left side of the screen.
+
+In case you are curious, there is actually a reason why #SWITCH is A2, rather than A1. During the development of programs I have established a practice of always having at least one variable in any INPUT statement that is at least two characters long and accessible. This is to permit entering %% in case things go awry.
+
+
+ >                                       > +  Program     LEFT     Lib XSTRO    
+ Top    ....+....1....+....2....+....3....+....4....+....5....+....6....+....7..
+   0010 DEFINE DATA                                                             
+   0020 GLOBAL USING MYGLOBE                                                    
+   0030 LOCAL                                                                   
+   0040 1 MYVIEW VIEW OF EMPLOYEES                                              
+   0050   2 NAME                                                                
+   0060   2 FIRST-NAME                                                          
+   0070 1 #SWITCH (A2)                                                          
+   0080 END-DEFINE                                                              
+   0090 FORMAT PS=13                                                            
+   0100 MOVE +LEFT-PAGE TO *PAGE-NUMBER                                         
+   0110 SET KEY PF5='%W>' PF3='%W<'                                             
+   0120 SET CONTROL 'WL35C20B001/001F'                                          
+   0130 READ (100) MYVIEW BY ISN STARTING FROM +LEFT-ISN                        
+   0140 DISPLAY *ISN NAME *ISN FIRST-NAME                                       
+   0150 END-READ                                                                
+   0160 *                                                                       
+   0170 AT END OF PAGE                                                          
+   0180 INPUT / 'SWITCH SIDES?' #SWITCH /* COM (AD=M AL=10)  
+   0190 *                   
+   0200 IF #SWITCH = 'Y'                                                        
+   0210    MOVE *PAGE-NUMBER TO +LEFT-PAGE                                                            
+   0220    MOVE *ISN (0130) TO  +LEFT-ISN                                       
+   0230    ADD 1 TO +LEFT-ISN                                                   
+   0240    FETCH 'RIGHT'                                                        
+   0250    END-IF                                                               
+   0260 END-ENDPAGE                                                             
+   0270 *                                                                       
+   0280 END                                                                     
+ 
+--------------------------------------------------------------------------------
+                                                                                
+
+Here is the RIGHT program. The SET CONTROL at line 0120 creates the window on the right side of the screen. Except for the references in the IF #SWITCH clause, the rest of RIGHT is identical to LEFT.
+
+ >                                       > +  Program     RIGHT    Lib XSTRO    
+ Top    ....+....1....+....2....+....3....+....4....+....5....+....6....+....7..
+   0010 DEFINE DATA                                                             
+   0020 GLOBAL USING MYGLOBE                                                    
+   0030 LOCAL                                                                   
+   0040 1 MYVIEW VIEW OF EMPLOYEES                                              
+   0050   2 NAME                                                                
+   0060   2 FIRST-NAME                                                          
+   0070 1 #SWITCH (A2)                                                          
+   0080 END-DEFINE                                                              
+   0090 *                                                                       
+   0100 MOVE +RIGHT-PAGE TO *PAGE-NUMBER                                        
+   0110 FORMAT PS=13                                                            
+   0120 SET CONTROL 'WL35C20FB001/040'                                          
+   0130 READ (100) MYVIEW BY ISN STARTING FROM +RIGHT-ISN                       
+   0140 DISPLAY *ISN NAME *ISN FIRST-NAME                                       
+   0150 END-READ                                                                
+   0160 *                                                                       
+   0170 AT END OF PAGE                                                          
+   0180 INPUT / 'SWITCH SIDES?' #SWITCH                                         
+   0190 *                                                                       
+   0200 IF #SWITCH = 'Y'                                                                                                     
+   0210    MOVE *PAGE-NUMBER TO +RIGHT-PAGE                                     
+   0220    MOVE *ISN (0130) TO  +RIGHT-ISN                                      
+   0230    ADD 1 TO +RIGHT-ISN                                                  
+   0240    FETCH 'LEFT'                                                      
+   0250    END-IF                                                               
+   0260 END-ENDPAGE                                                             
+   0270 *                                                                       
+   0280 END                                                                     
+
+--------------------------------------------------------------------------------
+
+Here is our Global Data Area. As noted above, we only require the page numbers and the ISNs, since we are reading in ISN sequence. If we were reading in logical sequence a value for the "key" would also be required.
+
+                                                                                
+ Global    MYGLOBE   Library XSTRO                          DBID 11177 FNR     8
+ Command                                                                     > +
+ I T L  Name                             F Length     Miscellaneous             
+ All -- -------------------------------- - ---------- ------------------------->
+      1 +LEFT-ISN                        I          4                           
+      1 +RIGHT-ISN                       I          4                           
+      1 +LEFT-PAGE                       P          3                           
+      1 +RIGHT-PAGE                      P          3                           
+
+--------------------------------------------------------------------------------
+                                                                                
+                                                                                
+
+I started by RUN'ing LEFTRITE. Here is the first screen I see.
+
+                                                                                
+  +--------------------------------+                                            
+  |                                |                                            
+  | Page      1                    |                                            
+  |                                |                                            
+  |    ISN              NAME       |                                            
+  | ----------- ------------------ |                                            
+  |                                |                                            
+  |           1 ADAM               |                                            
+  |           2 MORENO             |                                            
+  |           3 BLOND              |                                            
+  |           4 MAIZIERE           |                                            
+  |           5 CAOUDAL            |                                            
+  |           6 VERDIE             |                                            
+  |           7 GUERIN             |                                            
+  |           8 VAUZELLE           |                                            
+  |                                |                                            
+  | SWITCH SIDES?                  |                                            
+  |                                |                                            
+  |                                |                                            
+  +--------------------------------+                                            
+                                                                                
+          PF5 TO SCROLL RIGHT , PF3 SCROLLS LEFT                                
+                                                                                
+--------------------------------------------------------------------------------
+                                                                                
+I used PF5 to scroll right. Note the ISN's indicating we are looking at the same records. Also note a design "deficiency". It would be a good idea to have another "Switch Sides" variable on the right side of the window.
+
+  +--------------------------------+                                            
+  |                                |                                            
+  |                                |                                            
+  |                                |                                            
+  |       ISN           FIRST-NAME |                                            
+  | -- ----------- --------------- |                                            
+  |                                |                                            
+  |              1 SIMONE          |                                            
+  |              2 HUMBERTO        |                                            
+  |              3 ALEXANDRE       |                                            
+  |              4 ELISABETH       |                                            
+  |              5 ALBERT          |                                            
+  |              6 BERNARD         |                                            
+  |              7 MICHELE         |                                            
+  |              8 BERNARD         |                                            
+  |                                |                                            
+  |                                |                                            
+  |                                |                                            
+  |                                |                                            
+  +--------------------------------+                                            
+                                                                                
+          PF5 TO SCROLL RIGHT , PF3 SCROLLS LEFT                                
+                                                                                
+-------------------------------------------------------------------------------      
+                                                                                
+Because of the "design deficiency" I had to use PF3 to scroll back to the left in order to enter the N below.
+
+  +--------------------------------+                                            
+  |                                |                                            
+  | Page      1                    |                                            
+  |                                |                                            
+  |    ISN              NAME       |                                            
+  | ----------- ------------------ |                                            
+  |                                |                                            
+  |           1 ADAM               |                                            
+  |           2 MORENO             |                                            
+  |           3 BLOND              |                                            
+  |           4 MAIZIERE           |                                            
+  |           5 CAOUDAL            |                                            
+  |           6 VERDIE             |                                            
+  |           7 GUERIN             |                                            
+  |           8 VAUZELLE           |                                            
+  |                                |                                            
+  | SWITCH SIDES? N                |                                            
+  |                                |                                            
+  |                                |                                            
+  +--------------------------------+                                            
+                                                                                
+          PF5 TO SCROLL RIGHT , PF3 SCROLLS LEFT                                
+                                                                                
+--------------------------------------------------------------------------------
+                                                                                
+Note I am now on Page 2.
+
+  +--------------------------------+                                            
+  |                                |                                            
+  | Page      2                    |                                            
+  |                                |                                            
+  |    ISN              NAME       |                                            
+  | ----------- ------------------ |                                            
+  |                                |                                            
+  |           9 CHAPUIS            |                                            
+  |          10 MONTASSIER         |                                            
+  |          11 JOUSSELIN          |                                            
+  |          12 BAILLET            |                                            
+  |          13 MARX               |                                            
+  |          14 D'AGOSTINO         |                                            
+  |          15 LEROUGE            |                                            
+  |          16 GRUMBACH           |                                            
+  |                                |                                            
+  | SWITCH SIDES?                  |                                            
+  |                                |                                            
+  |                                |                                            
+  +--------------------------------+                                            
+                                                                                
+          PF5 TO SCROLL RIGHT , PF3 SCROLLS LEFT                                
+                                                                                
+--------------------------------------------------------------------------------
+                                                                                
+Now I entered a Y to switch to the right side.
+
+  +--------------------------------+                                            
+  |                                |                                            
+  | Page      2                    |                                            
+  |                                |                                            
+  |    ISN              NAME       |                                            
+  | ----------- ------------------ |                                            
+  |                                |                                            
+  |           9 CHAPUIS            |                                            
+  |          10 MONTASSIER         |                                            
+  |          11 JOUSSELIN          |                                            
+  |          12 BAILLET            |                                            
+  |          13 MARX               |                                            
+  |          14 D'AGOSTINO         |                                            
+  |          15 LEROUGE            |                                            
+  |          16 GRUMBACH           |                                            
+  |                                |                                            
+  | SWITCH SIDES? Y                |                                            
+  |                                |                                            
+  |                                |                                            
+  +--------------------------------+                                            
+                                                                                
+          PF5 TO SCROLL RIGHT , PF3 SCROLLS LEFT                                
+                                                                                
+--------------------------------------------------------------------------------
+                                                                                
+If you run the "system" you will see that the left window no longer has focus. Instead, the focus is with the right window, which is showing Page 1.
+
+  +--------------------------------+     +--------------------------------+     
+  |                                |     |                                |     
+  | Page      2                    |     | Page      1                    |     
+  |                                |     |                                |     
+  |    ISN              NAME       |     |    ISN              NAME       |     
+  | ----------- ------------------ |     | ----------- ------------------ |     
+  |                                |     |                                |     
+  |           9 CHAPUIS            |     |           1 ADAM               |     
+  |          10 MONTASSIER         |     |           2 MORENO             |     
+  |          11 JOUSSELIN          |     |           3 BLOND              |     
+  |          12 BAILLET            |     |           4 MAIZIERE           |     
+  |          13 MARX               |     |           5 CAOUDAL            |     
+  |          14 D'AGOSTINO         |     |           6 VERDIE             |     
+  |          15 LEROUGE            |     |           7 GUERIN             |     
+  |          16 GRUMBACH           |     |           8 VAUZELLE           |     
+  |                                |     |                                |     
+  | SWITCH SIDES? Y                |     | SWITCH SIDES?                  |     
+  |                                |     |                                |     
+  |                                |     |                                |     
+  +--------------------------------+     +--------------------------------+     
+                                                                                
+          PF5 TO SCROLL RIGHT , PF3 SCROLLS LEFT                                
+                                                                                
+--------------------------------------------------------------------------------
+                                                                                
+As shown below, I indicated I did not want to switch away from the right side.
+
+  +--------------------------------+     +--------------------------------+     
+  |                                |     |                                |     
+  | Page      2                    |     | Page      1                    |     
+  |                                |     |                                |     
+  |    ISN              NAME       |     |    ISN              NAME       |     
+  | ----------- ------------------ |     | ----------- ------------------ |     
+  |                                |     |                                |     
+  |           9 CHAPUIS            |     |           1 ADAM               |     
+  |          10 MONTASSIER         |     |           2 MORENO             |     
+  |          11 JOUSSELIN          |     |           3 BLOND              |     
+  |          12 BAILLET            |     |           4 MAIZIERE           |     
+  |          13 MARX               |     |           5 CAOUDAL            |     
+  |          14 D'AGOSTINO         |     |           6 VERDIE             |     
+  |          15 LEROUGE            |     |           7 GUERIN             |     
+  |          16 GRUMBACH           |     |           8 VAUZELLE           |     
+  |                                |     |                                |     
+  | SWITCH SIDES? Y                |     | SWITCH SIDES? N                |     
+  |                                |     |                                |     
+  |                                |     |                                |     
+  +--------------------------------+     +--------------------------------+     
+                                                                                
+          PF5 TO SCROLL RIGHT , PF3 SCROLLS LEFT                                
+                                                                                
+--------------------------------------------------------------------------------
+                                                                                
+As you can see below, the two Page 2's are identical.
+
+  +--------------------------------+     +--------------------------------+     
+  |                                |     |                                |     
+  | Page      2                    |     | Page      2                    |     
+  |                                |     |                                |     
+  |    ISN              NAME       |     |    ISN              NAME       |     
+  | ----------- ------------------ |     | ----------- ------------------ |     
+  |                                |     |                                |     
+  |           9 CHAPUIS            |     |           9 CHAPUIS            |     
+  |          10 MONTASSIER         |     |          10 MONTASSIER         |     
+  |          11 JOUSSELIN          |     |          11 JOUSSELIN          |     
+  |          12 BAILLET            |     |          12 BAILLET            |     
+  |          13 MARX               |     |          13 MARX               |     
+  |          14 D'AGOSTINO         |     |          14 D'AGOSTINO         |     
+  |          15 LEROUGE            |     |          15 LEROUGE            |     
+  |          16 GRUMBACH           |     |          16 GRUMBACH           |     
+  |                                |     |                                |     
+  | SWITCH SIDES? Y                |     | SWITCH SIDES?                  |     
+  |                                |     |                                |     
+  |                                |     |                                |     
+  +--------------------------------+     +--------------------------------+     
+                                                                                
+          PF5 TO SCROLL RIGHT , PF3 SCROLLS LEFT                                
+                                                                                
+--------------------------------------------------------------------------------
+                                                                                
+I next used PF5 to demonstrate that I can scroll to the right for the right window.
+Also note that it would be a good idea to use a WRITE TITLE that has the
+page number twice on the top of every page.
+
+  +--------------------------------+     +--------------------------------+     
+  |                                |     |                                |     
+  | Page      2                    |     |                                |     
+  |                                |     |                                |     
+  |    ISN              NAME       |     |       ISN           FIRST-NAME |     
+  | ----------- ------------------ |     | -- ----------- --------------- |     
+  |                                |     |                                |     
+  |           9 CHAPUIS            |     |              9 ROBERT          |     
+  |          10 MONTASSIER         |     |             10 JEAN            |     
+  |          11 JOUSSELIN          |     |             11 DANIEL          |     
+  |          12 BAILLET            |     |             12 PATRICK         |     
+  |          13 MARX               |     |             13 JEAN-MARIE      |     
+  |          14 D'AGOSTINO         |     |             14 LOUIS           |     
+  |          15 LEROUGE            |     |             15 MARC            |     
+  |          16 GRUMBACH           |     |             16 ANDRE           |     
+  |                                |     |                                |     
+  | SWITCH SIDES? Y                |     |                                |     
+  |                                |     |                                |     
+  |                                |     |                                |     
+  +--------------------------------+     +--------------------------------+     
+                                                                                
+          PF5 TO SCROLL RIGHT , PF3 SCROLLS LEFT                                
+                                                                                
+--------------------------------------------------------------------------------
+                                                                                
+I used PF3 to go back to the left, then entered N to not switch.
+
+  +--------------------------------+     +--------------------------------+     
+  |                                |     |                                |     
+  | Page      2                    |     | Page      2                    |     
+  |                                |     |                                |     
+  |    ISN              NAME       |     |    ISN              NAME       |     
+  | ----------- ------------------ |     | ----------- ------------------ |     
+  |                                |     |                                |     
+  |           9 CHAPUIS            |     |           9 CHAPUIS            |     
+  |          10 MONTASSIER         |     |          10 MONTASSIER         |     
+  |          11 JOUSSELIN          |     |          11 JOUSSELIN          |     
+  |          12 BAILLET            |     |          12 BAILLET            |     
+  |          13 MARX               |     |          13 MARX               |     
+  |          14 D'AGOSTINO         |     |          14 D'AGOSTINO         |     
+  |          15 LEROUGE            |     |          15 LEROUGE            |     
+  |          16 GRUMBACH           |     |          16 GRUMBACH           |     
+  |                                |     |                                |     
+  | SWITCH SIDES? Y                |     | SWITCH SIDES? N                |     
+  |                                |     |                                |     
+  |                                |     |                                |     
+  +--------------------------------+     +--------------------------------+     
+                                                                                
+          PF5 TO SCROLL RIGHT , PF3 SCROLLS LEFT                                
+                                                                                
+--------------------------------------------------------------------------------
+                                                                                
+One more N to the switch side option.
+
+  +--------------------------------+     +--------------------------------+     
+  |                                |     |                                |     
+  | Page      2                    |     | Page      3                    |     
+  |                                |     |                                |     
+  |    ISN              NAME       |     |    ISN              NAME       |     
+  | ----------- ------------------ |     | ----------- ------------------ |     
+  |                                |     |                                |     
+  |           9 CHAPUIS            |     |          17 HEURTEBISE         |     
+  |          10 MONTASSIER         |     |          18 REISKEIM           |     
+  |          11 JOUSSELIN          |     |          19 REIGNARD           |     
+  |          12 BAILLET            |     |          20 GUELIN             |     
+  |          13 MARX               |     |          21 RENAUD             |     
+  |          14 D'AGOSTINO         |     |          22 LION               |     
+  |          15 LEROUGE            |     |          23 REMOUE             |     
+  |          16 GRUMBACH           |     |          24 BART               |     
+  |                                |     |                                |     
+  | SWITCH SIDES? Y                |     | SWITCH SIDES? N                |     
+  |                                |     |                                |     
+  |                                |     |                                |     
+  +--------------------------------+     +--------------------------------+     
+                                                                                
+          PF5 TO SCROLL RIGHT , PF3 SCROLLS LEFT                                
+                                                                                
+--------------------------------------------------------------------------------
+                                                                                
+Now another N to stay in the right window.
+
+  +--------------------------------+     +--------------------------------+     
+  |                                |     |                                |     
+  | Page      2                    |     | Page      4                    |     
+  |                                |     |                                |     
+  |    ISN              NAME       |     |    ISN              NAME       |     
+  | ----------- ------------------ |     | ----------- ------------------ |     
+  |                                |     |                                |     
+  |           9 CHAPUIS            |     |          25 TANCHOU            |     
+  |          10 MONTASSIER         |     |          26 LAVENDA            |     
+  |          11 JOUSSELIN          |     |          27 RUYET              |     
+  |          12 BAILLET            |     |          28 BLAISE             |     
+  |          13 MARX               |     |          29 DAVIAUD            |     
+  |          14 D'AGOSTINO         |     |          30 DEZELUS            |     
+  |          15 LEROUGE            |     |          31 ERISSON            |     
+  |          16 GRUMBACH           |     |          32 BOYER              |     
+  |                                |     |                                |     
+  | SWITCH SIDES? Y                |     | SWITCH SIDES? N                |     
+  |                                |     |                                |     
+  |                                |     |                                |     
+  +--------------------------------+     +--------------------------------+     
+                                                                                
+          PF5 TO SCROLL RIGHT , PF3 SCROLLS LEFT                                
+                                                                                
+--------------------------------------------------------------------------------
+                                                                                
+Finally, a Y to switch to the left.
+
+  +--------------------------------+     +--------------------------------+     
+  |                                |     |                                |     
+  | Page      2                    |     | Page      5                    |     
+  |                                |     |                                |     
+  |    ISN              NAME       |     |    ISN              NAME       |     
+  | ----------- ------------------ |     | ----------- ------------------ |     
+  |                                |     |                                |     
+  |           9 CHAPUIS            |     |          33 BERTHELIN          |     
+  |          10 MONTASSIER         |     |          34 VALIN              |     
+  |          11 JOUSSELIN          |     |          35 RATA               |     
+  |          12 BAILLET            |     |          36 ROSENBERG          |     
+  |          13 MARX               |     |          37 BARA               |     
+  |          14 D'AGOSTINO         |     |          38 BROUSSE            |     
+  |          15 LEROUGE            |     |          39 GIORDA             |     
+  |          16 GRUMBACH           |     |          40 DROMARD            |     
+  |                                |     |                                |     
+  | SWITCH SIDES? y                |     | SWITCH SIDES? Y                |     
+  |                                |     |                                |     
+  |                                |     |                                |     
+  +--------------------------------+     +--------------------------------+     
+                                                                                
+          PF5 TO SCROLL RIGHT , PF3 SCROLLS LEFT                                
+                                                                                
+--------------------------------------------------------------------------------
+                                                                                
+We are back on the left, the Page is now 3 on the left. I entered an N
+to stay on the left.
+
+  +--------------------------------+     +--------------------------------+     
+  |                                |     |                                |     
+  | Page      3                    |     | Page      5                    |     
+  |                                |     |                                |     
+  |    ISN              NAME       |     |    ISN              NAME       |     
+  | ----------- ------------------ |     | ----------- ------------------ |     
+  |                                |     |                                |     
+  |          17 HEURTEBISE         |     |          33 BERTHELIN          |     
+  |          18 REISKEIM           |     |          34 VALIN              |     
+  |          19 REIGNARD           |     |          35 RATA               |     
+  |          20 GUELIN             |     |          36 ROSENBERG          |     
+  |          21 RENAUD             |     |          37 BARA               |     
+  |          22 LION               |     |          38 BROUSSE            |     
+  |          23 REMOUE             |     |          39 GIORDA             |     
+  |          24 BART               |     |          40 DROMARD            |     
+  |                                |     |                                |     
+  | SWITCH SIDES?  N               |     | SWITCH SIDES? Y                |     
+  |                                |     |                                |     
+  |                                |     |                                |     
+  +--------------------------------+     +--------------------------------+     
+                                                                                
+          PF5 TO SCROLL RIGHT , PF3 SCROLLS LEFT                                
+                                                                                
+--------------------------------------------------------------------------------
+                                                                                
+An N to stay on the left again.
+
+  +--------------------------------+     +--------------------------------+     
+  |                                |     |                                |     
+  | Page      4                    |     | Page      5                    |     
+  |                                |     |                                |     
+  |    ISN              NAME       |     |    ISN              NAME       |     
+  | ----------- ------------------ |     | ----------- ------------------ |     
+  |                                |     |                                |     
+  |          25 TANCHOU            |     |          33 BERTHELIN          |     
+  |          26 LAVENDA            |     |          34 VALIN              |     
+  |          27 RUYET              |     |          35 RATA               |     
+  |          28 BLAISE             |     |          36 ROSENBERG          |     
+  |          29 DAVIAUD            |     |          37 BARA               |     
+  |          30 DEZELUS            |     |          38 BROUSSE            |     
+  |          31 ERISSON            |     |          39 GIORDA             |     
+  |          32 BOYER              |     |          40 DROMARD            |     
+  |                                |     |                                |     
+  | SWITCH SIDES?  N               |     | SWITCH SIDES? Y                |     
+  |                                |     |                                |     
+  |                                |     |                                |     
+  +--------------------------------+     +--------------------------------+     
+                                                                                
+          PF5 TO SCROLL RIGHT , PF3 SCROLLS LEFT                                
+                                                                                
+--------------------------------------------------------------------------------
+                                                                                
+Finally, we are back at the same page again, and of course the output
+is identical in both windows.
+
+  +--------------------------------+     +--------------------------------+     
+  |                                |     |                                |     
+  | Page      5                    |     | Page      5                    |     
+  |                                |     |                                |     
+  |    ISN              NAME       |     |    ISN              NAME       |     
+  | ----------- ------------------ |     | ----------- ------------------ |     
+  |                                |     |                                |     
+  |          33 BERTHELIN          |     |          33 BERTHELIN          |     
+  |          34 VALIN              |     |          34 VALIN              |     
+  |          35 RATA               |     |          35 RATA               |     
+  |          36 ROSENBERG          |     |          36 ROSENBERG          |     
+  |          37 BARA               |     |          37 BARA               |     
+  |          38 BROUSSE            |     |          38 BROUSSE            |     
+  |          39 GIORDA             |     |          39 GIORDA             |     
+  |          40 DROMARD            |     |          40 DROMARD            |     
+  |                                |     |                                |     
+  | SWITCH SIDES?  %%              |     | SWITCH SIDES? Y                |     
+  |                                |     |                                |     
+  |                                |     |                                |     
+  +--------------------------------+     +--------------------------------+     
+                                                                                
+          PF5 TO SCROLL RIGHT , PF3 SCROLLS LEFT                                
+                                                                                
+At this point I entered %% (see above) to terminate my demo run.                                       

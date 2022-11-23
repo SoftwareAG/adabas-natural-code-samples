@@ -1,0 +1,78 @@
+
+Program     LEFTRITE
+--------------------
+DEFINE DATA GLOBAL                                                      
+  USING MYGLOBE                                                         
+  END-DEFINE                                                            
+*                                                                       
+  SET CONTROL 'QS'                                                      
+*                                                                       
+RESET +LEFT-PAGE +RIGHT-PAGE +LEFT-ISN +RIGHT-ISN                       
+*                                                                       
+INPUT 22/10 'PF5 TO SCROLL RIGHT , PF3 SCROLLS LEFT'                    
+FETCH 'LEFT'                                                            
+END                                                                     
+
+
+Program     LEFT
+----------------
+DEFINE DATA                                                             
+GLOBAL USING MYGLOBE                                                    
+LOCAL                                                                   
+1 MYVIEW VIEW OF EMPLOYEES                                              
+  2 NAME                                                                
+  2 FIRST-NAME                                                          
+1 #SWITCH (A2)                                                          
+END-DEFINE                                                              
+FORMAT PS=13                                                            
+MOVE +LEFT-PAGE TO *PAGE-NUMBER                                         
+SET KEY PF5='%W>' PF3='%W<'                                             
+SET CONTROL 'WL35C20B001/001F'                                          
+READ (100) MYVIEW BY ISN STARTING FROM +LEFT-ISN                        
+DISPLAY *ISN NAME *ISN FIRST-NAME                                       
+END-READ                                                                
+*                                                                       
+AT END OF PAGE                                                          
+INPUT / 'SWITCH SIDES?' #SWITCH /* COM (AD=M AL=10)  
+*                   
+IF #SWITCH = 'Y'                                                        
+   MOVE *PAGE-NUMBER TO +LEFT-PAGE                                                            
+   MOVE *ISN (0130) TO  +LEFT-ISN                                       
+   ADD 1 TO +LEFT-ISN                                                   
+   FETCH 'RIGHT'                                                        
+   END-IF                                                               
+END-ENDPAGE                                                             
+*                                                                       
+END                                                                     
+ 
+ 
+Program     RIGHT
+-----------------
+DEFINE DATA                                                             
+GLOBAL USING MYGLOBE                                                    
+LOCAL                                                                   
+1 MYVIEW VIEW OF EMPLOYEES                                              
+  2 NAME                                                                
+  2 FIRST-NAME                                                          
+1 #SWITCH (A2)                                                          
+END-DEFINE                                                              
+*                                                                       
+MOVE +RIGHT-PAGE TO *PAGE-NUMBER                                        
+FORMAT PS=13                                                            
+SET CONTROL 'WL35C20FB001/040'                                          
+READ (100) MYVIEW BY ISN STARTING FROM +RIGHT-ISN                       
+DISPLAY *ISN NAME *ISN FIRST-NAME                                       
+END-READ                                                                
+*                                                                       
+AT END OF PAGE                                                          
+INPUT / 'SWITCH SIDES?' #SWITCH                                         
+*                                                                       
+IF #SWITCH = 'Y'                                                                                                     
+   MOVE *PAGE-NUMBER TO +RIGHT-PAGE                                     
+   MOVE *ISN (0130) TO  +RIGHT-ISN                                      
+   ADD 1 TO +RIGHT-ISN                                                  
+   FETCH 'LEFT'                                                      
+   END-IF                                                               
+END-ENDPAGE                                                             
+*                                                                       
+END                                                                     
