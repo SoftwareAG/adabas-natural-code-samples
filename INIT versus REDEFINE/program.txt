@@ -1,0 +1,54 @@
+PROGRAM 1
+Often we define a large alpha variable, then REDEFINE it to specify its components (structure).  The INIT keyword is not allowed on the redefinitions, so we code explicit ASSIGN statements.  In our example, we use the redefinition of the starting value of a superdescriptor from the Employees file.
+
+DEFINE DATA LOCAL
+1 EMP    VIEW EMPLOYEES
+  2 DEPT
+  2 NAME
+1 #DEPT-PERSON (A26)    1 REDEFINE #DEPT-PERSON
+  2 #DEPT (A6)          /* INIT <"ADMA01">
+  2 #PERSON (A20)       /* INIT <"MADSen">
+END-DEFINE
+ASSIGN #DEPT   = "ADMA01"
+ASSIGN #PERSON = "MADSEN"
+FIND EMP WITH DEPT-PERSON = #DEPT-PERSON
+  DISPLAY DEPT
+          NAME
+END-FIND
+END
+
+
+PROGRAM 2
+For small structures, as in the example above, we have the option to initialize the "large alpha", but for complex structures this would be unwieldy and difficult to read and maintain.
+
+DEFINE DATA LOCAL
+1 EMP    VIEW EMPLOYEES
+  2 DEPT
+  2 NAME
+1 #DEPT-PERSON (A26)    INIT <"ADMA01MADSEN">
+END-DEFINE
+FIND EMP WITH DEPT-PERSON = #DEPT-PERSON
+  DISPLAY DEPT
+          NAME
+END-FIND
+END
+
+
+PROGRAM 3
+A simple solution is to flip the redefinitions.  We start with a structure and redefine it to be the "large alpha."
+
+DEFINE DATA LOCAL
+1 EMP    VIEW EMPLOYEES
+  2 DEPT
+  2 NAME
+1 #DP-DEF                                   /* Define a structure
+  2 #DEPT (A6)     INIT <"ADMA01">
+  2 #PERSON (A20)  INIT <"MADSEN">
+                        1 REDEFINE #DP-DEF  /* Define the block
+  2 #DEPT-PERSON (A26)
+END-DEFINE
+FIND EMP WITH DEPT-PERSON = #DEPT-PERSON
+  DISPLAY DEPT
+          NAME
+END-FIND
+END      
