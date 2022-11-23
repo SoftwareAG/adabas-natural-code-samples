@@ -1,0 +1,251 @@
+                                                        
+DEFINE DATA LOCAL
+1 MYVIEW VIEW OF EMPLOYEES
+2 NAME
+1 #NAME (A20/1:10)
+1 #LOOP (P3) INIT <1>
+1 #NAME-HOLD (A20)
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+READ (10) MYVIEW
+MOVE NAME TO #NAME (#LOOP)
+ADD 1 TO #LOOP
+END-READ
+*
+FOR #LOOP = 1 TO 10
+MOVE #NAME (#LOOP) TO #NAME-HOLD
+DISPLAY #LOOP #NAME-HOLD
+END-ALL
+SORT BY #NAME-HOLD USING #LOOP
+AT START OF DATA NEWPAGE END-START
+DISPLAY #LOOP #NAME-HOLD
+END-SORT
+END
+
+====================== OUTPUT =========================
+PAGE # 1 DATE: 24-Jul-2008
+PROGRAM: SORT06 LIBRARY: SNDEMO
+
+#LOOP #NAME-HOLD
+----- --------------------
+
+1 VERDIE
+2 GUERIN
+3 VAUZELLE
+4 CHAPUIS
+5 MONTASSIER
+6 JOUSSELIN
+7 BAILLET
+8 MARX
+9 D'AGOSTINO
+10 LEROUGE
+------------------------------------------------------------
+PAGE # 2 DATE: 24-Jul-2008
+PROGRAM: SORT06 LIBRARY: SNDEMO
+
+#LOOP #NAME-HOLD
+----- --------------------
+
+7 BAILLET
+4 CHAPUIS
+9 D'AGOSTINO
+2 GUERIN
+6 JOUSSELIN
+10 LEROUGE
+8 MARX
+5 MONTASSIER
+3 VAUZELLE
+1 VERDIE
+
+
+Note the subscripts. In your case you would do something like:
+
+FOR #LOOP = 1 TO 12
+MOVE #MAP-SERVICING-DEALER-NAME TO #NAME
+END-ALL
+SORT BY #NAME USING #LOOP
+DISPLAY #NAME #LOOP #MAP-DOCUMENT-ID (#LOOP) #MAP-OPEN-DATE-CYMD (#LOOP) etc. 
+
+
+
+
+OR Alternative using QSORT:
+
+Copycode: QSORT
+
+0010 ************************************************************************
+0020 * Copycode  : QSORT
+0030 * Purpose   : "Fast Quick Sort" ... Super efficent generic array sort.
+0040 * Desc      : This is a modified version of quick sort that uses Tri
+0050 *             Median which skips blocks of 4 elements so that a final
+0060 *             insertion sort is applied to almost sorted list.
+0070 *             The Insert sort under these conditions (ie an almost
+0080 *             sorted array) is veryefficient.
+0090 *
+0100 * Written by: pmacgowan@gmail.com on 5/Jan/2008 - Natural version
+0110 *             based on java code written by:
+0120 *               James Gosling,Kevin A. Smith,Denis Ahrens &
+0130 *               Robert Sedgwick
+0140 *             For more details google:
+0150 *               "sort algorithm demo" and use "Im feeling lucky"
+0160 *             and click on "Fast Quick Sort (by Denis Ahrens)"
+0170 *
+0180 * Parameters: &1& = Internal subroutine name to sort the array
+0190 *             &2& = Array variable name ie '#A' for #A(1:n)
+0200 *             &3& = Number of elements ... can be a const or variable
+0210 *             &4& = ">" for accending or "<" for descending sort
+0220 *             &5& = A temp work variable for used for swaping elements
+0230 *             &6& = 2nd working variable, same type/size as &5&
+0240 *
+0250 * Usage:      All working variables for the sort are defined in the LDA
+0260 *             QSORTL1 (uses I2 for arrays with < 32767 elements) or
+0270 *             QSORTL2 (uses I4 variables for arrays > 32767 elements).
+0280 *
+0290 *  Example Code to use the quick sort:
+0300 *
+0310 *    DEFINE DATA LOCAL USING QSORTL1
+0320 *    ...
+0330 *    1 #MY-ARRAY      (A10/1:50)
+0340 *    1 #MY-ARRAY-SWAP (A10)
+0350 *    1 #MY-ARRAY-WORK (A10)
+0360 *    ...
+0370 *    END-DEFINE
+0380 *    ... populate #MY-ARRAY(*) data ...
+0390 *    PERFORM SORT-MY-ARRAY /* Quick sorts the array via QSORT copycode
+0400 *    ...
+0410 *    INCLUDE QSORT
+0420 *      'SORT-MY-ARRAY'  '#MY-ARRAY' '50' '>'
+0430 *      '#MY-ARRAY-SWAP' '#MY-ARRAY-WORK'
+0440 *    END
+0450 *
+0460 * Amendments:
+0470 * Date   Person  Reason
+0480 * ddmmyy XXX
+0490 ***********************************************************************
+0500 *
+0510 **-------------------
+0520 DEFINE SUBROUTINE &1&
+0530 **-------------------
+0540 *
+0550 IF &3& > 4 THEN
+0560   RESET #QSORT-STACK-IDX
+0570   #QSORT-LO := 1
+0580   #QSORT-HI := &3&
+0590   PERFORM &1&&2&
+0600 END-IF
+0610 *
+0620 * Insertion Sort
+0630 *
+0640 FOR #QSORT-I = 2 TO &3&
+0650   &6& := &2&(#QSORT-I)
+0660   #QSORT-J := #QSORT-I
+0670   REPEAT WHILE #QSORT-J > 1 AND &2&(#QSORT-J - 1) &4& &6&
+0680     &2&(#QSORT-J) := &2&(#QSORT-J - 1)
+0690     SUBTRACT 1 FROM #QSORT-J
+0700   END-REPEAT
+0710   &2&(#QSORT-J) := &6&
+0720 END-FOR
+0730 END-SUBROUTINE
+0740 *
+0750 **----------------------
+0760 DEFINE SUBROUTINE &1&&2&
+0770 **----------------------
+0780 *
+0790 * WRITE 'QSORT' #QSORT-LO 'TO' #QSORT-HI
+0800 #QSORT-I := (#QSORT-HI + #QSORT-LO) / 2
+0810 IF &2&(#QSORT-LO) &4& &2&(#QSORT-I) THEN
+0820   &5&            := &2&(#QSORT-LO)
+0830   &2&(#QSORT-LO) := &2&(#QSORT-I)
+0840   &2&(#QSORT-I)  := &5&
+0850 END-IF
+0860 *
+0870 IF &2&(#QSORT-LO) &4& &2&(#QSORT-HI) THEN
+0880   &5&            := &2&(#QSORT-LO)
+0890   &2&(#QSORT-LO) := &2&(#QSORT-HI)
+0900   &2&(#QSORT-HI) := &5&
+0910 END-IF
+0920 *
+0930 IF &2&(#QSORT-I) &4& &2&(#QSORT-HI) THEN
+0940   &5&            := &2&(#QSORT-I)
+0950   &2&(#QSORT-I)  := &2&(#QSORT-HI)
+0960   &2&(#QSORT-HI) := &5&
+0970 END-IF
+0980 *
+0990 #QSORT-J := #QSORT-HI - 1
+1000 *
+1010 &5&           := &2&(#QSORT-I)
+1020 &2&(#QSORT-I) := &2&(#QSORT-J)
+1030 &2&(#QSORT-J) := &5&
+1040 *
+1050 #QSORT-I := #QSORT-LO
+1060 &6&      := &2&(#QSORT-J)
+1070 REPEAT
+1080   REPEAT
+1090     ADD 1 TO #QSORT-I
+1100     WHILE &6& &4& &2&(#QSORT-I)
+1110   END-REPEAT
+1120   REPEAT
+1130     SUBTRACT 1 FROM #QSORT-J
+1140     WHILE &2&(#QSORT-J) &4& &6&
+1150   END-REPEAT
+1160   IF #QSORT-J < #QSORT-I THEN
+1170     ESCAPE BOTTOM
+1180   END-IF
+1190   &5&           := &2&(#QSORT-I)
+1200   &2&(#QSORT-I) := &2&(#QSORT-J)
+1210   &2&(#QSORT-J) := &5&
+1220 END-REPEAT
+1230 &5&                := &2&(#QSORT-I)
+1240 &2&(#QSORT-I)      := &2&(#QSORT-HI - 1)
+1250 &2&(#QSORT-HI - 1) := &5&
+1260 *
+1270 IF (#QSORT-J - #QSORT-LO) > 4 THEN
+1280   ADD 1 TO #QSORT-STACK-IDX
+1290   #QSORT-STACK(#QSORT-STACK-IDX) := #QSORT-I-HI
+1300   #QSORT-HI := #QSORT-J
+1310 *  WRITE '#1' '=' #QSORT-LO '=' #QSORT-HI
+1320   PERFORM &1&&2&
+1330   #QSORT-I-HI := #QSORT-STACK(#QSORT-STACK-IDX)
+1340   SUBTRACT 1 FROM #QSORT-STACK-IDX
+1350 END-IF
+1360 *
+1370 ADD 1 TO #QSORT-I
+1380 IF (#QSORT-HI - #QSORT-I) > 4 THEN
+1390   #QSORT-LO := #QSORT-I
+1400 *  WRITE '#2' '=' #QSORT-LO '=' #QSORT-HI
+1410   PERFORM &1&&2&
+1420 END-IF
+1430 END-SUBROUTINE
+
+
+     -----------------Local QSORTL1  ----Lib SYSTEM
+0010 *
+0020 * Use by QSORT for < 32767 arrays
+0030 *
+0040 1 #QSORT-I-HI                     (A4)
+0050 1 REDEFINE #QSORT-I-HI
+0060   2 #QSORT-I                      (I2)
+0070   2 #QSORT-HI                     (I2)
+0080 *
+0090 1 #QSORT-J                        (I2)
+0100 1 #QSORT-LO                       (I2)
+0110 1 #QSORT-STACK-IDX                (I1)
+0120 1 #QSORT-STACK                    (A4/1:20)
+
+     -----------------Local QSORTL2  ----Lib SYSTEM 
+0010 *
+0020 * Use by QSORT for > 32767 arrays
+0030 *
+0040 1 #QSORT-I-HI                     (A8)
+0050 1 REDEFINE #QSORT-I-HI
+0060   2 #QSORT-I                      (I4)
+0070   2 #QSORT-HI                     (I4)
+0080 *
+0090 1 #QSORT-J                        (I4)
+0100 1 #QSORT-LO                       (I4)
+0110 1 #QSORT-STACK-IDX                (I1)
+0120 1 #QSORT-STACK                    (A8/1:40)
+            
