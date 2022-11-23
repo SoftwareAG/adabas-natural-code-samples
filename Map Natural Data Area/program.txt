@@ -1,0 +1,1722 @@
+                                                        
+NDATABLE...
+ ************************************************************************
+ *
+ *  Build table mapping fields defined in a Natural Data Area
+ *  (LDA, GDA or PDA) in parameter area.
+ *
+ *   Author : Kevin Thane
+ *  Created : 04 Feb 1999
+ *    Email : thanek@rba.gov.au  [W]
+ *            kdth@bigpond.com   [H]
+ *
+ *     Note : the field #S-FILL5 is set to (A17) for Natural version 3;
+ *            if you are still on V2.x you'll need to change this to
+ *            to (A13) - see below, about 70 lines down
+ *
+ *   Update : 20 Aug - cater for (1:V) arrays; allow for provision
+ *            of AIV called +V (I4) to map for any number of occurrences
+ *
+ *   Update : 20 Jul - handle filler (nX) fields
+ *
+ *   Update : 20 Dec - handle unicode (U) fields
+ *                        - handle C* fields
+ *
+ ************************************************************************
+ *
+ DEFINE DATA
+ *
+ PARAMETER
+ 1 #P-LIBRARY                   (A8)
+ 1 #P-MEMBER                    (A8)
+ 1 #P-FIELD-COUNT               (I2)
+ 1 #FIELD-TABLE
+   2 #FIELDS                      (1:500)
+     3 #FLD-NAME                    (A32)
+     3 #FLD-LEVEL                   (N1)
+     3 #FLD-TYPE                    (A1)
+     3 #FLD-LTH                     (I4)    /*  ext'd
+     3 #FLD-DEC-PLACES              (N1)
+     3 #FLD-OCC                     (I2)
+     3 #FLD-START-BYTE              (I4)    /*  extended
+     3 #FLD-END-BYTE                (I4)    /*  extended
+     3 #FLD-REDEF                   (L)
+ 1 #P-NDA-SIZE                  (I4)    /*  extended
+ 1 #P-RETURN-CODE               (N1)
+ *
+ INDEPENDENT
+ 1 +V                           (I4)
+ 1 +DYNAMLTH                    (I4)
+ 1 +NDA-INTERNAL-FMT            (A1)
+ *
+ LOCAL
+ *
+ 1 NAT-SOURCE VIEW OF SYSTEM-FUSER
+   2 SRCID
+   2 REDEFINE SRCID
+     3 SRCID-LIB                  (A8)
+     3 SRCID-PGM                  (A8)
+     3 SRCID-SEQ                  (I2)
+   2 C*SRCTX
+   2 SRCTX          (1:60)
+   2 REDEFINE SRCTX
+     3 #S-LINE      (1:60)
+       4 FILLER                      2X      /*  1 - 2
+       4 #S-BYTE3                   (A1)     /*  3
+       4 FILLER                      3X      /*  4 - 6
+       4 #S-BYTE7                   (A1)     /*  7
+       4 #S-FILL2                   (A11)    /*  8 - 18
+       4 #S-TYPE                    (A1)     /* 19
+       4 #S-LTH                     (N4)     /* 20 - 23
+       4 REDEFINE #S-LTH
+         5 #S-DIGITS                  (N2)
+         5 #S-LTH-DP                  (A1)
+         5 #S-DPS                     (N1)
+       4 #S-BYTE24                  (A1)     /* 24
+       4 #S-LEVEL                   (A1)     /* 25
+       4 REDEFINE #S-LEVEL
+         5 #S-LEVEL-N                 (N1)
+       4 #S-FIELD                   (A32)    /* 26 - 57
+       4 #S-OCCURRENCES             (A20)    /* 58 - 77
+         4 REDEFINE #S-OCCURRENCES
+           5 #S-OCC-BYTE1             (A1)
+           5 #S-OCC-2-20              (A19)
+         4 REDEFINE #S-OCCURRENCES
+           5 #S-FILL3                 (A1)
+           5 #S-OCC-BYTE2             (A1)
+           5 #S-OCC-3-10              (A8)
+         4 REDEFINE #S-OCCURRENCES
+           5 #S-CONST-LEADER          (A5)
+           5 #S-CONST-VALUE           (A15)
+ *       4 #S-FILL5                 (A13)  /*  13 bytes for Nat V2
+         4 #S-FILL5                 (A17)  /*  17 for Natural V3
+   2 REDEFINE SRCTX
+     3 #S1-LINE      (1:60)
+ *     4 #S1-FILL1                  (A6)     /*  1 - 6
+       4 FILLER                      6X      /*  1 - 6
+       4 #S1-BYTE7                  (A1)     /*  7
+       4 #S1-FILL2                  (A19)    /*  8 - 26
+       4 #S1-TYPE                   (A1)     /* 27
+       4 FILLER                      3X      /* 28 - 30
+       4 #S1-BYTES-31-37            (A7)     /* 31 - 37
+       4 REDEFINE #S1-BYTES-31-37
+         5 FILLER                      3X      /* 31 - 33
+         5 #S1-LTH                    (N4)     /* 34 - 37
+         5 REDEFINE #S1-LTH
+           6 #S1-DIGITS                 (N2)
+           6 #S1-LTH-DP                 (A1)
+           6 #S1-DPS                    (N1)
+       4 #S1-BYTE-38                (A1)     /* 38
+       4 #S1-BYTE-39                (A1)     /* 39
+       4 #S1-LEVEL                  (A1)     /* 40
+       4 REDEFINE #S1-LEVEL
+         5 #S1-LEVEL-N                (N1)
+       4 #S1-FIELD                  (A32)    /* 41 - 72
+       4 #S1-OCCURRENCES            (A20)    /* 73 - 92
+         4 REDEFINE #S1-OCCURRENCES
+           5 #S1-OCC-BYTE1            (A1)
+           5 #S1-OCC-2-20             (A19)
+         4 REDEFINE #S1-OCCURRENCES
+           5 #S1-FILL3                (A1)
+           5 #S1-OCC-BYTE2            (A1)
+           5 #S1-OCC-3-10             (A8)
+         4 REDEFINE #S1-OCCURRENCES
+           5 #S1-CONST-LEADER         (A5)
+           5 #S1-CONST-VALUE          (A15)
+       4 FILLER                       2X     /* 93 - 94
+ *
+ 1 #FLD-SUB                     (I2)
+ 1 #FLD-COUNT                   (I2)
+ 1 #LTH                         (I4)
+ 1 #DPS                         (N1)
+ 1 #TYPE                        (A1)
+ *
+ 1 #OCC-FROM-A                  (A20)
+ 1 #OCC-TO-A                    (A20)
+ 1 #OCC-FROM                    (I2)
+ 1 #OCC-TO                      (I2)
+ *
+ 1 #I                           (I2)
+ 1 #J                           (I2)
+ 1 #K                           (I2)  /* sub for Const-Table
+ 1 #KK                          (I2)  /* sub for Const search
+ *
+ 1 #NX-FLD-NAME                 (A6)
+ 1 REDEFINE #NX-FLD-NAME
+   2 #NX-FLD-LTH                  (N5)
+ *
+ 1 #FENDPOS                     (I2/9)  /* end byte per level
+ *
+ 1 #SRCID-FROM                  (A18)
+ 1 REDEFINE #SRCID-FROM
+   2 #SRCID-FM-L                  (A8)
+   2 #SRCID-FM-M                  (A8)
+   2 #SRCID-FM-S                  (B2)
+ 1 #SRCID-TO                    (A18)
+ *
+ 1 #CONST-TABLE
+   2 #CONST-ID                    (A32/50)
+   2 #CONST-VAL                   (A20/50)
+ *
+ END-DEFINE
+ *
+ ************************************************************************
+ *
+ FORMAT ZP=ON AD=L
+ *
+ MOVE #P-LIBRARY TO #SRCID-FM-L
+ MOVE #P-MEMBER TO #SRCID-FM-M
+ *
+ MOVE 0 TO #P-RETURN-CODE
+           #P-NDA-SIZE
+ *
+ ASSIGN #SRCID-FM-S = H'FFFF'
+ ASSIGN #SRCID-TO = #SRCID-FROM
+ ASSIGN #SRCID-FM-S = H'0000'
+ *
+ * WRITE '....+....1....+....2....+....3....+....4....+....5' (TU)
+ *        '...+....6....+....7....+....' (TU)
+ *
+ FIND NAT-SOURCE WITH SRCID = #SRCID-FROM THRU #SRCID-TO
+   IF NO RECORDS FOUND
+     MOVE 1 TO #P-RETURN-CODE
+     ESCAPE ROUTINE
+   END-NOREC
+   IF #S-BYTE3 (4) = '/'
+ *   WRITE 'New format'
+     MOVE '1' TO +NDA-INTERNAL-FMT
+   ELSE
+     MOVE '0' TO +NDA-INTERNAL-FMT
+ *   WRITE 'Old format'
+   END-IF
+ END-FIND
+ *
+ READ NAT-SOURCE BY SRCID FROM #SRCID-FROM THRU #SRCID-TO
+ * WRITE *ISN C*SRCTX
+   FOR #I 1 TO C*SRCTX
+ *   IF +VERSION = '1'
+     IF +NDA-INTERNAL-FMT = '1'
+       PERFORM PROCESS-SOURCE-LINE-V1
+     ELSE
+       PERFORM PROCESS-SOURCE-LINE-V0
+     END-IF
+   END-FOR
+ END-READ
+ *
+ MOVE #FLD-COUNT TO #P-FIELD-COUNT
+ *
+ FOR #FLD-SUB = #FLD-COUNT TO 1 STEP -1
+   IF #FLD-LTH (#FLD-SUB) = 0            /* must be a group item
+     PERFORM CALC-GROUP-LENGTH
+   END-IF
+ END-FOR
+ *
+ PERFORM CALC-FIELD-POSITIONS
+ *
+ ****************************************
+ DEFINE SUBROUTINE PROCESS-SOURCE-LINE-V0
+ ****************************************
+ *
+ * WRITE SRCTX (#I) (EM=X(77) CD=NE)
+ *   WRITE / #S-LINE (#I) (CD=YE)
+ * WRITE 12X 'type =' #S-TYPE (#I) 'lth =' #S-LTH (#I)
+ *           'redef2 =' #S-BYTE24 (#I) 'lev =' #S-LEVEL (#I)
+ *
+ IF #S-LEVEL (#I) = '1' THRU '9' AND #S-BYTE24 (#I) NE '*'
+ *     WRITE SRCTX (#I) (EM=X(77))
+   ADD 1 TO #FLD-COUNT
+   MOVE #S-FIELD (#I) TO #FLD-NAME (#FLD-COUNT)
+   MOVE #S-LEVEL-N (#I) TO #FLD-LEVEL (#FLD-COUNT)
+   MOVE #S-TYPE (#I) TO #FLD-TYPE (#FLD-COUNT)
+   PERFORM CALC-FIELD-LENGTH
+   MOVE #LTH TO #FLD-LTH (#FLD-COUNT)
+   MOVE #DPS TO #FLD-DEC-PLACES (#FLD-COUNT)
+   PERFORM CALC-OCCURRENCES
+   PERFORM EXTRACT-CONSTANT
+   IF #S-BYTE24 (#I) = 'R'
+     MOVE TRUE TO #FLD-REDEF (#FLD-COUNT)
+   END-IF
+   IF #S-BYTE24 (#I) = 'C'
+     COMPRESS 'C*' #FLD-NAME (#FLD-COUNT)
+         INTO #FLD-NAME (#FLD-COUNT) LEAVING NO SPACE
+     IF #FLD-TYPE (#FLD-COUNT) = ' '
+       MOVE 'N' TO #FLD-TYPE (#FLD-COUNT)
+     END-IF
+     IF #FLD-LTH (#FLD-COUNT) = 0
+       MOVE  3  TO #FLD-LTH  (#FLD-COUNT)
+     END-IF
+   END-IF
+   IF #FLD-COUNT = 1
+     IF #FLD-LEVEL (#FLD-COUNT) NE 1
+       MOVE 2 TO #P-RETURN-CODE      /*  First field is not level 1
+       ESCAPE ROUTINE
+     END-IF
+   END-IF
+ END-IF
+ *
+ END-SUBROUTINE
+ *
+ ****************************************
+ DEFINE SUBROUTINE PROCESS-SOURCE-LINE-V1
+ ****************************************
+ *
+ * WRITE SRCTX (#I) (EM=X(77) CD=NE)
+ * WRITE / #S-LINE (#I) (CD=YE)
+ *       / #S1-FILL2 (#I) (AD=U)
+ *         'type =' #S1-TYPE (#I) 'lth =' #S1-LTH (#I)
+ *         'lev =' #S1-LEVEL (#I)
+ * ESCAPE ROUTINE
+ *
+ IF #S1-LEVEL (#I) = '1' THRU '9'  /* AND #S-BYTE24 (#I) NE '*'
+ *   WRITE SRCTX (#I) (EM=X(77) CD=YE)
+ *     / 5X 'type =' #S1-TYPE (#I) '  lth =' #S1-LTH (#I)
+ *          'lev =' #S1-LEVEL (#I)
+   ADD 1 TO #FLD-COUNT
+   MOVE #S1-FIELD (#I) TO #FLD-NAME (#FLD-COUNT)
+   MOVE #S1-LEVEL-N (#I) TO #FLD-LEVEL (#FLD-COUNT)
+   MOVE #S1-TYPE (#I) TO #FLD-TYPE (#FLD-COUNT)
+   PERFORM CALC-FIELD-LENGTH
+   MOVE #LTH TO #FLD-LTH (#FLD-COUNT)
+   MOVE #DPS TO #FLD-DEC-PLACES (#FLD-COUNT)
+   PERFORM CALC-OCCURRENCES-V1
+ * PERFORM EXTRACT-CONSTANT
+   IF #S1-BYTE-38 (#I) = 'R'
+     MOVE TRUE TO #FLD-REDEF (#FLD-COUNT)
+   END-IF
+   IF #FLD-COUNT = 1
+     IF #FLD-LEVEL (#FLD-COUNT) NE 1
+       MOVE 2 TO #P-RETURN-CODE      /*  First field is not level 1
+       ESCAPE ROUTINE
+     END-IF
+   END-IF
+ END-IF
+ *
+ END-SUBROUTINE
+ *
+ ***********************************
+ DEFINE SUBROUTINE CALC-FIELD-LENGTH
+ ***********************************
+ *
+ IF +NDA-INTERNAL-FMT = '1'
+   IF #S1-BYTES-31-37 (#I) = 'DYNAMIC'
+     IF +DYNAMLTH > 1
+       MOVE +DYNAMLTH TO #LTH
+     ELSE
+       MOVE 1 TO #LTH
+     END-IF
+   ELSE
+     IF #S1-LTH-DP (#I) = '.'
+       COMPUTE #LTH = #S1-DIGITS (#I) + #S1-DPS (#I)
+       MOVE #S1-DPS (#I) TO #DPS
+     ELSE
+       MOVE #S1-LTH (#I) TO #LTH
+       RESET #DPS
+     END-IF
+   END-IF
+   MOVE #S1-TYPE (#I) TO #TYPE
+ ELSE
+   IF #S-LTH-DP (#I) = '.'
+     COMPUTE #LTH = #S-DIGITS (#I) + #S-DPS (#I)
+     MOVE #S-DPS (#I) TO #DPS
+   ELSE
+     MOVE #S-LTH (#I) TO #LTH
+     RESET #DPS
+   END-IF
+   MOVE #S-TYPE (#I) TO #TYPE
+ END-IF
+ *
+ * CIDE ON FIRST #S-TYPE (#I)
+ DECIDE ON FIRST #TYPE
+   VALUE 'P'
+     COMPUTE #LTH = (#LTH + 1) / 2
+   VALUE 'L'
+     MOVE 1 TO #LTH
+   VALUE 'C'
+     MOVE 2 TO #LTH
+   VALUE 'D'
+     MOVE 4 TO #LTH
+   VALUE 'T'
+     MOVE 7 TO #LTH
+   VALUE 'U'
+     COMPUTE #LTH = #LTH * 2
+   VALUE ' '
+     IF #FLD-NAME (#FLD-COUNT) = MASK (N'X')
+     OR #FLD-NAME (#FLD-COUNT) = MASK (NN'X')
+     OR #FLD-NAME (#FLD-COUNT) = MASK (NNN'X')
+     OR #FLD-NAME (#FLD-COUNT) = MASK (NNNN'X')
+     OR #FLD-NAME (#FLD-COUNT) = MASK (NNNNN'X')
+       MOVE RIGHT #FLD-NAME (#FLD-COUNT) TO #NX-FLD-NAME
+       MOVE #NX-FLD-LTH TO #LTH
+     END-IF
+   NONE
+     IGNORE
+ END-DECIDE
+ *
+ END-SUBROUTINE
+ *
+ **********************************
+ DEFINE SUBROUTINE EXTRACT-CONSTANT
+ **********************************
+ IF #K GE 50
+   ESCAPE ROUTINE
+ END-IF
+ *
+ IF #S-CONST-LEADER (#I) = 'CONST'
+   ADD 1 TO #K
+   MOVE #S-FIELD (#I) TO #CONST-ID (#K)
+   MOVE #S-CONST-VALUE (#I) TO #CONST-VAL (#K)
+   EXAMINE #CONST-VAL (#K) FOR '<' AND DELETE
+   EXAMINE #CONST-VAL (#K) FOR '>' AND DELETE
+ * WRITE #CONST-ID (#K)
+ *       #CONST-VAL (#K)
+ END-IF
+ *
+ END-SUBROUTINE
+ *
+ ***********************************
+ DEFINE SUBROUTINE CALC-OCCURRENCES
+ ***********************************
+ *
+ MOVE 1 TO #FLD-OCC (#FLD-COUNT)
+ IF #S-OCC-BYTE1 (#I) = '('
+   IF #S-OCC-BYTE2 (#I) = '/'
+     SEPARATE #S-OCC-3-10 (#I) INTO #OCC-TO-A IGNORE
+     COMPUTE #FLD-OCC (#FLD-COUNT) = VAL (#OCC-TO-A)
+   ELSE
+     IF #S-OCC-2-20 (#I) = SCAN ':'
+       SEPARATE #S-OCC-2-20 (#I) INTO #OCC-FROM-A #OCC-TO-A IGNORE
+                WITH DELIMITERS ':)'
+ *     WRITE '=' #OCC-FROM-A '=' #OCC-TO-A
+       PERFORM DETERMINE-OCC-FROM-TO-VALUES
+       COMPUTE #FLD-OCC (#FLD-COUNT) = #OCC-TO - #OCC-FROM + 1
+     ELSE
+       IF #S-OCC-BYTE2 (#I) >= ' '
+ *       WRITE '=' #S-OCC-2-20 (#I)
+         SEPARATE #S-OCC-2-20 (#I) INTO #OCC-TO-A IGNORE
+                  WITH DELIMITERS '()'
+         PERFORM DETERMINE-OCC-TO-VALUE
+ *       WRITE '=' #OCC-TO-A
+         COMPUTE #FLD-OCC (#FLD-COUNT) = #OCC-TO
+       END-IF
+     END-IF
+   END-IF
+ END-IF
+ *
+ END-SUBROUTINE
+ *
+ *************************************
+ DEFINE SUBROUTINE CALC-OCCURRENCES-V1
+ *************************************
+ *
+ MOVE 1 TO #FLD-OCC (#FLD-COUNT)
+ IF #S1-OCC-BYTE1 (#I) = '('
+   IF #S1-OCC-BYTE2 (#I) = '/'
+     SEPARATE #S1-OCC-3-10 (#I) INTO #OCC-TO-A IGNORE
+     COMPUTE #FLD-OCC (#FLD-COUNT) = VAL (#OCC-TO-A)
+   ELSE
+     IF #S1-OCC-2-20 (#I) = SCAN ':'
+       SEPARATE #S1-OCC-2-20 (#I) INTO #OCC-FROM-A #OCC-TO-A IGNORE
+                WITH DELIMITERS ':)'
+ *     WRITE 11X '=' #OCC-FROM-A (CD=GR) '=' #OCC-TO-A (CD=GR)
+       PERFORM DETERMINE-OCC-FROM-TO-VALUES
+       COMPUTE #FLD-OCC (#FLD-COUNT) = #OCC-TO - #OCC-FROM + 1
+ *     WRITE 14X '=' #FLD-OCC (#FLD-COUNT) (CD=GR)
+     ELSE
+       IF #S1-OCC-BYTE2 (#I) >= ' '
+ *       WRITE '=' #S1-OCC-2-20 (#I)
+         SEPARATE #S1-OCC-2-20 (#I) INTO #OCC-TO-A IGNORE
+                  WITH DELIMITERS '()'
+         PERFORM DETERMINE-OCC-TO-VALUE
+ *       WRITE '=' #OCC-TO-A
+         COMPUTE #FLD-OCC (#FLD-COUNT) = #OCC-TO
+       END-IF
+     END-IF
+   END-IF
+ END-IF
+ *
+ END-SUBROUTINE
+ *
+ ***********************************
+ DEFINE SUBROUTINE CALC-GROUP-LENGTH
+ ***********************************
+ *
+ RESET #LTH
+ COMPUTE #J = #FLD-SUB + 1
+ * WRITE 10X '@@@' #FLD-SUB
+ FOR #I = #J TO #FLD-COUNT
+   IF #FLD-LEVEL(#I) LE #FLD-LEVEL(#FLD-SUB)
+      ESCAPE BOTTOM
+   END-IF
+   IF #FLD-LEVEL(#I) = #FLD-LEVEL(#FLD-SUB) + 1
+                       AND NOT #FLD-REDEF(#I)
+     COMPUTE #LTH = #LTH + #FLD-LTH (#I) * #FLD-OCC (#I)
+   END-IF
+ END-FOR
+ MOVE #LTH TO #FLD-LTH (#FLD-SUB)
+ *
+ END-SUBROUTINE
+ *
+ *
+ **************************************
+ DEFINE SUBROUTINE CALC-FIELD-POSITIONS
+ **************************************
+ *
+ * RESET #FENDPOS (*)
+ *
+ FOR #FLD-SUB = 1 TO #FLD-COUNT
+   IF #FLD-SUB = 1
+     MOVE 1 TO #FLD-START-BYTE (1)
+     COMPUTE #FLD-END-BYTE (1)
+           = #FLD-LTH (1) * #FLD-OCC (1)
+   ELSE
+     IF #FLD-LEVEL (#FLD-SUB) = #FLD-LEVEL (#FLD-SUB - 1)
+       IF #FLD-REDEF (#FLD-SUB)
+ *             AND NOT #FLD-REDEF (#FLD-SUB - 1)
+         COMPUTE #FLD-START-BYTE (#FLD-SUB)
+               = #FLD-START-BYTE (#FLD-SUB - 1)
+         COMPUTE #FLD-END-BYTE (#FLD-SUB)
+               = #FLD-START-BYTE (#FLD-SUB)
+               + #FLD-LTH (#FLD-SUB) * #FLD-OCC (#FLD-SUB) - 1
+       ELSE
+         COMPUTE #FLD-START-BYTE (#FLD-SUB)
+               = #FLD-END-BYTE (#FLD-SUB - 1) + 1
+         COMPUTE #FLD-END-BYTE (#FLD-SUB)
+               = #FLD-START-BYTE (#FLD-SUB)
+               + #FLD-LTH (#FLD-SUB) * #FLD-OCC (#FLD-SUB) - 1
+       END-IF
+     END-IF
+     IF #FLD-LEVEL (#FLD-SUB) > #FLD-LEVEL (#FLD-SUB - 1)
+       COMPUTE #FLD-START-BYTE (#FLD-SUB)
+             = #FLD-START-BYTE (#FLD-SUB - 1)
+       COMPUTE #FLD-END-BYTE (#FLD-SUB)
+             = #FLD-START-BYTE (#FLD-SUB)
+             + #FLD-LTH (#FLD-SUB) * #FLD-OCC (#FLD-SUB) - 1
+     END-IF
+     IF #FLD-LEVEL (#FLD-SUB) < #FLD-LEVEL (#FLD-SUB - 1)
+       FOR #J = #FLD-SUB 2 STEP -1
+         COMPUTE #I = #J - 1
+         IF #FLD-LEVEL(#I) = #FLD-LEVEL(#FLD-SUB)
+ *         IF #FLD-REDEF(#FLD-SUB)
+            AND NOT #FLD-REDEF(#I)
+             ESCAPE BOTTOM
+ *         END-IF
+         END-IF
+       END-FOR
+       IF #FLD-REDEF (#FLD-SUB)
+               AND NOT #FLD-REDEF (#I)
+         COMPUTE #FLD-START-BYTE (#FLD-SUB)
+               = #FLD-START-BYTE (#I)
+         COMPUTE #FLD-END-BYTE (#FLD-SUB)
+               = #FLD-START-BYTE (#FLD-SUB)
+               + #FLD-LTH (#FLD-SUB) * #FLD-OCC (#FLD-SUB) - 1
+       ELSE
+         COMPUTE #FLD-START-BYTE (#FLD-SUB)
+               = #FLD-END-BYTE (#I) + 1
+         COMPUTE #FLD-END-BYTE (#FLD-SUB)
+               = #FLD-START-BYTE (#FLD-SUB)
+               + #FLD-LTH (#FLD-SUB) * #FLD-OCC (#FLD-SUB) - 1
+       END-IF
+     END-IF
+   END-IF
+ *
+   IF #FLD-LEVEL (#FLD-SUB) = 1 AND NOT #FLD-REDEF (#FLD-SUB)
+ *   ADD #FLD-END-BYTE (#FLD-SUB) TO #P-NDA-SIZE
+     MOVE #FLD-END-BYTE (#FLD-SUB) TO #P-NDA-SIZE
+   END-IF
+ *
+ END-FOR
+ *
+ END-SUBROUTINE
+ *
+ **********************************************
+ DEFINE SUBROUTINE DETERMINE-OCC-FROM-TO-VALUES
+ **********************************************
+ *
+ *     handle array definitions in form (M:N)
+ *
+ IF #OCC-FROM-A IS (N5)                      /*  ie M is numeric
+    COMPUTE #OCC-FROM = VAL (#OCC-FROM-A)
+ ELSE
+    MOVE 1 TO #OCC-FROM
+    EXAMINE #CONST-ID (*) FOR #OCC-FROM-A GIVING INDEX IN #KK
+    IF #KK > 0                               /*  M is a const value
+ *    WRITE 'Occ-From... ' '=' #KK #CONST-ID (#KK) #CONST-VAL (#KK)
+      COMPUTE #OCC-FROM = VAL (#CONST-VAL (#KK))
+    END-IF
+ END-IF
+ *
+ IF #OCC-TO-A IS (N5)                        /*  ie N is numeric
+    COMPUTE #OCC-TO   = VAL (#OCC-TO-A)
+ ELSE
+    MOVE #OCC-FROM TO #OCC-TO
+    IF #OCC-TO-A = 'V'                       /*  N is V in (1:V) form
+      IF +V > 0
+        MOVE +V TO #OCC-TO
+      END-IF
+    ELSE
+      EXAMINE #CONST-ID (*) FOR #OCC-TO-A GIVING INDEX IN #KK
+      IF #KK > 0                             /*  N is a const value
+ *      WRITE '  Occ-To... ' '=' #KK #CONST-ID (#KK) #CONST-VAL (#KK)
+        IF #CONST-VAL (#KK) IS (N5)
+          COMPUTE #OCC-TO = VAL (#CONST-VAL (#KK))
+        ELSE
+          MOVE 3 TO #P-RETURN-CODE
+          MOVE 1 TO #OCC-TO
+        END-IF
+      END-IF
+    END-IF
+ END-IF
+ *
+ END-SUBROUTINE
+ *
+ ****************************************
+ DEFINE SUBROUTINE DETERMINE-OCC-TO-VALUE
+ ****************************************
+ *
+ IF #OCC-TO-A IS (N5)
+    COMPUTE #OCC-TO   = VAL (#OCC-TO-A)
+ ELSE
+    EXAMINE #CONST-ID (*) FOR #OCC-TO-A GIVING INDEX IN #KK
+    IF #KK > 0
+      COMPUTE #OCC-TO = VAL (#CONST-VAL (#KK))
+    END-IF
+ END-IF
+ COMPUTE #FLD-OCC (#FLD-COUNT) = #OCC-TO
+ *
+ END-SUBROUTINE
+ *
+ ************************************************************************
+ *
+ END
+
+_____________________
+NDAMAP...
+ ************************************************************************
+ *
+ *  Map fields defined in a Natural Data Area (LDA, GDA or PDA)
+ *
+ *   Author : Kevin Thane
+ *  Created : 16 Dec 1998
+ *    Email : thanek@rba.gov.au  [W]
+ *
+ ************************************************************************
+ *
+ DEFINE DATA
+ *
+ INDEPENDENT
+ 1 +V                           (I4)
+ 1 +DYNAMLTH                    (I4)
+ 1 +NDA-INTERNAL-FMT            (A1)
+ 1 +RC                          (N1)
+ *
+ LOCAL
+ 1 #FIELD-TABLE
+   2 #FIELDS                    (1:500)
+     3 #FLD-NAME                  (A32)
+     3 #FLD-LEVEL                 (N1)
+     3 #FLD-TYPE                  (A1)
+     3 #FLD-LTH                   (I4)
+     3 #FLD-DEC-PLACES            (N1)
+     3 #FLD-OCC                   (I2)
+     3 #FLD-START-BYTE            (I4)
+     3 #FLD-END-BYTE              (I4)
+     3 #FLD-REDEF                 (L)
+ *
+ 1 #FLD-SUB                     (I2)
+ 1 #FLD-COUNT                   (I2)
+ 1 #NDA-SIZE                    (I4)
+ *
+ 1 #I                           (I2)
+ 1 #J                           (I2)
+ 1 #L                           (I2)
+ *
+ 1 #CV                          (C)  /*  INIT <(AD=U CD=GR)>
+ *
+ 1 #FENDPOS                     (I2/9)  /* end byte per level
+ *
+ 1 #I-LIBRARY                   (A8)
+ 1 #I-MEMBER                    (A8)
+ 1 #I-LVL1SKIP                  (L)  /*  space lines?
+ 1 #I-V                         (I4) /*  value in (1:V)
+ 1 #I-DYNAMLTH                  (N5) /*  length for DYNAMIC
+ 1 #RETURN-CODE                 (N1) /*  0 = OK
+ *
+ END-DEFINE
+ *
+ ************************************************************************
+ *
+ FORMAT SG=OFF
+ FORMAT (1) SG=OFF PS=56
+ SET KEY PF3
+ *
+ MOVE *LIBRARY-ID TO #I-LIBRARY
+ MOVE 'xxxxxxL' TO #I-MEMBER
+ *
+ INPUT (AD=MT)
+    // 18X 'Map field offsets for Natural Data Area'(U)
+   /// 24X 'Enter LIBRARY:' (I) #I-LIBRARY
+     / 24X '       MEMBER:' (I) #I-MEMBER
+     / 24X ' Level 1 skip:' (I) #I-LVL1SKIP (EM=N/Y)
+    // 24X 'Occurrences V:' (I) #I-V '(for 1:V notation)'
+    // 24X 'Dynamic lngth:' (I) #I-DYNAMLTH '(for DYNAMIC vars)'
+ *
+ MOVE #I-V TO +V
+ MOVE #I-DYNAMLTH TO +DYNAMLTH
+ RESET +RC
+ *
+ WRITE TITLE 'Field offsets within:'(I) #I-MEMBER (CD=TU)
+             'in library:' (I) #I-LIBRARY (CD=TU)
+             '  (size =' (I) #NDA-SIZE (CD=TU) 'bytes)' (I)
+ WRITE (1) TITLE 'Field offsets within:'(I) #I-MEMBER
+                 'in library:' (I) #I-LIBRARY
+                 '  (size =' (I) #NDA-SIZE (CD=TU) 'bytes)' (I)
+ *
+ CALLNAT 'NDATABLE'
+        #I-LIBRARY
+        #I-MEMBER
+        #FLD-COUNT
+        #FIELD-TABLE
+        #NDA-SIZE
+        #RETURN-CODE
+ *
+ IF #RETURN-CODE = 1
+   REINPUT 'No member found'
+ END-IF
+ IF #RETURN-CODE = 2
+   REINPUT 'First field not level 1'
+ END-IF
+ IF #RETURN-CODE > 0
+   MOVE #RETURN-CODE TO +RC
+ * REINPUT 'Error processing this member'
+ END-IF
+ *
+ NEWPAGE
+ * WRITE '=' #FLD-COUNT
+ FOR #I = 1 TO #FLD-COUNT
+   IF #FLD-LEVEL (#I) = 1 AND #I-LVL1SKIP
+ *                        AND NOT #FLD-REDEF (#I)
+     IF *DEVICE EQ 'BATCH'
+        WRITE (1) ' '
+     ELSE
+        WRITE ' '
+     END-IF
+   END-IF
+   IF #FLD-OCC (#I) > 1
+     MOVE (CD=PI) TO #CV
+   ELSE
+     MOVE (AD=N) TO #CV
+   END-IF
+   IF *DEVICE EQ 'BATCH'
+     DISPLAY (1) (SG=OFF) '//fld#' #I      (EM=ZZZ9 CD=BL)
+                           'l/v/l' #FLD-LEVEL (#I) (CD=TU)
+                           'r/d/f' #FLD-REDEF (#I) (CD=RE EM=/'R')
+ *                           '/r' #FLD-REDEF (#I) (CD=RE EM=/'R')
+                    '//field name' #FLD-NAME (#I)  (CD=NE)
+                          '/t/y/p' #FLD-TYPE (#I)  (CD=GR)
+                           '//lth' #FLD-LTH (#I)   (CD=PI)
+                            '/D/P' #FLD-DEC-PLACES (#I) (CD=RE)
+                           '//occ' #FLD-OCC (#I)   (CV=#CV)
+                    '/start/ byte' #FLD-START-BYTE (#I) (CD=NE)
+ *                    '/end/ byte' #FLD-END-BYTE (#I)   (CD=YE)
+   ELSE
+     IF *PF-KEY = 'PF3'
+       WRITE // 18X '*** exiting before end of NDA listing ***'
+       ESCAPE BOTTOM
+     END-IF
+     DISPLAY (SG=OFF) '//fld#' #I      (EM=ZZZ9 CD=BL)
+                       'l/v/l' #FLD-LEVEL (#I) (CD=TU)
+                       'r/d/f' #FLD-REDEF (#I) (CD=RE EM=/'R')
+ *                     '/rdf' #FLD-REDEF (#I) (CD=RE EM=/' R')
+                '//field name' #FLD-NAME (#I)  (CD=NE)
+                       't/y/p' #FLD-TYPE (#I)  (CD=GR)  /* EM='  'X)
+                       '//lth' #FLD-LTH (#I)   (CD=PI)
+                        '/D/P' #FLD-DEC-PLACES (#I) (CD=RE)
+                       '//occ' #FLD-OCC (#I)   (CV=#CV)
+                '/start/ byte' #FLD-START-BYTE (#I) (CD=NE)
+ *                '/end/ byte' #FLD-END-BYTE (#I)   (CD=YE)
+   END-IF
+ *
+ END-FOR
+ *
+ WRITE // 12X '{ Internal Format =' +NDA-INTERNAL-FMT '}'
+ *
+ ************************************************************************
+ *
+ END
+
+_____________________
+NDAFILE...
+ ************************************************************************
+ *
+ *  List records in a sequential file per fields defined in an LDA
+ *
+ *   Author : Kevin Thane
+ *  Created : 16 Dec 1998
+ *    Email : thanek@rba.gov.au  [W]
+ *
+ *     Note : this program contains Natural Process calls to determine
+ *            the DSN of the work file;  if Nat-Proc is not available,
+ *            remove or comment out those sections (scan for "NPR")
+ *
+ ************************************************************************
+ *
+ DEFINE DATA
+ *
+ LOCAL
+ *
+ 01 #LDA-FIELD-TABLE
+    02 #LDA-FIELDS            (1:500)
+       03 #LDAFLD-NAME                  (A32)
+       03 #LDAFLD-LEVEL                 (N1)
+       03 #LDAFLD-TYPE                  (A1)
+       03 #LDAFLD-LTH                   (I4)
+       03 #LDAFLD-DEC-PLACES            (N1)
+       03 #LDAFLD-OCC                   (I2)
+       03 #LDAFLD-START-BYTE            (I4)
+       03 #LDAFLD-END-BYTE              (I4)
+       03 #LDAFLD-REDEF                 (L)
+ *
+ 01 #RPT-FIELDS               (1:20)
+    02 #RPT-FLD-NAME                    (A32)
+    02 #RPT-FLD-HDR                     (A20)
+    02 #RPT-FLD-LDA-FLD-NR              (I2)
+    02 #RPT-FLD-SELECT-OPER             (A1)
+    02 #RPT-FLD-SELECT-VALUE            (A18)
+ *
+ 01 #FLD-MATCH-COUNT                    (I2)
+ 01 #FLD-SUB                            (I2)
+ 01 #NDA-SIZE                           (I4)
+ 01 #LDA-FLD-COUNT                      (I2)
+ 01 #RPT-FLD-COUNT                      (I2)
+ *
+ 01 #I                                  (I2) /* subscript of RPT-FIELD
+ 01 #J                                  (I2) /* start byte of fld in rec
+ 01 #K                                  (I2) /* end byte of field in rec
+ 01 #L                                  (I2) /* length of field in rec
+ 01 #M                                  (I2)
+ 01 #N1                                 (I2) /*  start byte in disp-line
+ 01 #N2                                 (I2) /*  end byte in display-line
+ 01 #DP                                 (I2) /*  nr dec places in field
+ *
+ 01 #CV                                 (C)  /*  INIT <(AD=U CD=GR)>
+ *
+ 01 #RECS-READ                          (P7)
+ 01 #RECS-LISTED                        (P7)
+ *
+ 01 #I-LIBRARY                          (A8)
+ 01 #I-MEMBER                           (A8)
+ 01 #I-FORMAT                           (A1) /*  V(ertival),H(orizontal)
+ 01 #I-SKIP                             (N7) /*  #recs to bypass
+ 01 #I-MAX                              (N7) /*  #recs to list
+ *
+ 01 #I-FIELD-NM                         (A32)
+ 01 #I-FIELD-HDR                        (A20)
+ 01 #I-FIELD-SELECT-OPER                (A1) /*  = > < # (EQ GT LT NE)
+                                             /*  + $ (sum-int, sum-amt)
+ 01 #I-FIELD-SELECT-VALUE               (A18)
+ 01 #RETURN-CODE                        (N1) /*  0 = OK
+ *
+ 01 #SEQ-RECORD
+    02 #SEQ-REC-1                       (A250)
+    02 #SEQ-REC-2                       (A250)
+    02 #SEQ-REC-3                       (A250)
+    02 #SEQ-REC-4                       (A250)
+ 01 REDEFINE #SEQ-RECORD
+    02 #SEQ-REC-BYTE                    (A1/1000)
+ *
+ 01 #REC-LTH                            (I4)
+ 01 #DF-LTH                             (I2)
+ 01 #W-BYTE                             (A1)
+ 01 #VALID-PACKDEC                      (L)
+ 01 #RECORD-REJECTED                    (L)
+ *
+ 01 #W-DISPLAY-FLD                      (A253)
+ 01 REDEFINE #W-DISPLAY-FLD
+    02 #W-DF-BYTE                       (A1/1:253)
+ 01 REDEFINE #W-DISPLAY-FLD
+    02 #W-DF-2BYTES                     (A2/1:126)
+ 01 REDEFINE #W-DISPLAY-FLD
+    02 #W-DISPLAY-FLD-PART1             (A40)
+    02 #W-DISPLAY-FLD-PART2             (A40)
+    02 #W-DISPLAY-FLD-PART3             (A40)
+ 01 REDEFINE #W-DISPLAY-FLD
+    02 #W-DISPLAY-FLD-DATE              (A11)
+    02 #W-DISPLAY-FLD-TIME              (A10)
+ 01 REDEFINE #W-DISPLAY-FLD
+    02 #W-DISPLAY-FLD-18                (A18)
+ 01 REDEFINE #W-DISPLAY-FLD
+    02 #W-DISPLAY-FLD-30                (A30)
+ *
+ 01 #WORK-FIELD                         (B8)
+ 01 REDEFINE #WORK-FIELD
+    02 #WORK-FLD-BYTE                   (A1/1:8)
+ 01 REDEFINE #WORK-FIELD
+    02 #BIN-INT1                        (I1)
+ 01 REDEFINE #WORK-FIELD
+    02 #BIN-INT2                        (I2)
+ 01 REDEFINE #WORK-FIELD
+    02 #BIN-INT4                        (I4)
+ 01 REDEFINE #WORK-FIELD
+    02 #DATE-FIELD                      (D)
+ 01 REDEFINE #WORK-FIELD
+    02 #TIME-FIELD                      (T)
+ 01 REDEFINE #WORK-FIELD
+    02 #P7-FIELD                        (P7)
+ 01 REDEFINE #WORK-FIELD
+    02 #A4-FIELD                        (A4)
+ 01 REDEFINE #WORK-FIELD
+    02 #A7-FIELD                        (A7)
+ 01 REDEFINE #WORK-FIELD
+    02 #FLOAT-4                         (F4)
+ 01 REDEFINE #WORK-FIELD
+    02 #FLOAT-8                         (F8)
+ *
+ 01 #WORK-FIELD2                        (A14)
+ 01 REDEFINE #WORK-FIELD2
+    02 #WF2-BYTE                        (A1/1:14)
+ *
+ 01 #W-DISPLAY-LINE                     (A120)
+ *
+ 01 #HDR-LINE-1                         (A120)
+ 01 #HDR-LINE-2                         (A120)
+ 01 #W-UNDERLINE                        (A60)  INIT
+       <'------------------------------------------------------------'>
+ *
+ 01 #MIN-DATE                           (P7) CONST <577813>
+ 01 #MAX-DATE                           (P7) CONST <577813>
+ *
+ 01 #SELECT-VALUE-ABSOLUTE              (A18)
+ 01 #FIELD-VALUE-ABSOLUTE               (A30)
+ 01 #SV-MINUS-SIGNS                     (I2)
+ 01 #FV-MINUS-SIGNS                     (I2)
+ 01 #SELECT-VALUE-NUMERIC               (P19.6)
+ 01 #FIELD-VALUE-NUMERIC                (P19.6)
+ 01 #VALID-NUMERIC-VALUES               (L)
+ *
+ 01 #SIGMA-COUNT                        (P19)
+ 01 #SIGMA-AMOUNT                       (P19.2)
+ *
+ 01 #DSN                                (A44)
+ 01 #ETC                                (A4)
+ 01 #PREV-DDNAME                        (A8)
+ 01 #NP-NODE                            (N3) CONST <150>    /* NPR
+ *
+ LOCAL USING ALLOCS-L                              /* NPR
+ LOCAL USING ASCB-L                                /* NPR
+ *
+ END-DEFINE
+ *
+ ************************************************************************
+ *
+ FORMAT LS=94
+ FORMAT (01) LS=121 PS=56 SG=OFF ZP=ON
+ *
+ INPUT #I-LIBRARY #I-MEMBER #I-FORMAT #I-SKIP #I-MAX
+ *
+ WRITE TITLE 'Field offsets within:'(I) #I-MEMBER (CD=TU)
+             'in library:' (I) #I-LIBRARY (CD=TU)
+ *
+ WRITE (01) TITLE 'List Work File Records per format in LDA:'(I)
+                  #I-MEMBER (CD=TU)
+                  'in library:' (I) #I-LIBRARY (CD=TU) 30X /
+                  'Contents of Dataset:' #DSN #ETC 24X /   /* NPR
+ *
+ AT TOP OF PAGE (01)
+   IF #I-FORMAT = 'H'                             /*  horizontal
+     WRITE (01)   #HDR-LINE-1 /
+                  #HDR-LINE-2 /
+   END-IF
+ END-TOPPAGE
+ *
+ PERFORM NATPROC-DETERMINE-DSN                          /* NPR
+ *
+ CALLNAT 'NDATABLE'
+        #I-LIBRARY
+        #I-MEMBER
+        #LDA-FLD-COUNT
+        #LDA-FIELD-TABLE
+        #NDA-SIZE
+        #RETURN-CODE
+ *
+ IF #RETURN-CODE = 1
+   REINPUT 'No member found'
+ END-IF
+ IF #RETURN-CODE = 2
+   REINPUT 'First field not level 1'
+ END-IF
+ IF #RETURN-CODE > 0
+   REINPUT 'Error processing this member'
+ END-IF
+ *
+ FOR #I = 1 TO #LDA-FLD-COUNT
+   IF #LDAFLD-OCC (#I) > 1
+     MOVE (CD=PI) TO #CV
+   ELSE
+     MOVE (AD=N) TO #CV
+   END-IF
+   DISPLAY (SG=OFF) '/fld#' #I      (EM=ZZZ9 CD=BL)
+                  2X '/lvl' #LDAFLD-LEVEL (#I) (CD=TU EM='  '9)
+                     '/rdf' #LDAFLD-REDEF (#I) (CD=RE EM=' 'X)
+              '/field name' #LDAFLD-NAME (#I)  (CD=NE)
+                     '/typ' #LDAFLD-TYPE (#I)  (CD=GR EM='  'X)
+                     '/lth' #LDAFLD-LTH (#I)   (CD=PI)
+                      'D/P' #LDAFLD-DEC-PLACES (#I) (CD=RE)
+                     '/occ' #LDAFLD-OCC (#I)   (CV=#CV)
+           2X 'start/ byte' #LDAFLD-START-BYTE (#I) (CD=NE)
+             1X 'end/ byte' #LDAFLD-END-BYTE (#I)   (CD=YE)
+ *
+ END-FOR
+ *
+ WRITE / 'Fields selected...' 20X 'fld#  <-----heading------>'
+                               2X '<---selection--->'
+ READ WORK FILE 1 #I-FIELD-NM #I-FIELD-HDR
+                  #I-FIELD-SELECT-OPER
+                  #I-FIELD-SELECT-VALUE
+   ADD 1 TO #RPT-FLD-COUNT
+   IF #RPT-FLD-COUNT > 20
+     WRITE '***  Max number of fields exceeded  ***'
+   ELSE
+     MOVE #I-FIELD-NM TO #RPT-FLD-NAME (#RPT-FLD-COUNT)
+     MOVE #I-FIELD-HDR TO #RPT-FLD-HDR (#RPT-FLD-COUNT)
+     MOVE #I-FIELD-SELECT-OPER  TO #RPT-FLD-SELECT-OPER (#RPT-FLD-COUNT)
+     MOVE #I-FIELD-SELECT-VALUE TO #RPT-FLD-SELECT-VALUE (#RPT-FLD-COUNT)
+     EXAMINE #LDAFLD-NAME (*) FOR #I-FIELD-NM
+             GIVING NUMBER IN #FLD-MATCH-COUNT
+ *   WRITE 'FMC =' #FLD-MATCH-COUNT
+     IF #FLD-MATCH-COUNT = 1
+       EXAMINE #LDAFLD-NAME (*) FOR #I-FIELD-NM
+               GIVING INDEX IN #RPT-FLD-LDA-FLD-NR (#RPT-FLD-COUNT)
+     ELSE
+       EXAMINE FULL #LDAFLD-NAME (*) FOR FULL VALUE #I-FIELD-NM
+               GIVING INDEX IN #RPT-FLD-LDA-FLD-NR (#RPT-FLD-COUNT)
+     END-IF
+   END-IF
+   WRITE 3X #RPT-FLD-NAME (#RPT-FLD-COUNT)
+            #RPT-FLD-LDA-FLD-NR (#RPT-FLD-COUNT) (ZP=ON)
+         2X #RPT-FLD-HDR (#RPT-FLD-COUNT)
+         2X #RPT-FLD-SELECT-OPER (#RPT-FLD-COUNT)
+            #RPT-FLD-SELECT-VALUE (#RPT-FLD-COUNT)
+   IF #RPT-FLD-LDA-FLD-NR (#RPT-FLD-COUNT) = 0
+     WRITE '*** WARNING *** - cannot resolve field' #I-FIELD-NM
+   END-IF
+ END-WORK
+ *
+ MOVE ' Rec # ' TO #HDR-LINE-1
+ MOVE '-------' TO #HDR-LINE-2
+ NEWPAGE
+ *
+ READ WORK FILE 2 #SEQ-RECORD GIVING LENGTH #REC-LTH
+   ADD 1 TO #RECS-READ
+   IF #I-SKIP > 0 AND #RECS-READ LE #I-SKIP
+     ESCAPE TOP
+   END-IF
+   PERFORM SELECTION-TEST
+   IF #RECORD-REJECTED
+     ESCAPE TOP
+   END-IF
+   IF #I-FORMAT = 'V'
+     WRITE (01) / 'Record Nr' #RECS-READ (AD=L)
+               3X 'Length =' #REC-LTH (AD=L)
+   END-IF
+   IF #RPT-FLD-COUNT GT 0
+     PERFORM DISPLAY-FIELDS
+   ELSE
+     WRITE (01) #SEQ-REC-1 (EM=X(60))
+   END-IF
+   ADD 1 TO #RECS-LISTED
+   IF #I-MAX > 0 AND #RECS-LISTED GE #I-MAX
+     ESCAPE BOTTOM
+   END-IF
+ END-WORK
+ *
+ WRITE (01) /// #RECS-READ   (ZP=ON) 'input records read'
+             // #RECS-LISTED (ZP=ON) 'records selected and listed'
+ IF #RPT-FLD-SELECT-OPER (*) = '+'
+   WRITE (01) / 10X ' sigma count =' #SIGMA-COUNT (AD=L)
+ END-IF
+ IF #RPT-FLD-SELECT-OPER (*) = '$'
+   WRITE (01) / 10X 'sigma amount =' #SIGMA-AMOUNT (AD=L)
+ END-IF
+ *
+ WRITE NOTITLE /// #RECS-READ   (ZP=ON) 'input records read'
+                // #RECS-LISTED (ZP=ON) 'records selected and listed'
+               /// 10X ' sigma count =' #SIGMA-COUNT (AD=L)
+                // 10X 'sigma amount =' #SIGMA-AMOUNT (AD=L)
+ *
+ ************************************************************************
+ *
+ DEFINE SUBROUTINE SELECTION-TEST
+ *
+ MOVE FALSE TO #RECORD-REJECTED
+ FOR #I = 1 TO #RPT-FLD-COUNT
+   IF #RPT-FLD-SELECT-OPER (#I) > ' '
+     MOVE #RPT-FLD-LDA-FLD-NR (#I) TO #FLD-SUB
+     IF #FLD-SUB > 0
+       PERFORM BUILD-DISPLAY-FIELD
+       PERFORM COMPARE-FIELD-VALUE
+     END-IF
+   END-IF
+   IF #RECORD-REJECTED
+     ESCAPE BOTTOM
+   END-IF
+ END-FOR
+ *
+ END-SUBROUTINE
+ *
+ ************************************************************************
+ *
+ DEFINE SUBROUTINE DISPLAY-FIELDS
+ *
+ RESET #N1
+ FOR #I = 1 TO #RPT-FLD-COUNT
+   RESET #W-DISPLAY-FLD
+   MOVE #RPT-FLD-LDA-FLD-NR (#I) TO #FLD-SUB
+   IF #FLD-SUB > 0
+     PERFORM BUILD-DISPLAY-FIELD
+   ELSE
+     MOVE '***  invalid field name  ***' TO #W-DISPLAY-FLD
+     MOVE 12 TO #DF-LTH
+   END-IF
+   IF #I-FORMAT = 'V'
+     WRITE (01) 10X #RPT-FLD-NAME (#I) ':'
+                    #W-DISPLAY-FLD-PART1
+     IF #DF-LTH GT 40
+       WRITE 44X #W-DISPLAY-FLD-PART2
+       IF #DF-LTH GT 80
+         WRITE 44X #W-DISPLAY-FLD-PART3
+       END-IF
+     END-IF
+   ELSE
+     PERFORM BUILD-DISPLAY-LINE
+   END-IF
+ END-FOR
+ *
+ IF #I-FORMAT = 'H'
+   WRITE (01) #W-DISPLAY-LINE
+ END-IF
+ *
+ END-SUBROUTINE
+ *
+ ************************************************************************
+ *
+ DEFINE SUBROUTINE BUILD-DISPLAY-FIELD
+ *
+ MOVE #LDAFLD-LTH (#FLD-SUB) TO #L
+ IF #LDAFLD-OCC (#FLD-SUB) > 1
+   COMPUTE #L = #L * #LDAFLD-OCC (#FLD-SUB)
+ END-IF
+ MOVE #LDAFLD-DEC-PLACES (#FLD-SUB) TO #DP
+ MOVE #LDAFLD-START-BYTE (#FLD-SUB) TO #J
+ MOVE #LDAFLD-END-BYTE (#FLD-SUB) TO #K
+ RESET #W-DISPLAY-FLD
+ *
+ DECIDE ON EVERY VALUE OF #LDAFLD-TYPE (#FLD-SUB)
+   VALUE 'A'
+     MOVE #SEQ-REC-BYTE (#J:#K) TO #W-DF-BYTE (1:#L)
+     COMPUTE #DF-LTH = #L
+   VALUE 'N'
+     MOVE #SEQ-REC-BYTE (#J:#K) TO #W-DF-BYTE (1:#L)
+     COMPUTE #DF-LTH = #L + 1     /* nr digits plus 1 for sign
+   VALUE 'I'
+     MOVE #SEQ-REC-BYTE (#J:#K) TO #WORK-FLD-BYTE (1:#L)
+     DECIDE ON FIRST VALUE OF #L
+       VALUE 1
+         MOVE EDITED #BIN-INT1 (EM=ZZ9-) TO #W-DISPLAY-FLD
+         MOVE 4 TO #DF-LTH
+       VALUE 2
+         MOVE EDITED #BIN-INT2 (EM=ZZZZ9-) TO #W-DISPLAY-FLD
+         MOVE 6 TO #DF-LTH
+       VALUE 4
+         MOVE EDITED #BIN-INT4 (EM=ZZZZZZZZ9-) TO #W-DISPLAY-FLD
+         MOVE 10 TO #DF-LTH
+       NONE
+         IGNORE
+     END-DECIDE
+   VALUE 'B', 'P'
+     FOR #K = 1 TO #L
+       COMPUTE #M = #J + #K - 1
+ *     MOVE SUBSTRING (#SEQ-RECORD,#M,1) TO #W-BYTE
+       MOVE #SEQ-REC-BYTE (#M) TO #W-BYTE
+       MOVE EDITED #W-BYTE (EM=H) TO #W-DF-2BYTES (#K)
+     END-FOR
+     COMPUTE #DF-LTH = #L * 2     /* nr of nybbles
+   VALUE 'P'
+     DECIDE ON FIRST VALUE OF #W-DF-BYTE (#DF-LTH)
+       VALUE 'C'
+         MOVE '+' TO #W-DF-BYTE (#DF-LTH)
+       VALUE 'D'
+         MOVE '-' TO #W-DF-BYTE (#DF-LTH)
+       VALUE 'F'
+         RESET #W-DF-BYTE (#DF-LTH)
+       NONE
+         IGNORE
+     END-DECIDE
+   VALUE 'N', 'P'                            /*  insert dec point
+     IF #DP > 0
+ *     WRITE 10X #W-DISPLAY-FLD-PART1 #DP #DF-LTH
+       FOR #K = 0 TO #DP
+         COMPUTE #M = #DF-LTH - #K
+         MOVE #W-DF-BYTE (#M) TO #W-DF-BYTE (#M+1)
+       END-FOR
+       COMPUTE #M = #DF-LTH - #DP
+       MOVE '.' TO #W-DF-BYTE (#M)
+       ADD 1 TO #DF-LTH
+     END-IF
+   VALUE 'D'
+     MOVE #SEQ-REC-BYTE (#J:#K) TO #WORK-FLD-BYTE (1:#L)
+     PERFORM UNPACK-DATE
+     MOVE 10 TO #DF-LTH
+   VALUE 'T'
+     MOVE #SEQ-REC-BYTE (#J:#K) TO #WORK-FLD-BYTE (1:#L)
+     PERFORM UNPACK-TIME
+     MOVE 20 TO #DF-LTH
+   VALUE 'F'
+     MOVE #SEQ-REC-BYTE (#J:#K) TO #WORK-FLD-BYTE (1:#L)
+ *   WRITE 10X 'Wkfld =' #WORK-FIELD
+     DECIDE ON FIRST VALUE OF #L
+       VALUE 4
+ *       WRITE 12X 'Float =' #FLOAT-4
+         MOVE #FLOAT-4 TO #W-DISPLAY-FLD
+         MOVE 13 TO #DF-LTH
+       VALUE 8
+         MOVE #FLOAT-8 TO #W-DISPLAY-FLD
+ *       MOVE EDITED #FLOAT-8 (EM=ZZ9-) TO #W-DISPLAY-FLD
+         MOVE 22 TO #DF-LTH
+       NONE IGNORE
+   END-DECIDE
+   NONE
+     FOR #K = 1 TO #L
+       COMPUTE #M = #J + #K - 1
+       MOVE #SEQ-REC-BYTE (#M) TO #W-BYTE
+       MOVE EDITED #W-BYTE (EM=H) TO #W-DF-2BYTES (#K)
+     END-FOR
+     COMPUTE #DF-LTH = #L * 2
+ END-DECIDE
+ *
+ IF #DF-LTH < 3
+   MOVE 3 TO #DF-LTH
+ END-IF
+ *
+ END-SUBROUTINE
+ *
+ ************************************************************************
+ *
+ DEFINE SUBROUTINE BUILD-DISPLAY-LINE
+ *
+ IF #N1 = 0
+   MOVE EDITED #RECS-READ (EM=ZZZZZZ9) TO #W-DISPLAY-LINE
+   MOVE 10 TO #N1
+ END-IF
+ *
+ COMPUTE #N2 = #N1 + #DF-LTH - 1
+ IF #N2 LE 120
+   MOVE #W-DISPLAY-FLD-PART1 TO SUBSTRING (#W-DISPLAY-LINE,#N1,#DF-LTH)
+   IF #RECS-LISTED = 0
+     MOVE #RPT-FLD-HDR (#I) TO SUBSTRING (#HDR-LINE-1,#N1,#DF-LTH)
+     MOVE #W-UNDERLINE TO SUBSTRING (#HDR-LINE-2,#N1,#DF-LTH)
+   END-IF
+ END-IF
+ COMPUTE #N1 = #N1 + #DF-LTH + 1
+ *
+ END-SUBROUTINE
+ *
+ ************************************************************************
+ *
+ DEFINE SUBROUTINE UNPACK-DATE
+ *
+ MOVE TRUE TO #VALID-PACKDEC
+ MOVE EDITED #A4-FIELD (EM=HHHH) TO #WORK-FIELD2
+ FOR #K = 1 TO 7
+   IF #WF2-BYTE (#K) = '0' THRU '9'
+     IGNORE
+   ELSE
+     MOVE FALSE TO #VALID-PACKDEC
+   END-IF
+ END-FOR
+ IF #WF2-BYTE (8) = 'A' THRU 'F'
+   IGNORE
+ ELSE
+   MOVE FALSE TO #VALID-PACKDEC
+ END-IF
+ *
+ IF #VALID-PACKDEC
+   IF #P7-FIELD = 577813 THRU 986153
+     MOVE EDITED #DATE-FIELD (EM=YYYY/MM/DD) TO #W-DISPLAY-FLD
+   ELSE
+     MOVE EDITED #P7-FIELD (EM=ZZZZZZZ9) TO #W-DISPLAY-FLD
+   END-IF
+ ELSE
+   MOVE EDITED #A4-FIELD (EM=HHHH) TO #W-DISPLAY-FLD
+ END-IF
+ *
+ END-SUBROUTINE
+ *
+ ************************************************************************
+ *
+ DEFINE SUBROUTINE UNPACK-TIME
+ *
+ MOVE TRUE TO #VALID-PACKDEC
+ MOVE EDITED #A7-FIELD (EM=HHHHHHH) TO #WORK-FIELD2
+ FOR #K = 1 TO 13
+   IF #WF2-BYTE (#K) = '0' THRU '9'
+     IGNORE
+   ELSE
+     MOVE FALSE TO #VALID-PACKDEC
+   END-IF
+ END-FOR
+ IF #WF2-BYTE (14) = 'F'
+   IGNORE
+ ELSE
+   MOVE FALSE TO #VALID-PACKDEC
+ END-IF
+ *
+ IF #VALID-PACKDEC
+   MOVE EDITED #TIME-FIELD (EM=YYYY/MM/DD) TO #W-DISPLAY-FLD-DATE
+   MOVE EDITED #TIME-FIELD (EM=HH:II:SS) TO #W-DISPLAY-FLD-TIME
+ ELSE
+   MOVE EDITED #A7-FIELD (EM=HHHHHHH) TO #W-DISPLAY-FLD
+ END-IF
+ *
+ END-SUBROUTINE
+ *
+ ************************************************************************
+ *
+ DEFINE SUBROUTINE COMPARE-FIELD-VALUE
+ *
+ * WRITE / 'comparing field' #I
+ *         #RPT-FLD-NAME (#I)
+ *         #RPT-FLD-SELECT-OPER (#I)
+ * WRITE 10X #RPT-FLD-SELECT-VALUE (#I) #W-DISPLAY-FLD-PART1
+ PERFORM EXTRACT-NUMERIC-VALUE
+ *
+ DECIDE ON EVERY VALUE OF #RPT-FLD-SELECT-OPER (#I)
+   VALUE '='
+     IF #RPT-FLD-SELECT-VALUE (#I) NE #W-DISPLAY-FLD-18
+       MOVE TRUE TO #RECORD-REJECTED
+     END-IF
+   VALUE '#'                            /*  for NE
+     IF #RPT-FLD-SELECT-VALUE (#I) = #W-DISPLAY-FLD-18
+       MOVE TRUE TO #RECORD-REJECTED
+     END-IF
+   VALUE '>'                            /*  for GT
+     IF #VALID-NUMERIC-VALUES
+       IF #FIELD-VALUE-NUMERIC LE #SELECT-VALUE-NUMERIC
+         MOVE TRUE TO #RECORD-REJECTED
+       END-IF
+     ELSE
+       IF #W-DISPLAY-FLD-18 LE #RPT-FLD-SELECT-VALUE (#I)
+         MOVE TRUE TO #RECORD-REJECTED
+       END-IF
+     END-IF
+   VALUE 'ÃƒÂ‚Ã‚Â¯'                            /*  for GE
+     IF #RPT-FLD-SELECT-VALUE (#I) GT #W-DISPLAY-FLD-18
+       MOVE TRUE TO #RECORD-REJECTED
+     END-IF
+   VALUE '<'                            /*  for LT
+     IF #RPT-FLD-SELECT-VALUE (#I) LE #W-DISPLAY-FLD-18
+       MOVE TRUE TO #RECORD-REJECTED
+     END-IF
+   VALUE 'ÃƒÂ‚Ã‚Â®'                            /*  for LE
+     IF #RPT-FLD-SELECT-VALUE (#I) LT #W-DISPLAY-FLD-18
+       MOVE TRUE TO #RECORD-REJECTED
+     END-IF
+   VALUE '+'                            /*  sum of integer field
+     ADD #FIELD-VALUE-NUMERIC TO #SIGMA-COUNT
+   VALUE '$'                            /*  sum of amount fld (2 dec pl)
+     ADD #FIELD-VALUE-NUMERIC TO #SIGMA-AMOUNT
+   NONE
+     IGNORE
+ END-DECIDE
+ *
+ END-SUBROUTINE
+ *
+ ************************************************************************
+ *
+ DEFINE SUBROUTINE EXTRACT-NUMERIC-VALUE
+ *
+ MOVE FALSE TO #VALID-NUMERIC-VALUES
+ IF #LDAFLD-TYPE (#FLD-SUB) = 'P' OR = 'N'
+ * WRITE / 'packed field' #I
+ *         #RPT-FLD-NAME (#I)
+ *         #RPT-FLD-SELECT-OPER (#I)
+ *         #LDAFLD-TYPE (#FLD-SUB)
+   MOVE TRUE TO #VALID-NUMERIC-VALUES
+   MOVE #W-DISPLAY-FLD-30 TO #FIELD-VALUE-ABSOLUTE
+   EXAMINE #FIELD-VALUE-ABSOLUTE FOR '-' AND DELETE
+           GIVING NUMBER IN #FV-MINUS-SIGNS
+   EXAMINE #FIELD-VALUE-ABSOLUTE FOR '+' AND DELETE
+   IF #FIELD-VALUE-ABSOLUTE IS (N18.6)
+     COMPUTE #FIELD-VALUE-NUMERIC = VAL (#FIELD-VALUE-ABSOLUTE)
+     IF #FV-MINUS-SIGNS = 1
+       MULTIPLY #FIELD-VALUE-NUMERIC BY -1
+     END-IF
+   ELSE
+     MOVE FALSE TO #VALID-NUMERIC-VALUES
+   END-IF
+   MOVE #RPT-FLD-SELECT-VALUE (#I) TO #SELECT-VALUE-ABSOLUTE
+   EXAMINE #SELECT-VALUE-ABSOLUTE FOR '-' AND DELETE
+           GIVING NUMBER IN #SV-MINUS-SIGNS
+   EXAMINE #SELECT-VALUE-ABSOLUTE FOR '+' AND DELETE
+   IF #SELECT-VALUE-ABSOLUTE IS (N12.6)
+     COMPUTE #SELECT-VALUE-NUMERIC = VAL (#SELECT-VALUE-ABSOLUTE)
+     IF #SV-MINUS-SIGNS = 1
+       MULTIPLY #SELECT-VALUE-NUMERIC BY -1
+     END-IF
+   ELSE
+     MOVE FALSE TO #VALID-NUMERIC-VALUES
+   END-IF
+ * WRITE (ZP=ON) 20X #FIELD-VALUE-NUMERIC #SELECT-VALUE-NUMERIC
+ *                   #VALID-NUMERIC-VALUES (EM=F/T)
+ END-IF
+ *
+ END-SUBROUTINE
+ *
+ ************************************************************************
+ *
+ DEFINE SUBROUTINE NATPROC-DETERMINE-DSN            /* NPR
+ *
+ MOVE *INIT-PROGRAM TO ADDRESS-SPACE.JOB-NAME
+ J. FIND (1) ADDRESS-SPACE WITH JOB-NAME = ADDRESS-SPACE.JOB-NAME
+ *     WRITE 'JOBNAME =' ADDRESS-SPACE.JOB-NAME
+ *              'NODE =' ##NODE
+ *
+       FIND ALLOCATIONS WITH JOB-NAME    = ADDRESS-SPACE.JOB-NAME
+                         AND TCB-ADDRESS = ADDRESS-SPACE.TCB
+                         AND NODE        = #NP-NODE
+ *
+          IF ERROR-CODE NE 0
+             ESCAPE ROUTINE
+          END-IF
+ *
+ *        WRITE 'DDNAME =' DDNAME
+ *              'DSNAME =' DSNAME (EM=X(32))
+ *
+          IF ALLOCATIONS.DDNAME = 'CMWKF02'
+            MOVE ALLOCATIONS.DSNAME TO #DSN
+          END-IF
+          IF ALLOCATIONS.DDNAME = ' ' AND #PREV-DDNAME = 'CMWKF02'
+            MOVE 'etc.' TO #ETC
+          END-IF
+ *
+          MOVE ALLOCATIONS.DDNAME TO #PREV-DDNAME
+ *
+       END-FIND
+ *
+    END-FIND
+ *
+ END-SUBROUTINE
+ *
+ ************************************************************************
+ *
+ END
+
+_____________________
+GDASHOW...
+ ************************************************************************
+ *
+ *  Map fields defined in a Natural Data Area (LDA, GDA or PDA)
+ *
+ *   Author : Kevin Thane
+ *  Created : 16 Dec 2001
+ *    Email : thanek@rba.gov.au  [W]
+ *            kevin_thane@yahoo.com [H]
+ *
+ ************************************************************************
+ *
+ DEFINE DATA
+ LOCAL
+ *
+ 01 #FIELD-TABLE
+    02 #FIELDS                 (1:500)
+       03 #FLD-NAME                     (A32)
+       03 #FLD-LEVEL                    (N1)
+       03 #FLD-TYPE                     (A1)
+       03 #FLD-LTH                      (I4)
+       03 #FLD-DEC-PLACES               (N1)
+       03 #FLD-OCC                      (I2)
+       03 #FLD-START-BYTE               (I4)
+       03 #FLD-END-BYTE                 (I4)
+       03 #FLD-REDEF                    (L)
+ *
+ 1 #FLD-SUB                         (I2)
+ 1 #FLD-COUNT                       (I2)
+ 1 #NDA-SIZE                        (I4)
+ *
+ 1 #I                               (I2)
+ 1 #J                               (I2)
+ 1 #K                               (I2)
+ *
+ *  #CV                             (C)  /*  INIT <(AD=U CD=GR)>
+ 1 #SUPPRESS-ITEM                   (L)  /*
+ 1 #NSP                             (A24/10)  /*  Nat session parms
+ 1 #NSP-STRING                      (A60)
+ 1 #SUBSCRIPT                       (A6)
+ 1 #OCCS                            (N2)
+ 1 #TITLE                           (A80)
+ 1 #WRITE-STRING                    (A80)
+ 1 #IF-STRING                       (A60)
+ 1 #NULL-VALUE                      (A6)
+ 1 #FORMAT-STRING                   (A20)
+ *
+ 1 #TAB                                 (A2) INIT <'1T'>  /* tabulation
+ 1 REDEFINE #TAB
+   2 #TAB-LEVEL                           (N1)
+ *
+ 1 #WITHIN-PE-GROUP                     (L)
+ *
+ 1 #LIBRARY                             (A8)
+ 1 #I-MEMBER                            (A8)
+ 1 #I-SUPPRESS-NULL                     (L)  /*  null value items?
+ 1 #I-SHOW-FORMAT                       (L)  /*
+ 1 #I-LEVEL-INDENTATION                 (L)  /*
+ 1 #RETURN-CODE                         (N1) /*  0 = OK
+ *
+ 01 SOURCE-LINES
+    02 #SL-DEFINE-DATA        (A20) CONST <'DEFINE DATA'>
+    02 #SL-GLOBAL-USING       (A20) CONST <'GLOBAL USING'>
+    02 #SL-END-DEFINE         (A20) CONST <'END-DEFINE'>
+    02 #SL-ASTERS             (A20) CONST <'********************'>
+    02 #SL-FORMAT             (A20) CONST <'FORMAT LS=90 ZP=ON'>
+    02 #SL-WRITE-TITLE        (A20) CONST <'WRITE TITLE LEFT'>
+    02 #SL-END                (A20) CONST <'END'>
+ *
+ 01 #U080-PARAM
+    02 #U080-ACTION       (A08)
+    02 #U080-TYPE         (A01)
+    02 #U080-NAME         (A08)
+    02 #U080-EMPTY        (L)
+    02 #U080-RESPONSE     (N04)
+    02 #U080-ERROR-TEXT   (A65)
+ *
+ END-DEFINE
+ *
+ ************************************************************************
+ *
+ FORMAT AD=L SG=OFF ZP=ON
+ FORMAT (1) SG=OFF PS=56
+ SET KEY PF3
+ *
+ *     ensure that Nat editor is correct type and category
+ MOVE 'SET' TO #U080-ACTION
+ MOVE 'P'   TO #U080-TYPE
+ CALLNAT 'USR0080N' #U080-PARAM
+ IF #U080-RESPONSE NE 0
+   WRITE 12X '=' #U080-RESPONSE
+      // 12X 'Press enter, then "." to continue'
+   STACK TOP COMMAND *PROGRAM
+   STACK TOP COMMAND 'EDIT PROGRAM'
+   ESCAPE ROUTINE
+ END-IF
+ *
+ MOVE *LIBRARY-ID TO #LIBRARY
+ MOVE 'GA0000G' TO #I-MEMBER
+ * VE 'PADLGDA' TO #I-MEMBER
+ MOVE TRUE TO #I-SUPPRESS-NULL
+              #I-SHOW-FORMAT
+ *
+ INPUT (AD=MT)
+    // 18X 'Display contents of Global Data Area'(U)
+   /// 24X 'Enter GDA name:' (I) #I-MEMBER
+     / 24X 'Suppress nulls:' (I) #I-SUPPRESS-NULL (EM=N/Y)
+     / 24X '  Show formats:' (I) #I-SHOW-FORMAT (EM=N/Y)
+     / 24X '  Level indent:' (I) #I-LEVEL-INDENTATION (EM=N/Y)
+ *
+ CALLNAT 'NDATABLE'
+        #LIBRARY
+        #I-MEMBER
+        #FLD-COUNT
+        #FIELD-TABLE
+        #NDA-SIZE
+        #RETURN-CODE
+ *
+ IF #RETURN-CODE = 1
+   REINPUT 'No member found'
+ END-IF
+ IF #RETURN-CODE = 2
+   REINPUT 'First field not level 1'
+ END-IF
+ IF #RETURN-CODE > 0
+   REINPUT 'Error processing this member'
+ END-IF
+ *
+ COMPRESS '12X "Contents of Global Data Area'
+          #I-MEMBER 'in Library' #LIBRARY '" /'
+     INTO #TITLE
+ *
+ DEFINE PRINTER (11) OUTPUT 'SOURCE'
+ FORMAT (11) PS=0 LS=250
+ SET CONTROL 'Z'  /* CLEAR SOURCE AREA
+ *
+ WRITE (11) NOTITLE NOHDR #SL-DEFINE-DATA
+ WRITE (11) NOTITLE NOHDR #SL-GLOBAL-USING #I-MEMBER
+ WRITE (11) NOTITLE NOHDR #SL-END-DEFINE
+ WRITE (11) NOTITLE NOHDR #SL-ASTERS
+ WRITE (11) NOTITLE NOHDR #SL-FORMAT
+ WRITE (11) NOTITLE NOHDR #SL-WRITE-TITLE
+ WRITE (11) NOTITLE NOHDR '   ' #TITLE
+ WRITE (11) NOTITLE NOHDR #SL-ASTERS
+ *
+ FOR #I = 1 TO #FLD-COUNT
+   PERFORM ANALYSE-FIELD
+   IF NOT #SUPPRESS-ITEM
+     IF #I-SUPPRESS-NULL
+       COMPRESS 'IF' #FLD-NAME (#I) #SUBSCRIPT 'NE' #NULL-VALUE
+                INTO #IF-STRING
+       WRITE (11) #IF-STRING
+     END-IF
+ *
+     COMPRESS 'WRITE~' #TAB '~"' #FLD-NAME (#I) #SUBSCRIPT '" (CD=TU)'
+              INTO #WRITE-STRING LEAVING NO SPACE
+     EXAMINE #WRITE-STRING FOR '~' REPLACE WITH ' '
+     WRITE (11) NOTITLE NOHDR 2X #WRITE-STRING
+     IF #I-SHOW-FORMAT
+       WRITE (11) NOTITLE NOHDR 11X #FORMAT-STRING
+     END-IF
+     COMPRESS #FLD-NAME (#I) #SUBSCRIPT #NSP-STRING
+              INTO #WRITE-STRING
+     WRITE (11) NOTITLE NOHDR 11X #WRITE-STRING
+     IF #FLD-TYPE (#I) = 'I'
+       WRITE (11) NOTITLE NOHDR 11X '"    hex"'
+       COMPRESS #FLD-NAME (#I) #SUBSCRIPT '(EM=HHHH)'
+                INTO #WRITE-STRING
+       WRITE (11) NOTITLE NOHDR 11X #WRITE-STRING
+     END-IF
+ *
+     IF #I-SUPPRESS-NULL
+       WRITE (11) 'END-IF'
+     END-IF
+   END-IF
+ END-FOR
+ WRITE (11) NOTITLE NOHDR #SL-END
+ *
+ STACK TOP COMMAND 'RUN'
+ STACK TOP COMMAND 'RENUM'
+ STACK TOP COMMAND 'GLOBALS SM=ON'
+ * STACK TOP COMMAND 'SET TYPE PROGRAM' /*  does not work
+ IF #U080-RESPONSE NE 0
+ * WRITE '=' #U080-RESPONSE
+   STACK TOP COMMAND 'EDIT PROGRAM'
+ END-IF
+ *
+ ************************************************************************
+ DEFINE SUBROUTINE ANALYSE-FIELD
+ ************************************************************************
+ *
+ RESET #SUPPRESS-ITEM #SUBSCRIPT #NSP (*) #NULL-VALUE #FORMAT-STRING
+ MOVE '(AD=U' TO #NSP (1)
+ MOVE 2 TO #J
+ *
+ IF #I-LEVEL-INDENTATION
+   MOVE #FLD-LEVEL (#I) TO #TAB-LEVEL
+ END-IF
+ *
+ PERFORM DETERMINE-SUBSCRIPTS
+ *
+ DECIDE ON FIRST #FLD-TYPE (#I)
+   VALUE ' '
+     MOVE TRUE TO #SUPPRESS-ITEM
+   VALUE 'A'
+     MOVE '" "' TO #NULL-VALUE
+     IF #FLD-LTH (#I) GE 80
+       MOVE 'AL=80' TO #NSP (#J)
+       ADD 1 TO #J
+     END-IF
+   VALUE 'B'
+     MOVE 'H"00"' TO #NULL-VALUE
+     IF #FLD-LTH (#I) GT 40
+       MOVE 'EM=H(40)' TO #NSP (#J)
+       ADD 1 TO #J
+     END-IF
+   VALUE 'D'
+     MOVE 0 TO #NULL-VALUE
+     MOVE 'EM=DD/MM/YYYY' TO #NSP (#J)
+     ADD 1 TO #J
+   VALUE 'F', 'I'
+     MOVE '0' TO #NULL-VALUE
+   VALUE 'L'
+     MOVE 'FALSE' TO #NULL-VALUE
+     MOVE 'EM=N/Y' TO #NSP (#J)
+     ADD 1 TO #J
+   VALUE 'N', 'P'
+     MOVE '0' TO #NULL-VALUE
+   VALUE 'T'
+     MOVE 0 TO #NULL-VALUE
+     MOVE 'EM=YYYY/MM/DD-HH:II:SS.T' TO #NSP (#J)
+     ADD 1 TO #J
+   NONE
+     MOVE '" "' TO #NULL-VALUE
+ END-DECIDE
+ *
+ MOVE 'CD=YE)' TO #NSP (#J)
+ *
+ COMPRESS #NSP(1) #NSP(2) #NSP(3) #NSP(4)
+     INTO #NSP-STRING
+ *
+ COMPRESS '"(' #FLD-TYPE (#I) #FLD-LTH (#I) ')" (CD=NE)'
+     INTO #FORMAT-STRING LEAVING NO SPACE
+ *
+ END-SUBROUTINE /* ANALYSE-FIELD
+ *
+ ************************************************************************
+ DEFINE SUBROUTINE DETERMINE-SUBSCRIPTS
+ ************************************************************************
+ *
+ MOVE FALSE TO #WITHIN-PE-GROUP
+ IF #FLD-LEVEL (#I) > 1
+   FOR #K = #I TO 1 STEP -1
+     IF #FLD-LEVEL (#K) < #FLD-LEVEL (#I)
+       IF #FLD-OCC (#K) > 1
+         MOVE TRUE TO #WITHIN-PE-GROUP
+       END-IF
+       ESCAPE BOTTOM
+     END-IF
+   END-FOR
+ END-IF
+ *
+ IF #WITHIN-PE-GROUP
+   IF #FLD-OCC (#I) > 1
+     MOVE '(1,1)' TO #SUBSCRIPT
+   ELSE
+     MOVE '(1)' TO #SUBSCRIPT
+   END-IF
+ ELSE
+   IF #FLD-OCC (#I) > 1
+     MOVE '(1)' TO #SUBSCRIPT
+     DECIDE ON FIRST #FLD-LTH (#I)
+       VALUE 1
+         ASSIGN #OCCS = 20
+       VALUE 2
+         ASSIGN #OCCS = 14
+       VALUE 3
+         ASSIGN #OCCS = 10
+       VALUE 4
+         ASSIGN #OCCS = 8
+       VALUE 5
+         ASSIGN #OCCS = 7
+       VALUE 6
+         ASSIGN #OCCS = 6
+       VALUE 7
+         ASSIGN #OCCS = 5
+       VALUE 8, 9
+         ASSIGN #OCCS = 4
+       VALUE 10, 11, 12, 13
+         ASSIGN #OCCS = 3
+       VALUE 14, 15, 16, 17, 18, 19, 20
+         ASSIGN #OCCS = 2
+       NONE
+         ASSIGN #OCCS = 1
+     END-DECIDE
+     IF #OCCS > #FLD-OCC (#I)
+       ASSIGN #OCCS = #FLD-OCC (#I)
+     END-IF
+     IF #OCCS > 1
+       COMPRESS '(1:' #OCCS ')'  INTO #SUBSCRIPT LEAVING NO SPACE
+     END-IF
+   END-IF
+ END-IF
+ *
+ END-SUBROUTINE
+ ************************************************************************
+ *
+ END
+            
