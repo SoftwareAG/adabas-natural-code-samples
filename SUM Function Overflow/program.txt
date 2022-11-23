@@ -1,0 +1,162 @@
+                                                        
+
+ 
+* THIS PROGRAM PRODUCES A RUNTIME ERROR MESSAGE.
+* FOR A HINT, SEE THE OUTPUT BELOW.
+*
+DEFINE DATA LOCAL
+1 MYVIEW VIEW OF EMPLOYEES
+  2 NAME
+  2 FIRST-NAME
+  2 LEAVE-DUE 
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+READ (5) MYVIEW BY NAME STARTING FROM 'SMITH' ENDING AT 'SMITH'
+DISPLAY 5T FIRST-NAME LEAVE-DUE
+AT END OF DATA
+   WRITE / 5T 'SUM OF LEAVE-DUE' SUM (LEAVE-DUE)
+   END-ENDDATA
+END-READ
+*
+END
+
+
+Here is the output you will see before getting the runtime error message.
+
+
+    PAGE #   1                    DATE:    03/07/11
+    PROGRAM: SUM01                LIBRARY: SNIPPET
+ 
+         FIRST-NAME      LEAVE
+                          DUE
+    -------------------- -----
+ 
+    GERHARD               30
+    SEYMOUR               13
+    MATILDA               31
+    ANN                   14
+    TONI                  18
+
+
+
+Here is the runtime error message, which is a hint as to the problem.
+
+NAT1305 Numeric value truncated in MOVE/ASSIGN operation.
+-------------------------------------------------------------
+TEXT:
+  Numeric value truncated in MOVE/ASSIGN operation.
+EXPL:
+  The receiving field in a MOVE/ASSIGN operation is not long
+  enough to hold the result of the value.
+ACTN:
+  Increase the length of the receiving field.
+
+A very helpful error message. The problem is that LEAVE-DUE has a default format of N2. At the end of processing each SMITH record, Natural adds that record's LEAVE-DUE to its running SUM. If you look at the output above, TONI's 18 days of LEAVE-DUE takes the running SUM over 100.
+
+The problem is quite simple. Natural's default format for system functions (like SUM) is the same format as that of the argument of the system function. Thus, the default format for SUM (LEAVE-DUE) is also N2. 
+
+Fortunately, there is a simple Ã¢â‚¬Å“fixÃ¢â‚¬ï¿½ for this problem. As shown below, all that is required is the specification (NL=3) after SUM (LEAVE-DUE). In most places in Natural, (NL=3) is nothing more than an edit mask. Here it also controls the amount of memory allocated to SUM (LEAVE-DUE).
+
+This solution works for Report and Mixed Mode as well.
+
+* THIS PROGRAM DOES NOT PRODUCE A RUNTIME ERROR MESSAGE.
+* SEE THE COMPLETE OUTPUT BELOW.
+*
+DEFINE DATA LOCAL
+1 MYVIEW VIEW OF EMPLOYEES
+  2 NAME
+  2 FIRST-NAME
+  2 LEAVE-DUE 
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+READ MYVIEW BY NAME STARTING FROM 'SMITH' ENDING AT 'SMITH'
+DISPLAY 5T FIRST-NAME LEAVE-DUE
+AT END OF DATA
+   WRITE / 5T 'SUM OF LEAVE-DUE' SUM (LEAVE-DUE) (NL=3)
+   END-ENDDATA
+END-READ
+*
+END
+
+
+  PAGE #   1                    DATE:    03/07/11
+    PROGRAM: SUM01A               LIBRARY: SNIPPET
+ 
+         FIRST-NAME      LEAVE
+                          DUE
+    -------------------- -----
+ 
+    GERHARD               30
+    SEYMOUR               13
+    MATILDA               31
+    ANN                   14
+    TONI                  18
+    MARTIN                36
+    THOMAS                22
+    SUNNY                 38
+    MARK                  14
+    LOUISE                20
+    MAXWELL               29
+    ELSA                  33
+    CHARLY                12
+    LEE                   19
+    FRANK                 30
+    GERALD                30
+    FRANCIS               28
+    
+    PAGE #   2                    DATE:    03/07/11
+    PROGRAM: SUM01A               LIBRARY: SNIPPET
+ 
+         FIRST-NAME      LEAVE
+                          DUE
+    -------------------- -----
+ 
+    WINSTON               28
+    JUNE                  10
+ 
+    SUM OF LEAVE-DUE  455
+
+
+
+The following program produces output identical to SUM01A (above).
+It demonstrates that System Functions (like SUM) can be applied to user defined variables as well as data base fields.
+
+
+* THIS PROGRAM IS AN OLD SOLUTION TO THIS PROBLEM.
+* EXCEPT FOR THE COST (ADMITTEDLY QUITE SMALL)
+* OF THE MOVE STATEMENT, THERE IS NO REASON 
+* TO CHANGE THIS CODE IF IT APPEARS IN SOME
+* OF YOUR SYSTEMS.
+* FOR FUTURE DEVELOPMENT, THOUGH, USE THE NL OVERRIDE.
+*
+DEFINE DATA LOCAL
+1 MYVIEW VIEW OF EMPLOYEES
+  2 NAME
+  2 FIRST-NAME
+  2 LEAVE-DUE 
+1 #LEAVE-DUE (N3)  
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+READ MYVIEW BY NAME STARTING FROM 'SMITH' ENDING AT 'SMITH'
+DISPLAY 5T FIRST-NAME LEAVE-DUE
+MOVE LEAVE-DUE TO #LEAVE-DUE
+AT END OF DATA
+   WRITE / 5T 'SUM OF LEAVE-DUE' SUM (#LEAVE-DUE)
+   END-ENDDATA
+END-READ
+*
+END
+
+
+
+
+                                       
