@@ -1,0 +1,175 @@
+* THIS PROGRAM SHOWS SEVERAL WAYS TO CODE WHAT IS
+* A SIMPLIFIED VERSION OF POTENTIALLY MORE COMPLICATED
+* CODE. IN A REAL APPLICATION THE RANGE OF NAME (IN OUR
+* EXAMPLE BELOW) WOULD PROBABLY BE GREATER. fOR EXAMPLE,
+* ALL NAMES FROM F TO LZZZ.
+*
+* ALSO, IN A REAL EXAMPLE, THE 'SEARCH' FIELD WOULD
+* OFTEN BE A SUPER DESCRIPTOR, NOT A SINGLE FIELD.
+*
+* YES, SINCE THIS IS SUCH A SIMPLE EXAMPLE, A FIND
+* COULD BE USED RATHER THAN A READ WITHOUT ANY OF THE 
+* COMPLICATIONS WE WILL SEE BELOW FOR THE READ.
+* 
+DEFINE DATA LOCAL
+1 MYVIEW VIEW OF EMPLOYEES
+  2 NAME
+  2 FIRST-NAME
+  2 LEAVE-DUE 
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+* NATURAL DOES THE ENDING AT CLAUSE.
+* THUS, THE FIRST ANDERSON RECORD IS READ.
+* HOWEVER, NATURAL DOES NOT ENTER THE READ
+* LOOP WITH THE ANDERSON RECORD.
+* HENCE, THE SUM IS CORRECT.
+* NOTE IN THE AT END CLAUSE WE HAVE AN
+* ANDERSON RECORD, NOT THE LAST ANDERSEN RECORD.
+*
+READ MYVIEW BY NAME STARTING FROM 'ANDERSEN' ENDING AT 'ANDERSEN'
+DISPLAY 5T FIRST-NAME LEAVE-DUE
+AT END OF DATA
+   WRITE  / 5T 'STARTING FROM ... ENDING AT'
+   / 5T 'SUM OF LEAVE-DUE' SUM (LEAVE-DUE) (NL=3)
+         / 5T 'IN AT END CLAUSE:' 25T '=' FIRST-NAME 
+                              /   25T '=' LEAVE-DUE
+                              /   25T '=' NAME
+                              /   5T '-' (50)
+   END-ENDDATA
+END-READ
+*
+* ADABAS DOES THE 'TO' TEST
+* THE ANDERSON RECORD IS NOT READ BY NATURAL.
+* HENCE, THE RECORD IN THE AT END CLAUSE
+* IS ANDERSEN, NOT ANDERSON.
+* THE SUM IS CORRECT.
+*
+READ MYVIEW BY NAME STARTING FROM 'ANDERSEN' TO 'ANDERSEN'
+DISPLAY 5T FIRST-NAME LEAVE-DUE
+AT END OF DATA
+   WRITE  /  5T 'STARTING FROM ... TO'
+   / 5T 'SUM OF LEAVE-DUE' SUM (LEAVE-DUE) (NL=3)
+         / 5T 'IN AT END CLAUSE:' 25T '=' FIRST-NAME 
+                              /   25T '=' LEAVE-DUE
+                              /   25T '=' NAME
+                              /   5T '-' (50)                                                                                    
+END-ENDDATA
+END-READ
+*
+* THIS IS THE LOOP YOU REALLY HAVE TO BE CAREFUL ABOUT.
+* NOTE THAT WE WILL READ THE FIRST ANDERSON RECORD,
+* AND, WE WILL PROCESS THE ANDERSON RECORD.
+* ESCAPE BOTTOM (UNLIKE ESCAPE BOTTOM IMMEDIATE)
+* DOES NOT SIMPLY EXIT THE READ LOOP.
+* FIRST, IT 'FINISHES' THE READ LOOP.
+* THIS ENTAILS INCLUDING THE CURRENT RECORD
+* (WHICH IS ANDERSON, NOT ANDERSEN) IN SYSTEM FUNCTIONS.
+* THEN NATURAL WILL DO ANY AT BREAK CLAUSES AND AT END CLAUSES.
+* THEREFORE, AS YOU WILL SEE FROM THE OUTPUT,
+* THE SUM IS NOT CORRECT.
+*
+READ MYVIEW BY NAME STARTING FROM 'ANDERSEN'
+IF NAME NE 'ANDERSEN' 
+   ESCAPE BOTTOM
+   END-IF
+DISPLAY 5T FIRST-NAME LEAVE-DUE
+AT END OF DATA
+      WRITE / 5T 'IF ... NE ... ESCAPE BOTTOM'
+   / 5T 'SUM OF LEAVE-DUE' SUM (LEAVE-DUE) (NL=3)
+         / 5T 'IN AT END CLAUSE:' 25T '=' FIRST-NAME 
+                              /   25T '=' LEAVE-DUE
+                              /   25T '=' NAME
+                              /   5T '-' (50)
+   END-ENDDATA
+END-READ
+*
+* THIS LOOP IS THE SAME AS ABOVE, EXCEPT,
+* PRIOR TO ESCAPE BOTTOM, WE RESET LEAVE-DUE.
+* TRUE, THE CURRENT RECORD IS INCLUDED IN SYSTEM FUNCTIONS
+* HOWEVER, LEAVE-DUE ALTHOUGH ADDED TO THE SUM
+* IS ZERO, HENCE THE SUM IS CORRECT.
+*
+* NOTE, A SYSTEM FUNCTION LIKE AVER WILL REQUIRE
+* ADDITIONAL CODE IN THE AT END CLAUSE TO COMPENSATE
+* FOR AN INCORRECT NUMBER OF RECORDS IN THE COMPUTATION
+* OF THE AVERAGE.
+*
+READ MYVIEW BY NAME STARTING FROM 'ANDERSEN'
+IF NAME NE 'ANDERSEN' 
+   RESET LEAVE-DUE     /* LEAVE-DUE WILL BE ADDED, BUT IS ZERO
+   ESCAPE BOTTOM
+   END-IF
+DISPLAY 5T FIRST-NAME LEAVE-DUE
+AT END OF DATA
+      WRITE / 5T 'IF .. NE .. RESET .. ESCAPE BOTTOM'
+   / 5T 'SUM OF LEAVE-DUE' SUM (LEAVE-DUE) (NL=3)
+         / 5T 'IN AT END CLAUSE:' 25T '=' FIRST-NAME 
+                              /   25T '=' LEAVE-DUE
+                              /   25T '=' NAME
+                              /   5T '-' (50)
+   END-ENDDATA
+END-READ
+*
+END
+
+-----------------------------------------------------------
+Output from the above program
+
+
+    PAGE #   1                    DATE:    03/12/11
+    PROGRAM: SUM02                LIBRARY: SNIPPET
+ 
+         FIRST-NAME      LEAVE
+                          DUE
+    -------------------- -----
+ 
+    ANITA                 30
+    KARIN                 30
+    LISSI                 30
+ 
+    STARTING FROM ... ENDING AT
+    SUM OF LEAVE-DUE   90
+    IN AT END CLAUSE:   FIRST-NAME: JENNY
+                        LEAVE DUE:  29
+                        NAME: ANDERSON
+    --------------------------------------------------
+    ANITA                 30
+    KARIN                 30
+    LISSI                 30
+ 
+    STARTING FROM ... TO
+    SUM OF LEAVE-DUE   90
+    IN AT END CLAUSE:   FIRST-NAME: LISSI
+                        LEAVE DUE:  30
+                        NAME: ANDERSEN
+    --------------------------------------------------
+    PAGE #   2                    DATE:    03/12/11
+    PROGRAM: SUM02                LIBRARY: SNIPPET
+ 
+         FIRST-NAME      LEAVE
+                          DUE
+    -------------------- -----
+ 
+    ANITA                 30
+    KARIN                 30
+    LISSI                 30
+ 
+    IF ... NE ... ESCAPE BOTTOM
+    SUM OF LEAVE-DUE  119
+    IN AT END CLAUSE:   FIRST-NAME: JENNY
+                        LEAVE DUE:  29
+                        NAME: ANDERSON
+    --------------------------------------------------
+    ANITA                 30
+    KARIN                 30
+    LISSI                 30
+ 
+    IF .. NE .. RESET .. ESCAPE BOTTOM
+    SUM OF LEAVE-DUE   90
+    IN AT END CLAUSE:   FIRST-NAME: JENNY
+                        LEAVE DUE:   0
+                        NAME: ANDERSON
+    --------------------------------------------------                                       
