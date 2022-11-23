@@ -1,0 +1,35 @@
+DEFINE DATA LOCAL
+1 #M (I4)     CONST <2>
+1 #CSV
+  2 #ID (A8)
+  2 #NAME (A20)
+  2 #CURR (A3/#M)
+  2 #SAL (P9/#M)
+  2 #LEAVE (N2)
+1 #HDR (A20/5)
+END-DEFINE
+DEFINE WORK FILE 1 'c:\Users\Ralph\Desktop\csv-test.csv'
+            TYPE "CSV"
+*
+READ WORK 1 ONCE #HDR (*)
+READ WORK 1 #CSV
+  DISPLAY #CSV
+END-WORK
+END
+PAGE     1                                                   15-04-27  23:56:18
+
+                        #CSV
+
+  #ID           #NAME         #CURR    #SAL    #LEAVE
+-------- -------------------- ----- ---------- ------
+
+11100102 SCHINDLER            EUR        24615  15
+                              EUR        23589
+11100105 SCHIRM               EUR        34871  20
+                              EUR        33846
+11100106 SCHMITT              EUR        26153   0
+                              EUR        24358
+11100107 SCHMIDT              EUR        18461  20
+                              EUR        16410
+11100108 SCHNEIDER            EUR        22564  12
+                              EUR        21538

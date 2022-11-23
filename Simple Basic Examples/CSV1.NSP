@@ -1,0 +1,43 @@
+0010OPTIONS TQMARK=OFF
+0020DEFINE DATA LOCAL
+00301 #M (I4)     CONST <2>
+00401 EMP    VIEW EMPLOYEES
+0050  2 PERSONNEL-ID
+0060  2 NAME
+0070  2 CURR-CODE (#M)
+0080  2 SALARY (#M)
+0090  2 LEAVE-TAKEN
+01001 #CURR (A3/#M)
+01101 #SAL (N9/#M)
+01201 #C (A1)     CONST <','>
+01301 #Q (A1)     CONST <'"'>
+0140END-DEFINE
+0150*
+0160DEFINE WORK FILE 1 'c:\Users\Ralph\Desktop\csv-test.txt'
+0170            TYPE "ASCII"
+0180*
+0190LIMIT 5
+0200READ EMP BY PERSONNEL-ID
+0210  AT START OF DATA
+0220    WRITE WORK 1 VARIABLE 'Personnel ID' #C
+0230                          'Surname'      #C
+0240                          'Currency'     #C
+0250                          'Salary'       #C
+0260                          'Leave Taken'
+0270  END-START
+0280  ASSIGN #CURR (*) = CURR-CODE (*)
+0290  ASSIGN #SAL  (*) = SALARY    (*)
+0300  WRITE WORK 1 VARIABLE #Q PERSONNEL-ID  #Q #C
+0310                        #Q NAME          #Q #C
+0320                        #Q #CURR (1)     #Q #C
+0330                        #Q #CURR (2)     #Q #C
+0340                           #SAL  (1)        #C
+0350                           #SAL  (2)        #C
+0360                           LEAVE-TAKEN
+0370  DISPLAY PERSONNEL-ID
+0380          NAME
+0390          CURR-CODE (*)
+0400          SALARY (*)
+0410          LEAVE-TAKEN
+0420END-READ
+0430END

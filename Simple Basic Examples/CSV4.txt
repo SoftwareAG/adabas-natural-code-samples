@@ -1,0 +1,31 @@
+DEFINE DATA LOCAL
+1 #M (I4)     CONST <2>
+1 #CSV
+  2 #ID (A8)
+  2 #NAME (A20)
+  2 #CURR (A3/#M)
+  2 #SAL (P9/#M)
+  2 #LEAVE (N2)
+1 #HDR (A20/5)
+*
+1 #USR2011
+  2 FUNCTION        (A1)     INIT <"S">
+  2 WORK-NUM        (I1)     INIT <1>
+  2 WORK-FILE       (A253) /*INIT <'c:\Users\Ralph\Desktop\csv-test.txt'>
+  2 WORK-TYPE       (A1)   /*INIT <"B">
+  2 MAX-NUM         (I1)
+  2 RESPONSE        (I4)
+  2 EXTENDED-DATA   (A1/1)   INIT <H'00'>
+  2 WORK-ATTRIBUTES (A1000)
+  2 WORK-CODEPAGE   (A64)
+  2 WORK-PROPERTIES (A1000)  INIT <"SEPARATOR-COMMA">
+END-DEFINE
+DEFINE WORK FILE 1 'c:\Users\Ralph\Desktop\csv-test.txt'
+            TYPE "CSV"
+CALLNAT "USR2011N" #USR2011
+*
+READ WORK 1 ONCE #HDR (*)
+READ WORK 1 #CSV
+  DISPLAY #CSV
+END-WORK
+END

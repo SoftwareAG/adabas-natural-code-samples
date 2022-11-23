@@ -1,0 +1,13 @@
+DEFINE DATA LOCAL
+1 #FROM (T)        INIT <E'04/05/2015 07:00:00'>
+1 #THRU (T)        INIT <E'04/07/2015 01:10:01'>
+1 #HOURS (T)       (HD='hh:mm:ss')
+1 #D (D)
+1 #DAYS (I1)       (HD='Days')
+END-DEFINE
+ASSIGN #HOURS = #THRU - #FROM     /* duration
+ASSIGN #D     = #HOURS            /* extract days
+ASSIGN #DAYS  = #D                /* D to numeric format
+DISPLAY #DAYS
+        #HOURS
+END

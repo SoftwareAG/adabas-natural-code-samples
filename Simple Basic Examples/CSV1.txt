@@ -1,0 +1,43 @@
+OPTIONS TQMARK=OFF
+DEFINE DATA LOCAL
+1 #M (I4)     CONST <2>
+1 EMP    VIEW EMPLOYEES
+  2 PERSONNEL-ID
+  2 NAME
+  2 CURR-CODE (#M)
+  2 SALARY (#M)
+  2 LEAVE-TAKEN
+1 #CURR (A3/#M)
+1 #SAL (N9/#M)
+1 #C (A1)     CONST <','>
+1 #Q (A1)     CONST <'"'>
+END-DEFINE
+*
+DEFINE WORK FILE 1 'c:\Users\Ralph\Desktop\csv-test.txt'
+            TYPE "ASCII"
+*
+LIMIT 5
+READ EMP BY PERSONNEL-ID
+  AT START OF DATA
+    WRITE WORK 1 VARIABLE 'Personnel ID' #C
+                          'Surname'      #C
+                          'Currency'     #C
+                          'Salary'       #C
+                          'Leave Taken'
+  END-START
+  ASSIGN #CURR (*) = CURR-CODE (*)
+  ASSIGN #SAL  (*) = SALARY    (*)
+  WRITE WORK 1 VARIABLE #Q PERSONNEL-ID  #Q #C
+                        #Q NAME          #Q #C
+                        #Q #CURR (1)     #Q #C
+                        #Q #CURR (2)     #Q #C
+                           #SAL  (1)        #C
+                           #SAL  (2)        #C
+                           LEAVE-TAKEN
+  DISPLAY PERSONNEL-ID
+          NAME
+          CURR-CODE (*)
+          SALARY (*)
+          LEAVE-TAKEN
+END-READ
+END

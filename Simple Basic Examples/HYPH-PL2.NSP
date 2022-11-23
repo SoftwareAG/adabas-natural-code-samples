@@ -1,0 +1,43 @@
+0010DEFINE DATA LOCAL
+00201 #MC (I4)         CONST <15>
+00301 #MM (I4)         CONST <12>
+00401 #MTBL (A11/#MM)  INIT <'31' - 'January'
+0050                        ,'28' - 'February'
+0060                        ,'31' - 'March'
+0070                        ,'30' - 'April'
+0080                        ,'31' - 'May'
+0090                        ,'30' - 'June'
+0100                        ,'31' - 'July'
+0110                        ,'31' - 'August'
+0120                        ,'30' - 'September'
+0130                        ,'31' - 'October'
+0140                        ,'30' - 'November'
+0150                        ,'31' - 'December'
+0160                        >
+0170                   1 REDEFINE #MTBL
+0180  2 #ENTRY (#MM)
+0190    3 #DAYS (N2)
+0200    3 #MONTH (A9)
+02101 #CTBL (A11/#MC)  INIT <"BK" - 'Black'
+0220                        ,"BL" - 'Blue'
+0230                        ,"BR" - 'Brown'
+0240                        ,"CY" - 'Cyan'
+0250                        ,"GR" - 'Gray'
+0260                        ,"GY" - 'Green'
+0270                        ,"MA" - 'Magenta'
+0280                        ,"OR" - 'Orange'
+0290                        ,"PI" - 'Pink'
+0300                        ,"PU" - 'Purple'
+0310                        ,"RE" - 'Red'
+0320                        ,"TU" - 'Turquoise'
+0330                        ,"WH" - 'White'
+0340                        ,"YE" - 'Yellow'
+0350                        >
+0360                   1 REDEFINE #CTBL
+0370  2 #ENTRY (#MC)
+0380    3 #COL (A2)
+0390    3 #COLOR (A9)
+0400END-DEFINE
+0410DISPLAY #MONTH (*) #DAYS (*)
+0420        #COL (*)   #COLOR (*)
+0430END

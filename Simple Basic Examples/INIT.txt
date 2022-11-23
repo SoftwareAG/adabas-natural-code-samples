@@ -1,0 +1,34 @@
+DEFINE DATA LOCAL
+1 #A (A10)    INIT <'Alpha'>
+1 #B (B1)     INIT <H'FF'>
+1 #C (C)      INIT <(AD=I CD=RE)>
+1 #D (D)      INIT <D'04/13/2015'>
+1 #F (F4)     INIT <3.14159265E0>
+1 #I (I4)     INIT <1>
+1 #L (L)      INIT <TRUE>
+1 #N (N1)     INIT <2>
+1 #P (P3.1)   INIT <123.4>
+1 #U (U10)    INIT <UH'8100820083008400'>
+*
+1 #T (T)      INIT <T'14:10:12'>
+1 #E (T)      INIT <E'04/13/2015 14:10:12'>
+*
+1 #SD (D)     INIT <*DATX>
+1 #SL (A8)    INIT <*LIBRARY-ID>
+END-DEFINE
+*
+WRITE
+    / '=' #A
+    / '=' #B
+    / '=' #D #D (CV=#C) #D (EM=MM/DD/YYYY)
+    / '=' #F
+    / '=' #I
+    / '=' #L
+    / '=' #N
+    / '=' #P
+    / '=' #U #U (EM=HHHHHHHHHH)
+    / '=' #T (EM=MM/DD/YYYY^HH:II:SS.T)
+    / '=' #E (EM=MM/DD/YYYY^HH:II:SS.T)
+    / '=' #SD
+    / '=' #SL
+END

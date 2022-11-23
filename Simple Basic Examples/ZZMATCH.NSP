@@ -1,0 +1,350 @@
+0010* Module:   ZZMATCH
+0020* System:   ZZUtils
+0030* Function: Sequential Match
+0040* Author:   R. Zbrog
+0050* Date:     02/18/89
+0060************************************************************************
+0070*   Date   *   Name    * Summary of Changes
+0080************************************************************************
+0090* 03/23/06 * R. Zbrog  * Windows WORK file definitions
+0100* 11/04/03 * R. Zbrog  * Orphans and Widows to WORK files
+0110* 09/11/01 * R. Zbrog  * Demo files
+0120* 09/23/94 * R. Zbrog  * Nat 2.2.5
+0130* 09/29/93 * R. Zbrog  * Comments requesting custom code.
+0140* 12/16/92 * R. Zbrog  * Trace
+0150************************************************************************
+0160*
+0170* Sample sequential-match program.
+0180*
+0190*   Matches an Adabas file and a work file  -  the Adabas file MUST be
+0200*   processed as the outer loop.  Two sequential files may be matched by
+0210*   replacing the Adabas READ loop with a READ WORK loop (although no
+0220*   starting value may be specified for the READ WORK loop).  Two Adabas
+0230*   files may not be matched; one of them must be converted to a work
+0240*   file (ie the inner loop MUST process a WORK file).
+0250*
+0260*   The view or record layout for the outer loop is called MSTR.  The
+0270*   record layout for the inner loop is called TRAN.
+0280*
+0290*   The program uses the standard algorithm for a master file updated by
+0300*   a transaction file.  The view or record layout for the outer loop
+0310*   is called MSTR; the record layout for the inner loop is called TRAN.
+0320*   The program detects record matches, extra MSTR records, and extra
+0330*   TRAN records.
+0340*
+0350*   The MSTR file must have a unique key and the TRAN file must be in
+0360*   the same sequence as MSTR.  If both files have unique keys, a ratio
+0370*   of 1:1, then either file may be defined as MSTR or TRAN.  If there
+0380*   is a 1:n ratio, then the file with the unique key must be defined as
+0390*   MSTR and the file with the non-unique key must be defined as TRAN.
+0400*
+0410*   Indeed, the files may not be true master and transaction files.  It
+0420*   is the one-to-many ratio that defines which file will be treated as
+0430*   master and which will be treated as transaction.
+0440*
+0450*   If MSTR is an Adabas file, the program may be a good Prefetch
+0460*   candidate.
+0470*
+0480*   When customizing this program, review all comments for coding
+0490*   suggestions.  For example, if a 1:1 ratio, optimize for this.
+0500*
+0510*   Lines marked with '<<<' contain mandatory changes.
+0520*   Lines marked with '>>>' contain optional code; use as appropriate.
+0530*   Remove optional code if it is not needed, as this will improve
+0540*   performance.
+0550*
+0560*   It is recommended that the #TRACE-ALL variable be set to TRUE until
+0570*   the user has reached an acceptable level of confidence in the
+0580*   program's use.  This setting will cause an audit report to be
+0590*   produced, displaying all widows, orphans, and matches.
+0600*
+0610*   Software AG's EMPLOYEES demonstration file was used as the basis for
+0620*   the sample match in this program.  To ensure unique keys, the MSTR
+0630*   file is defined as a WORK file.  Sample MSTR and TRAN files are
+0640*   found in modules ZZMATCHM and ZZMATCHT, respectively.  For sample
+0650*   MVS JCL, refer to module ZZMATCHJ, which includes the MSTR and TRAN
+0660*   data.
+0670*
+0680*
+0690DEFINE DATA LOCAL
+07001 MSTR (A72)                      /* Extract from EMPLOYEES demo file
+0710                        1 REDEFINE MSTR
+0720  2 PERSONNEL-ID (A8)
+0730  2 NAME (A20)
+0740  2 FIRST-NAME (A20)
+0750  2 PHONE (A15)
+0760  2 DEPT (A6)
+0770  2 LANG (A3)
+0780*
+0790*
+08001 #TRAN (A40)           1 REDEFINE #TRAN
+0810  2 NAME (A20)
+0820  2 DEPT (A6)
+0830  2 CUSTOMER (N5)
+0840  2 COMMISSION (N7.2)
+0850*
+0860*
+08701 #START                               /* >>> Optional FROM processing
+0880  2 DEPT (A6)                INIT <' '>
+0890  2 NAME (A20)               INIT <' '>
+0900                        1 REDEFINE #START
+0910  2 #START-KEY (A26)
+0920*
+09301 #END                                 /* >>> Optional THRU processing
+0940  2 DEPT (A6)                INIT FULL LENGTH <H'FF'>
+0950  2 NAME (A20)               INIT FULL LENGTH <H'FF'>
+0960                        1 REDEFINE #END
+0970  2 #END-KEY(A26)
+0980*
+09901 #MKEY                      /* >>> Build key from non-contiguous fields
+1000  2 DEPT (A6)
+1010  2 NAME (A20)
+1020                        1 REDEFINE #MKEY
+1030  2 #MSTR-KEY (A26)
+1040*
+10501 #TKEY                      /* >>> Build key from non-contiguous fields
+1060  2 DEPT (A6)
+1070  2 NAME (A20)
+1080                        1 REDEFINE #TKEY
+1090  2 #TRAN-KEY (A26)
+1100*
+1110*
+11201 #N                                   /* Counters
+1130  2 CNTM (P7)                          /* Master
+1140  2 EXTM (P7)                          /* Extra Master (Widow)
+1150  2 CNTT (P7)                          /* Transaction
+1160  2 EXTT (P7)                          /* Extra Trans (Orphan)
+1170  2 MCHT (P7)                          /* Matched transactions
+1180*
+11901 #LOGICALS
+1200  2 #MSTR-MATCHED (L)
+1210  2 #TRAN-NEEDED (L)         INIT <TRUE>
+1220  2 #EOF (L)                 INIT <FALSE>
+1230  /*
+1240  2 #TRACE-ALL (L)           INIT <TRUE>    /* >>>
+1250  2 #TRACE-MSTR (L)          INIT <FALSE>   /* >>>
+1260  2 #TRACE-TRAN (L)          INIT <FALSE>   /* >>>
+1270  2 #TRACE-MISC (L)          INIT <FALSE>   /* >>>
+1280*
+12901 #MISC
+1300  2 #DATE (A8)               INIT <*DATU>   /* Constant for report
+1310  2 #TIME (A5)               INIT <*TIMX>   /* Constant for report
+1320  /*
+1330  2 #NAME (A20)
+1340  /*                                   /* >>> for OpenSystems
+1350  2 #WORK1 (A250)                      /* >>> Master data
+1360  2 #WORK2 (A250)                      /* >>> Transaction data
+1370  2 #WORK3 (A250)                      /* >>> Widow masters
+1380  2 #WORK4 (A250)                      /* >>> Orphan transactions
+1390END-DEFINE
+1400*
+1410* WORK file definitions for OpenSystems implementation/demonstration
+1420*
+1430COMPRESS '%natdir%\NatApps\Fuser\' *LIBRARY-ID '\RES\ZZMATCHM.TXT'/* >>>
+1440    INTO #WORK1 LEAVING NO SPACE                                  /* >>>
+1450COMPRESS '%natdir%\NatApps\Fuser\' *LIBRARY-ID '\RES\ZZMATCHT.TXT'/* >>>
+1460    INTO #WORK2 LEAVING NO SPACE                                  /* >>>
+1470COMPRESS '%natdir%\NatApps\Fuser\' *LIBRARY-ID '\RES\ZZMATCHW.TXT'/* >>>
+1480    INTO #WORK3 LEAVING NO SPACE                                  /* >>>
+1490COMPRESS '%natdir%\NatApps\Fuser\' *LIBRARY-ID '\RES\ZZMATCHO.TXT'/* >>>
+1500    INTO #WORK4 LEAVING NO SPACE                                  /* >>>
+1510*
+1520DEFINE WORK FILE 1 #WORK1 TYPE 'ASCII' /* >>>
+1530DEFINE WORK FILE 2 #WORK2 TYPE 'ASCII' /* >>>
+1540DEFINE WORK FILE 3 #WORK3 TYPE 'ASCII' /* >>>
+1550DEFINE WORK FILE 4 #WORK4 TYPE 'ASCII' /* >>>
+1560*
+1570DEFINE PRINTER (01) OUTPUT 'VIDEO'                              /* >>>
+1580*
+1590FORMAT (01) PS=60 LS=132
+1600*/
+1610*
+1620READ WORK 1 MSTR                       /* >>> READ MSTR BY DEPT-PERSON
+1630  /*      FROM #START-KEY              /* >>>
+1640  ASSIGN #MKEY.DEPT = MSTR.DEPT        /* >>> Build a
+1650  ASSIGN #MKEY.NAME = MSTR.NAME        /* >>> contiguous key
+1660  IF  #MSTR-KEY > #END-KEY             /* >>> Optional 'thru'
+1670    THEN
+1680      ESCAPE BOTTOM
+1690  END-IF
+1700  ADD 1 TO #N.CNTM
+1710  ASSIGN #MSTR-MATCHED = FALSE         /* Not yet matched
+1720  /*
+1730  /*
+1740  COMPRESS MSTR.NAME                   /* <<<
+1750           ','
+1760      INTO #NAME LEAVING NO SPACE
+1770  COMPRESS #NAME                       /* <<<
+1780           MSTR.FIRST-NAME
+1790      INTO #NAME
+1800  /*
+1810  /*
+1820  RPT.
+1830  REPEAT
+1840    IF  #TRAN-NEEDED
+1850      THEN
+1860        TR.
+1870        READ WORK 2 ONCE #TRAN
+1880             AT END OF FILE
+1890               ASSIGN #EOF = TRUE
+1900             END-ENDFILE
+1910        IF  #EOF
+1920          THEN
+1930            MOVE ALL H'FF' TO #TRAN-KEY
+1940            ASSIGN #TRAN-NEEDED = FALSE
+1950          ELSE
+1960            ASSIGN #TKEY.DEPT = #TRAN.DEPT  /* >>> Build a
+1970            ASSIGN #TKEY.NAME = #TRAN.NAME  /* >>> contiguous key
+1980            ADD 1 TO #N.CNTT
+1990        END-IF
+2000    END-IF
+2010    /*
+2020    DECIDE FOR FIRST CONDITION
+2030      WHEN #MSTR-KEY < #TRAN-KEY       /* Must get next master
+2040           IF  NOT #MSTR-MATCHED       /* Previously matched
+2050             THEN                      /* Process an unmatched master
+2060               IF  #TRACE-ALL          /* >>>
+2070                OR #TRACE-MSTR
+2080                 THEN
+2090                   WRITE (01)
+2100                              MSTR.DEPT (IS=T)
+2110                           2X #NAME
+2120                           2X MSTR.PHONE
+2130                           2X MSTR.PERSONNEL-ID
+2140                           2X MSTR.LANG
+2150                          88T #N.CNTM (EM=Z,ZZZ,ZZ9)
+2160                         110T 'Extra Master'          /* Widow
+2170               END-IF
+2180               /*
+2190               /* <<<  Code 'widow' logic here.  <<<
+2200               WRITE WORK 3 MSTR
+2210               /*
+2220               ADD 1 TO #N.EXTM
+2230           END-IF
+2240           ASSIGN #TRAN-NEEDED = FALSE /* Apply to next master
+2250           ESCAPE BOTTOM (RPT.)        /* Process next master
+2260      WHEN #MSTR-KEY = #TRAN-KEY       /* Process a match
+2270           IF  #TRACE-ALL              /* >>>
+2280            OR #TRACE-MSTR
+2290            OR #TRACE-TRAN
+2300             THEN
+2310               WRITE (01)
+2320                          MSTR.DEPT (IS=T)
+2330                       2X #NAME
+2340                       2X MSTR.PHONE
+2350                       2X MSTR.PERSONNEL-ID
+2360                       2X MSTR.LANG
+2370                      64T #TRAN.CUSTOMER
+2380                      74T #TRAN.COMMISSION (EM=Z,ZZZ,ZZ9.99)
+2390                      88T #N.CNTM (EM=Z,ZZZ,ZZ9)
+2400                      99T #N.CNTT (EM=Z,ZZZ,ZZ9)
+2410                     110T 'Matched MSTR/TRAN'
+2420           END-IF
+2430           ADD 1 TO #N.MCHT
+2440           /*
+2450           /* <<<  Code 'match' logic here.  <<<
+2460           /*
+2470           ASSIGN #MSTR-MATCHED = TRUE
+2480           ASSIGN #TRAN-NEEDED  = TRUE /* Try next transaction
+2490* >>>      ESCAPE BOTTOM (RPT.)        /* Next master; force 1:1 ratio
+2500      WHEN #MSTR-KEY > #TRAN-KEY       /* Process an unmatched tran
+2510           IF  #TRACE-ALL              /* >>>
+2520            OR #TRACE-TRAN
+2530             THEN
+2540               WRITE (01)
+2550                          #TRAN.DEPT (IS=T)
+2560                       2X #TRAN.NAME
+2570                      64T #TRAN.CUSTOMER
+2580                      74T #TRAN.COMMISSION (EM=Z,ZZZ,ZZ9.99)
+2590                      99T #N.CNTT (EM=Z,ZZZ,ZZ9)
+2600                     110T 'Extra Transaction'    /* Orphan
+2610           END-IF                      /*
+2620           ADD 1 TO #N.EXTT
+2630           PERFORM ORPHAN
+2640           ASSIGN #TRAN-NEEDED = TRUE  /* Try next transaction
+2650      WHEN NONE
+2660           IGNORE
+2670    END-DECIDE
+2680  END-REPEAT
+2690END-WORK                               /* >>> END-READ
+2700*
+2710IF  #TRAN-NEEDED                       /* No waiting transaction
+2720 OR #EOF                               /* Transaction end of file
+2730  THEN
+2740    IGNORE
+2750  ELSE
+2760    IF  #TRACE-ALL                     /* >>>
+2770     OR #TRACE-TRAN
+2780      THEN
+2790        WRITE (01)
+2800                   #TRAN.DEPT (IS=T)
+2810                2X #TRAN.NAME
+2820               64T #TRAN.CUSTOMER
+2830               74T #TRAN.COMMISSION (EM=Z,ZZZ,ZZ9.99)
+2840               99T #N.CNTT (EM=Z,ZZZ,ZZ9)
+2850              110T 'Trailing TRAN'     /* Orphan
+2860    END-IF
+2870    ADD 1 TO #N.EXTT
+2880    PERFORM ORPHAN
+2890END-IF
+2900*
+2910REPEAT WHILE NOT #EOF                  /* Process extra TRAN records
+2920  READ WORK 2 ONCE #TRAN               /* Same file number as (TR.)
+2930       AT END OF FILE
+2940         ESCAPE BOTTOM
+2950       END-ENDFILE
+2960  ADD 1 TO #N.CNTT
+2970  IF  #TRACE-ALL                       /* >>>
+2980   OR #TRACE-TRAN
+2990    THEN
+3000      WRITE (01)
+3010                 #TRAN.DEPT (IS=T)
+3020              2X #TRAN.NAME
+3030             64T #TRAN.CUSTOMER
+3040             74T #TRAN.COMMISSION (EM=Z,ZZZ,ZZ9.99)
+3050             99T #N.CNTT (EM=Z,ZZZ,ZZ9)
+3060            110T 'Extra TRAN > Last MSTR'   /* Orphan
+3070  END-IF
+3080  ADD 1 TO #N.EXTT
+3090  PERFORM ORPHAN
+3100END-REPEAT
+3110*
+3120*
+3130NEWPAGE (01)
+3140WRITE (01)
+3150   //     #N.CNTM (EM=Z,ZZZ,ZZ9) 'Master Records Read'
+3160   //     #N.CNTT (EM=Z,ZZZ,ZZ9) 'Transaction Records Read'
+3170 ////     #N.EXTM (EM=Z,ZZZ,ZZ9) 'Unmatched Masters (Widows)'
+3180   //     #N.EXTT (EM=Z,ZZZ,ZZ9) 'Unmatched Transactions (Orphans)'
+3190 ////     #N.MCHT (EM=Z,ZZZ,ZZ9) 'Matched Transactions'
+3200NEWPAGE (01)
+3210*
+3220*
+3230WRITE (01) TITLE LEFT
+3240           *PROGRAM (CD=BL)
+3250       10T 'LEN Consulting LLC'
+3260      118T #DATE
+3270           #TIME
+3280    /  10T 'Natural Utilities'
+3290      125T 'ZZUtils' (YEI)
+3300    /  10T 'Sample Sequential Match Program' (BLI)
+3310      120T 'Page:' *PAGE-NUMBER (01) (EM=ZZ,ZZ9)
+3320   //      'Dept'                                /* <<<
+3330        9T 'Name'                                /* <<<
+3340       31T 'Phone'                               /* <<<
+3350       48T 'Personnel'                           /* <<<
+3360       58T 'Lang'                                /* <<<
+3370       64T '  Cust'                              /* <<<
+3380       74T '  Commission'                        /* <<<
+3390       88T '   Master'                           /* <<<
+3400       99T '    Trans'                           /* <<<
+3410      110T 'Message'                             /* <<<
+3420    /
+3430*
+3440*
+3450DEFINE SUBROUTINE ORPHAN
+3460*
+3470* <<<  Code 'orphan' logic here.  <<<
+3480WRITE WORK 4 #TRAN
+3490END-SUBROUTINE
+3500END

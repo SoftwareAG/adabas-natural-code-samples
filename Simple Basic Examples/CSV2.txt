@@ -1,0 +1,33 @@
+DEFINE DATA LOCAL
+1 EMP    VIEW EMPLOYEES
+  2 PERSONNEL-ID
+  2 NAME
+  2 CURR-CODE (2)
+  2 SALARY (2)
+  2 LEAVE-TAKEN
+END-DEFINE
+*
+DEFINE WORK FILE 1 'c:\Users\Ralph\Desktop\csv-test.csv'
+            TYPE "CSV"
+*
+LIMIT 5
+READ EMP BY PERSONNEL-ID
+  AT START OF DATA
+    WRITE WORK 1 VARIABLE 'Personnel ID'
+                          'Surname'
+                          'Currency'
+                          'Salary'
+                          'Leave Taken'
+  END-START
+  WRITE WORK 1 VARIABLE PERSONNEL-ID
+                        *TRIM (NAME, TRAILING)
+                        CURR-CODE (*)
+                        SALARY (*)
+                        LEAVE-TAKEN
+  DISPLAY PERSONNEL-ID
+          NAME
+          CURR-CODE (*)
+          SALARY (*)
+          LEAVE-TAKEN
+END-READ
+END

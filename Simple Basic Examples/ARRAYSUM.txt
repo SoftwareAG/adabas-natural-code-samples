@@ -1,0 +1,20 @@
+DEFINE DATA LOCAL
+1 #MR (I4)     CONST <2>
+1 #MC (I4)     CONST <4>
+1 #N (I4/#MR, #MC) INIT (1, V) <1, 2, 3, 4>
+                        (2, V) <5, 6, 7, 8>
+1 #TOTAL (I4)
+1 #SUM (I4)
+1 #I (I4)
+1 #J (I4)
+END-DEFINE
+FOR #I = 1 #MR
+  FOR #J = 1 #MC
+    ADD #N (#I, #J) TO #TOTAL
+  END-FOR
+END-FOR
+WRITE '=' #TOTAL /
+**
+#SUM := #N (*, *) + 0
+WRITE '=' #SUM
+END

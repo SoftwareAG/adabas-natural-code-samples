@@ -1,0 +1,20 @@
+0010DEFINE DATA LOCAL
+00201 #M (I4)          CONST <5>
+00301 #TBL (A22/#M)    INIT <'00001' - "D" - H'00' - 'Development'
+0040                        ,'00010' - "U" - H'00' - 'UAT'
+0050                        ,'00128' - "T" - H'01' - 'Web Test'
+0060                        ,'00250' - "P" - H'00' - 'Production'
+0070                        ,'00777' - "S" - H'01' - 'Sandbox'
+0080                        >
+0090                   1 REDEFINE #TBL
+0100  2 #ENTRY (#M)
+0110    3 #DBID (N5)
+0120    3 #ENV (A1)
+0130    3 #DBA-ONLY (L)
+0140    3 #DESC (A15)
+0150END-DEFINE
+0160DISPLAY #DBID (*) (SG=F)
+0170        #ENV (*)
+0180        #DBA-ONLY (*)
+0190        #DESC (*)
+0200END

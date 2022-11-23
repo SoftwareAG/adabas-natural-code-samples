@@ -1,0 +1,11 @@
+DEFINE DATA LOCAL
+1 #LONG (A200)
+END-DEFINE
+
+ASSIGN #LONG = 'When a literal string does not fit into a source line, '
+             - 'a hypen is used to continue it on the next line.'
+
+      REINPUT 'Due to indentation, this text string '
+            - 'must be continued onto another line.'
+
+END

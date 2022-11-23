@@ -1,0 +1,33 @@
+0010DEFINE DATA LOCAL
+00201 EMP    VIEW EMPLOYEES
+0030  2 PERSONNEL-ID
+0040  2 NAME
+0050  2 CURR-CODE (2)
+0060  2 SALARY (2)
+0070  2 LEAVE-TAKEN
+0080END-DEFINE
+0090*
+0100DEFINE WORK FILE 1 'c:\Users\Ralph\Desktop\csv-test.csv'
+0110            TYPE "CSV"
+0120*
+0130LIMIT 5
+0140READ EMP BY PERSONNEL-ID
+0150  AT START OF DATA
+0160    WRITE WORK 1 VARIABLE 'Personnel ID'
+0170                          'Surname'
+0180                          'Currency'
+0190                          'Salary'
+0200                          'Leave Taken'
+0210  END-START
+0220  WRITE WORK 1 VARIABLE PERSONNEL-ID
+0230                        *TRIM (NAME, TRAILING)
+0240                        CURR-CODE (*)
+0250                        SALARY (*)
+0260                        LEAVE-TAKEN
+0270  DISPLAY PERSONNEL-ID
+0280          NAME
+0290          CURR-CODE (*)
+0300          SALARY (*)
+0310          LEAVE-TAKEN
+0320END-READ
+0330END

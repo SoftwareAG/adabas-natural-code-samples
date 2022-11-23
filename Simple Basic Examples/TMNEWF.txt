@@ -1,0 +1,8 @@
+DEFINE DATA LOCAL
+1 #PDT (T)  INIT <*TIMX> (HD='Pacific Time')
+1 #NDT (T)               (HD='Newfoundland Time')
+END-DEFINE
+COMPUTE #NDT = #PDT + T'03:30:00'     /* 3.5 hours
+DISPLAY #PDT (EM=YYYY/MM/DD^HH:II:SS)
+        #NDT (EM=YYYY/MM/DD^HH:II:SS)
+END

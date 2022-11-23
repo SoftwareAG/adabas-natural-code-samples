@@ -1,0 +1,17 @@
+DEFINE DATA LOCAL
+1 #MC (I4)         CONST <15>
+1 #MM (I4)         CONST <12>
+1 #DAYS (N2/#MM)   INIT <31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31>
+1 #MONTH (A9/#MM)  INIT <'January', 'February', 'March', 'April', 'May',
+                         'June', 'July', 'August', 'September',
+                         'October', 'November', 'December'>
+*
+1 #COL (A2/#MC)    INIT <"BK", "BL", "BR", "CY", "GR", "GY", "MA", "OR",
+                         "PI", "PU", "RE", "TU", "WH", "YE">
+1 #COLOR (A9/#MC)  INIT <'Black', 'Blue', 'Brown', 'Cyan', 'Gray',
+                         'Green', 'Magenta', 'Orange', 'Pink', 'Purple',
+                         'Red', 'Turquoise', 'White', 'Yellow'>
+END-DEFINE
+DISPLAY #MONTH (*) #DAYS (*)
+        #COL (*)   #COLOR (*)
+END

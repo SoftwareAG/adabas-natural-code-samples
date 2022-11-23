@@ -1,0 +1,350 @@
+* Module:   ZZMATCH
+* System:   ZZUtils
+* Function: Sequential Match
+* Author:   R. Zbrog
+* Date:     02/18/89
+************************************************************************
+*   Date   *   Name    * Summary of Changes
+************************************************************************
+* 03/23/06 * R. Zbrog  * Windows WORK file definitions
+* 11/04/03 * R. Zbrog  * Orphans and Widows to WORK files
+* 09/11/01 * R. Zbrog  * Demo files
+* 09/23/94 * R. Zbrog  * Nat 2.2.5
+* 09/29/93 * R. Zbrog  * Comments requesting custom code.
+* 12/16/92 * R. Zbrog  * Trace
+************************************************************************
+*
+* Sample sequential-match program.
+*
+*   Matches an Adabas file and a work file  -  the Adabas file MUST be
+*   processed as the outer loop.  Two sequential files may be matched by
+*   replacing the Adabas READ loop with a READ WORK loop (although no
+*   starting value may be specified for the READ WORK loop).  Two Adabas
+*   files may not be matched; one of them must be converted to a work
+*   file (ie the inner loop MUST process a WORK file).
+*
+*   The view or record layout for the outer loop is called MSTR.  The
+*   record layout for the inner loop is called TRAN.
+*
+*   The program uses the standard algorithm for a master file updated by
+*   a transaction file.  The view or record layout for the outer loop
+*   is called MSTR; the record layout for the inner loop is called TRAN.
+*   The program detects record matches, extra MSTR records, and extra
+*   TRAN records.
+*
+*   The MSTR file must have a unique key and the TRAN file must be in
+*   the same sequence as MSTR.  If both files have unique keys, a ratio
+*   of 1:1, then either file may be defined as MSTR or TRAN.  If there
+*   is a 1:n ratio, then the file with the unique key must be defined as
+*   MSTR and the file with the non-unique key must be defined as TRAN.
+*
+*   Indeed, the files may not be true master and transaction files.  It
+*   is the one-to-many ratio that defines which file will be treated as
+*   master and which will be treated as transaction.
+*
+*   If MSTR is an Adabas file, the program may be a good Prefetch
+*   candidate.
+*
+*   When customizing this program, review all comments for coding
+*   suggestions.  For example, if a 1:1 ratio, optimize for this.
+*
+*   Lines marked with '<<<' contain mandatory changes.
+*   Lines marked with '>>>' contain optional code; use as appropriate.
+*   Remove optional code if it is not needed, as this will improve
+*   performance.
+*
+*   It is recommended that the #TRACE-ALL variable be set to TRUE until
+*   the user has reached an acceptable level of confidence in the
+*   program's use.  This setting will cause an audit report to be
+*   produced, displaying all widows, orphans, and matches.
+*
+*   Software AG's EMPLOYEES demonstration file was used as the basis for
+*   the sample match in this program.  To ensure unique keys, the MSTR
+*   file is defined as a WORK file.  Sample MSTR and TRAN files are
+*   found in modules ZZMATCHM and ZZMATCHT, respectively.  For sample
+*   MVS JCL, refer to module ZZMATCHJ, which includes the MSTR and TRAN
+*   data.
+*
+*
+DEFINE DATA LOCAL
+1 MSTR (A72)                      /* Extract from EMPLOYEES demo file
+                        1 REDEFINE MSTR
+  2 PERSONNEL-ID (A8)
+  2 NAME (A20)
+  2 FIRST-NAME (A20)
+  2 PHONE (A15)
+  2 DEPT (A6)
+  2 LANG (A3)
+*
+*
+1 #TRAN (A40)           1 REDEFINE #TRAN
+  2 NAME (A20)
+  2 DEPT (A6)
+  2 CUSTOMER (N5)
+  2 COMMISSION (N7.2)
+*
+*
+1 #START                               /* >>> Optional FROM processing
+  2 DEPT (A6)                INIT <' '>
+  2 NAME (A20)               INIT <' '>
+                        1 REDEFINE #START
+  2 #START-KEY (A26)
+*
+1 #END                                 /* >>> Optional THRU processing
+  2 DEPT (A6)                INIT FULL LENGTH <H'FF'>
+  2 NAME (A20)               INIT FULL LENGTH <H'FF'>
+                        1 REDEFINE #END
+  2 #END-KEY(A26)
+*
+1 #MKEY                      /* >>> Build key from non-contiguous fields
+  2 DEPT (A6)
+  2 NAME (A20)
+                        1 REDEFINE #MKEY
+  2 #MSTR-KEY (A26)
+*
+1 #TKEY                      /* >>> Build key from non-contiguous fields
+  2 DEPT (A6)
+  2 NAME (A20)
+                        1 REDEFINE #TKEY
+  2 #TRAN-KEY (A26)
+*
+*
+1 #N                                   /* Counters
+  2 CNTM (P7)                          /* Master
+  2 EXTM (P7)                          /* Extra Master (Widow)
+  2 CNTT (P7)                          /* Transaction
+  2 EXTT (P7)                          /* Extra Trans (Orphan)
+  2 MCHT (P7)                          /* Matched transactions
+*
+1 #LOGICALS
+  2 #MSTR-MATCHED (L)
+  2 #TRAN-NEEDED (L)         INIT <TRUE>
+  2 #EOF (L)                 INIT <FALSE>
+  /*
+  2 #TRACE-ALL (L)           INIT <TRUE>    /* >>>
+  2 #TRACE-MSTR (L)          INIT <FALSE>   /* >>>
+  2 #TRACE-TRAN (L)          INIT <FALSE>   /* >>>
+  2 #TRACE-MISC (L)          INIT <FALSE>   /* >>>
+*
+1 #MISC
+  2 #DATE (A8)               INIT <*DATU>   /* Constant for report
+  2 #TIME (A5)               INIT <*TIMX>   /* Constant for report
+  /*
+  2 #NAME (A20)
+  /*                                   /* >>> for OpenSystems
+  2 #WORK1 (A250)                      /* >>> Master data
+  2 #WORK2 (A250)                      /* >>> Transaction data
+  2 #WORK3 (A250)                      /* >>> Widow masters
+  2 #WORK4 (A250)                      /* >>> Orphan transactions
+END-DEFINE
+*
+* WORK file definitions for OpenSystems implementation/demonstration
+*
+COMPRESS '%natdir%\NatApps\Fuser\' *LIBRARY-ID '\RES\ZZMATCHM.TXT'/* >>>
+    INTO #WORK1 LEAVING NO SPACE                                  /* >>>
+COMPRESS '%natdir%\NatApps\Fuser\' *LIBRARY-ID '\RES\ZZMATCHT.TXT'/* >>>
+    INTO #WORK2 LEAVING NO SPACE                                  /* >>>
+COMPRESS '%natdir%\NatApps\Fuser\' *LIBRARY-ID '\RES\ZZMATCHW.TXT'/* >>>
+    INTO #WORK3 LEAVING NO SPACE                                  /* >>>
+COMPRESS '%natdir%\NatApps\Fuser\' *LIBRARY-ID '\RES\ZZMATCHO.TXT'/* >>>
+    INTO #WORK4 LEAVING NO SPACE                                  /* >>>
+*
+DEFINE WORK FILE 1 #WORK1 TYPE 'ASCII' /* >>>
+DEFINE WORK FILE 2 #WORK2 TYPE 'ASCII' /* >>>
+DEFINE WORK FILE 3 #WORK3 TYPE 'ASCII' /* >>>
+DEFINE WORK FILE 4 #WORK4 TYPE 'ASCII' /* >>>
+*
+DEFINE PRINTER (01) OUTPUT 'VIDEO'                              /* >>>
+*
+FORMAT (01) PS=60 LS=132
+*/
+*
+READ WORK 1 MSTR                       /* >>> READ MSTR BY DEPT-PERSON
+  /*      FROM #START-KEY              /* >>>
+  ASSIGN #MKEY.DEPT = MSTR.DEPT        /* >>> Build a
+  ASSIGN #MKEY.NAME = MSTR.NAME        /* >>> contiguous key
+  IF  #MSTR-KEY > #END-KEY             /* >>> Optional 'thru'
+    THEN
+      ESCAPE BOTTOM
+  END-IF
+  ADD 1 TO #N.CNTM
+  ASSIGN #MSTR-MATCHED = FALSE         /* Not yet matched
+  /*
+  /*
+  COMPRESS MSTR.NAME                   /* <<<
+           ','
+      INTO #NAME LEAVING NO SPACE
+  COMPRESS #NAME                       /* <<<
+           MSTR.FIRST-NAME
+      INTO #NAME
+  /*
+  /*
+  RPT.
+  REPEAT
+    IF  #TRAN-NEEDED
+      THEN
+        TR.
+        READ WORK 2 ONCE #TRAN
+             AT END OF FILE
+               ASSIGN #EOF = TRUE
+             END-ENDFILE
+        IF  #EOF
+          THEN
+            MOVE ALL H'FF' TO #TRAN-KEY
+            ASSIGN #TRAN-NEEDED = FALSE
+          ELSE
+            ASSIGN #TKEY.DEPT = #TRAN.DEPT  /* >>> Build a
+            ASSIGN #TKEY.NAME = #TRAN.NAME  /* >>> contiguous key
+            ADD 1 TO #N.CNTT
+        END-IF
+    END-IF
+    /*
+    DECIDE FOR FIRST CONDITION
+      WHEN #MSTR-KEY < #TRAN-KEY       /* Must get next master
+           IF  NOT #MSTR-MATCHED       /* Previously matched
+             THEN                      /* Process an unmatched master
+               IF  #TRACE-ALL          /* >>>
+                OR #TRACE-MSTR
+                 THEN
+                   WRITE (01)
+                              MSTR.DEPT (IS=T)
+                           2X #NAME
+                           2X MSTR.PHONE
+                           2X MSTR.PERSONNEL-ID
+                           2X MSTR.LANG
+                          88T #N.CNTM (EM=Z,ZZZ,ZZ9)
+                         110T 'Extra Master'          /* Widow
+               END-IF
+               /*
+               /* <<<  Code 'widow' logic here.  <<<
+               WRITE WORK 3 MSTR
+               /*
+               ADD 1 TO #N.EXTM
+           END-IF
+           ASSIGN #TRAN-NEEDED = FALSE /* Apply to next master
+           ESCAPE BOTTOM (RPT.)        /* Process next master
+      WHEN #MSTR-KEY = #TRAN-KEY       /* Process a match
+           IF  #TRACE-ALL              /* >>>
+            OR #TRACE-MSTR
+            OR #TRACE-TRAN
+             THEN
+               WRITE (01)
+                          MSTR.DEPT (IS=T)
+                       2X #NAME
+                       2X MSTR.PHONE
+                       2X MSTR.PERSONNEL-ID
+                       2X MSTR.LANG
+                      64T #TRAN.CUSTOMER
+                      74T #TRAN.COMMISSION (EM=Z,ZZZ,ZZ9.99)
+                      88T #N.CNTM (EM=Z,ZZZ,ZZ9)
+                      99T #N.CNTT (EM=Z,ZZZ,ZZ9)
+                     110T 'Matched MSTR/TRAN'
+           END-IF
+           ADD 1 TO #N.MCHT
+           /*
+           /* <<<  Code 'match' logic here.  <<<
+           /*
+           ASSIGN #MSTR-MATCHED = TRUE
+           ASSIGN #TRAN-NEEDED  = TRUE /* Try next transaction
+* >>>      ESCAPE BOTTOM (RPT.)        /* Next master; force 1:1 ratio
+      WHEN #MSTR-KEY > #TRAN-KEY       /* Process an unmatched tran
+           IF  #TRACE-ALL              /* >>>
+            OR #TRACE-TRAN
+             THEN
+               WRITE (01)
+                          #TRAN.DEPT (IS=T)
+                       2X #TRAN.NAME
+                      64T #TRAN.CUSTOMER
+                      74T #TRAN.COMMISSION (EM=Z,ZZZ,ZZ9.99)
+                      99T #N.CNTT (EM=Z,ZZZ,ZZ9)
+                     110T 'Extra Transaction'    /* Orphan
+           END-IF                      /*
+           ADD 1 TO #N.EXTT
+           PERFORM ORPHAN
+           ASSIGN #TRAN-NEEDED = TRUE  /* Try next transaction
+      WHEN NONE
+           IGNORE
+    END-DECIDE
+  END-REPEAT
+END-WORK                               /* >>> END-READ
+*
+IF  #TRAN-NEEDED                       /* No waiting transaction
+ OR #EOF                               /* Transaction end of file
+  THEN
+    IGNORE
+  ELSE
+    IF  #TRACE-ALL                     /* >>>
+     OR #TRACE-TRAN
+      THEN
+        WRITE (01)
+                   #TRAN.DEPT (IS=T)
+                2X #TRAN.NAME
+               64T #TRAN.CUSTOMER
+               74T #TRAN.COMMISSION (EM=Z,ZZZ,ZZ9.99)
+               99T #N.CNTT (EM=Z,ZZZ,ZZ9)
+              110T 'Trailing TRAN'     /* Orphan
+    END-IF
+    ADD 1 TO #N.EXTT
+    PERFORM ORPHAN
+END-IF
+*
+REPEAT WHILE NOT #EOF                  /* Process extra TRAN records
+  READ WORK 2 ONCE #TRAN               /* Same file number as (TR.)
+       AT END OF FILE
+         ESCAPE BOTTOM
+       END-ENDFILE
+  ADD 1 TO #N.CNTT
+  IF  #TRACE-ALL                       /* >>>
+   OR #TRACE-TRAN
+    THEN
+      WRITE (01)
+                 #TRAN.DEPT (IS=T)
+              2X #TRAN.NAME
+             64T #TRAN.CUSTOMER
+             74T #TRAN.COMMISSION (EM=Z,ZZZ,ZZ9.99)
+             99T #N.CNTT (EM=Z,ZZZ,ZZ9)
+            110T 'Extra TRAN > Last MSTR'   /* Orphan
+  END-IF
+  ADD 1 TO #N.EXTT
+  PERFORM ORPHAN
+END-REPEAT
+*
+*
+NEWPAGE (01)
+WRITE (01)
+   //     #N.CNTM (EM=Z,ZZZ,ZZ9) 'Master Records Read'
+   //     #N.CNTT (EM=Z,ZZZ,ZZ9) 'Transaction Records Read'
+ ////     #N.EXTM (EM=Z,ZZZ,ZZ9) 'Unmatched Masters (Widows)'
+   //     #N.EXTT (EM=Z,ZZZ,ZZ9) 'Unmatched Transactions (Orphans)'
+ ////     #N.MCHT (EM=Z,ZZZ,ZZ9) 'Matched Transactions'
+NEWPAGE (01)
+*
+*
+WRITE (01) TITLE LEFT
+           *PROGRAM (CD=BL)
+       10T 'LEN Consulting LLC'
+      118T #DATE
+           #TIME
+    /  10T 'Natural Utilities'
+      125T 'ZZUtils' (YEI)
+    /  10T 'Sample Sequential Match Program' (BLI)
+      120T 'Page:' *PAGE-NUMBER (01) (EM=ZZ,ZZ9)
+   //      'Dept'                                /* <<<
+        9T 'Name'                                /* <<<
+       31T 'Phone'                               /* <<<
+       48T 'Personnel'                           /* <<<
+       58T 'Lang'                                /* <<<
+       64T '  Cust'                              /* <<<
+       74T '  Commission'                        /* <<<
+       88T '   Master'                           /* <<<
+       99T '    Trans'                           /* <<<
+      110T 'Message'                             /* <<<
+    /
+*
+*
+DEFINE SUBROUTINE ORPHAN
+*
+* <<<  Code 'orphan' logic here.  <<<
+WRITE WORK 4 #TRAN
+END-SUBROUTINE
+END

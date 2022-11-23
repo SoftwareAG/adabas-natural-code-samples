@@ -1,0 +1,11 @@
+0010DEFINE DATA LOCAL
+00201 #LONG (A200)
+0030END-DEFINE
+0040
+0050ASSIGN #LONG = 'When a literal string does not fit into a source line, '
+0060             - 'a hypen is used to continue it on the next line.'
+0070
+0080      REINPUT 'Due to indentation, this text string '
+0090            - 'must be continued onto another line.'
+0100
+0110END

@@ -1,0 +1,14 @@
+DEFINE DATA LOCAL
+1 #FROM (D)  INIT <D'04/06/2015'>
+1 #TO (D)    INIT <D'04/09/2015'>
+1 #DAYS (N3)
+END-DEFINE
+#DAYS := D'04/09/2015' - D'04/06/2015'
+WRITE #DAYS 'days between D"04/09/2015" and D"04/06/2015"'
+*
+#DAYS := #TO - #FROM
+WRITE #DAYS 'days between #FROM and #TO'
+*
+#DAYS := *DATX - D'04/06/2015'
+WRITE #DAYS 'days between *DATX and D"04/06/2015"'
+END

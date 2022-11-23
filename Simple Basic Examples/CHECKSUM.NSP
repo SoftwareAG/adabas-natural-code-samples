@@ -1,0 +1,130 @@
+0010* Sample CHECKSUM to compare contents of two data base files
+0020*   - same file on two databases
+0030*
+0040* Customization:
+0050*   1 Provide DBIDs
+0060*   2 Provide file name in #FILE
+0070*   3 Provide file name in VIEW
+0080*   4 Provide a full DDM definition following VIEW
+0090*   5 Provide LRECL in #DDM - try (A50000) - Natural will correct you
+0100*   6 Following testing, remove the READ limit of (10)
+0110*   7 Specify a unique READ key - records must be in the same sequence
+0120*     . ISN or descriptor
+0130*   8 For cross-platform comparisons, ensure a consistent sign nibble
+0140*     .     ensure identical PSIGNF parameter
+0150*       or  insert "ADD 0" for each packed field
+0160*
+0170DEFINE DATA LOCAL
+01801 #DB1 (N5)        INIT <001>               /* <<<<< 1
+01901 #DB2 (N5)        INIT <002>               /* <<<<< 1
+02001 #FILE (A32)      INIT <"EMPLOYEES">       /* <<<<< 2
+02101 DDM   VIEW EMPLOYEES                      /* <<<<< 3
+0220  2 PERSONNEL-ID                            /* <<<<< 4
+0230  2 FIRST-NAME
+0240  2 MIDDLE-I
+0250  2 NAME
+0260  2 MIDDLE-NAME
+0270  2 MAR-STAT
+0280  2 SEX
+0290  2 BIRTH
+0300  2 ADDRESS-LINE (5)
+0310  2 CITY
+0320  2 ZIP
+0330  2 POST-CODE
+0340  2 COUNTRY
+0350  2 AREA-CODE
+0360  2 PHONE
+0370  2 DEPT
+0380  2 JOB-TITLE
+0390  2 CURR-CODE (10)
+0400  2 SALARY (10)
+0410  2 BONUS (10, 10)
+0420  2 LEAVE-DUE
+0430  2 LEAVE-TAKEN
+0440  2 LEAVE-START (20)
+0450  2 LEAVE-END (20)
+0460  2 LANG (5)
+0470                   1 REDEFINE DDM
+0480  2 #DDM (A1189)                            /* <<<<< 5
+04901 #1023
+0500  2 FUNC (A1)      INIT <"M">
+0510  2 RC (N4)
+0520  2 TIME (T)
+0530  2 DATE (D)
+0540  2 TS (B8)
+0550  2 MS (P19)
+05601 #1040
+0570  2 OP (A1)        INIT <'S'>
+0580  2 DB (N5)
+0590  2 RC (I4)
+06001 #4011
+0610  2 FUNC (I4)
+0620  2 CTX (B156)
+0630  2 TEXT (A) DYNAMIC
+0640  2 HASH (B20)
+06501 #HASH (B20)
+06601 #COUNT (P10)
+06701 #ELAPSED (N7)
+0680END-DEFINE
+0690*
+0700FORMAT SG=F
+0710*
+0720DEFINE SUBROUTINE HASH-RTN
+0730CALLNAT "USR1040N" #1040
+0740ASSIGN #4011.FUNC = 1
+0750CALLNAT "USR4011N" #4011
+0760ASSIGN #4011.FUNC = 2
+0770ASSIGN #1023.MS   = *CPU-TIME
+0780E.
+0790SET TIME
+0800R.
+0810READ (10) MULTI-FETCH ON                    /* <<<<< 6
+0820                         DDM BY ISN         /* <<<<< 7
+0830  ADD 0 TO DDM.BIRTH                        /* <<<<< 8
+0840  ADD 0 TO DDM.SALARY (*)                   /* <<<<< 8
+0850  ADD 0 TO DDM.BONUS  (*, *)                /* <<<<< 8
+0860  ASSIGN #4011.TEXT = #DDM
+0870  CALLNAT "USR4011N" #4011
+0880END-READ
+0890ASSIGN #4011.FUNC = 3
+0900CALLNAT "USR4011N" #4011
+0910ASSIGN #1023.MS = *CPU-TIME - #1023.MS
+0920CALLNAT "USR1023N" #1023
+0930ASSIGN #ELAPSED = *TIMD (E.)
+0940DISPLAY 'DBID'     #1040.DB
+0950        'Records'  *COUNTER (R.)
+0960        'Checksum' #4011.HASH
+0970        'CPU Time' #1023.TIME (EM=HH:II:SS.T)
+0980        'Elapsed'  #ELAPSED (EM=99':'99':'99'.'9)
+0990END-SUBROUTINE
+1000*
+1010*
+1020ASSIGN #1040.DB = #DB1
+1030PERFORM HASH-RTN
+1040ASSIGN #HASH  = #4011.HASH
+1050ASSIGN #COUNT = *COUNTER (R.)
+1060*
+1070ASSIGN #1040.DB = #DB2
+1080PERFORM HASH-RTN
+1090*
+1100IF  *COUNTER (R.) = #COUNT
+1110  THEN
+1120    WRITE / T**COUNTER (R.) 'Counters match' (GRI)
+1130  ELSE
+1140    WRITE / T**COUNTER (R.) '>>>>>  Counters do not match  <<<<<' (REI)
+1150END-IF
+1160IF  #4011.HASH = #HASH
+1170  THEN
+1180    WRITE / T*#4011.HASH 'Checksums match' (GRI)
+1190  ELSE
+1200    WRITE / T*#4011.HASH '>>>>>  Checksums do not match  <<<<<' (REI)
+1210END-IF
+1220*
+1230WRITE TITLE LEFT
+1240          *PROGRAM
+1250      10T 'Checksum Comparison'
+1260      62T *DAT4U
+1270          *TIME (AL=5)
+1280    / 10T 'File' #FILE
+1290    /
+1300END

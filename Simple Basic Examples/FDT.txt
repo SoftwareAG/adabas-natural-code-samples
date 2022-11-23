@@ -1,0 +1,252 @@
+* List an FDT
+*
+DEFINE DATA
+LOCAL
+1 #MAX (I4)        CONST <926>
+*
+1 #LF                                  /* Histogram source library
+  2 CB-RESERVED  (B2)   INIT <H'3000'> /* 2-byte file number
+  2 CB-CMD       (A2)   INIT <'LF'>    /* Command code
+  2 CB-CID       (A4)
+  2 CB-RSP       (B2)                  /* Response code
+                        2 REDEFINE CB-RSP
+    3 CB-FNR     (B2)                  /* File number (2-byte)
+  2 CB-DBID      (B2)                  /* Database ID (2-byte)
+  2 CB-ISN       (B4)                  /* ISN
+  2 CB-ISL       (B4)                  /* ISN lower limit
+  2 CB-ISQ       (B4)                  /* ISN quantity
+  2 CB-FBL       (B2)   INIT <1>       /* Format buffer length
+  2 CB-RBL       (B2)   INIT <7408>    /* Record buffer length
+  2 CB-SBL       (B2)   INIT <1>       /* Search buffer length
+  2 CB-VBL       (B2)   INIT <1>       /* Value  buffer length
+  2 CB-IBL       (B2)   INIT <1>       /* ISN    buffer length
+  2 CB-COP1      (A1)   INIT <' '>     /* Command Option 1
+  2 CB-COP2      (A1)   INIT <' '>     /* Command Option 2
+  2 CB-ADD1      (A8)                  /* Additions 1
+  2 CB-ADD2      (A4)                  /* Additions 2
+  2 CB-ADD3      (A8)                  /* Additions 3
+  2 CB-ADD4      (A8)                  /* Additions 4
+  2 CB-ADD5      (A8)                  /* Additions 5
+  2 CB-CT        (A4)                  /* Command time
+  2 CB-UA        (A4)                  /* User area
+                        1 REDEFINE #LF
+  2 #CB-LF (A80)
+*
+1 #FB-LF (A1)
+1 #RB-LF (A1/7412)
+                        1 REDEFINE #RB-LF
+  2 #NUM (I4)
+  2 #FLD (#MAX)
+    3 #LVL (B1)              (HD='Lv')
+    3 #NAM (A2)              (HD='Nm')
+    3 #LEN (B1)
+    3 #FMT (A1)              (HD='F')
+    3 #DUH (B1)
+1 #SB-LF (A1)
+1 #VB-LF (A1)
+1 #IB-LF (A1)
+1 #RC (I4)
+*
+1 #L (N3)                    (HD='Len')
+1 ## (P5)
+1 #R (I1)               1 REDEFINE #R
+  2 #FLAG (L)
+1 #D (L)                     (HD='DE')
+1 #F (L)                     (HD='FI')
+1 #M (L)                     (HD='MU')
+1 #N (L)                     (HD='NU')
+1 #E (L)                     (HD='PE')
+1 #P (L)                     (HD='PH')
+1 #S (L)                     (HD='SD')
+1 #U (L)                     (HD='UD')
+*
+1 #DBIN (A5)
+1 #FLIN (A5)       INIT <'*'>
+*
+1 #DBID (N5)
+1 #FILB (N5)
+1 #FILE (N5)
+1 #FILN (N5)
+1 #DEVICE (A10)    INIT <*DEVICE>
+1 #I (I4)
+END-DEFINE
+*
+*
+SET KEY PF3
+FORMAT PS=0 SG=F
+*
+*
+REPEAT
+  RESET *PAGE-NUMBER
+  INPUT (AD=O IP=F)
+            *PROGRAM
+        10T 'Adabas FDT List' (NEI)
+        64T *DAT4U
+            *TIME (AL=5)
+     // 10T 'DBID:' #DBIN (AD=MDLT'_')
+     // 10T 'File:' #FLIN (AD=MDLT'_')
+         2X '"*" for files 1 - 255'
+    ///  5T 'PF3' (IYE) 'to Stop'
+  /*
+  /*
+  IF  *PF-KEY              = 'PF3'
+   OR SUBSTR (#DBIN, 1, 1) = '.'
+   OR SUBSTR (#FLIN, 1, 1) = '.'
+    THEN
+      STOP
+  END-IF
+  /*
+  IF  #DBIN = ' '
+    THEN
+      REINPUT 'DBID is required' MARK *#DBIN ALARM
+  END-IF
+  IF  #DBIN IS (N5)
+    THEN
+      ASSIGN #DBID = VAL (#DBIN)
+    ELSE
+      REINPUT 'DBID is invalid' MARK *#DBIN ALARM
+  END-IF
+  IF  #DBID <= 0
+    THEN
+      REINPUT 'DBID is invalid' MARK *#DBIN ALARM
+  END-IF
+  /*
+  IF  #FLIN = ' '
+    THEN
+      REINPUT 'File number is required' MARK *#FLIN ALARM
+  END-IF
+  DECIDE FOR FIRST CONDITION
+    WHEN #FLIN IS (N5)
+      assign #FILE = VAL (#FLIN)
+      ASSIGN #FILB = #file
+    WHEN #FLIN = '*'
+      ASSIGN #FILB = 1
+      ASSIGN #FILE = 255               /* Max range
+    WHEN NONE
+      REINPUT 'File number is invalid' MARK *#FLIN ALARM
+  END-DECIDE
+  IF  #FILB <= 0
+    THEN
+      REINPUT 'File number is invalid' MARK *#FLIN ALARM
+  END-IF
+  /*
+  /*
+  FOR #FILN = #FILB THRU #FILE
+    ASSIGN #LF.CB-RESERVED = H'3000'
+    ASSIGN #LF.CB-DBID     = #DBID
+    ASSIGN #LF.CB-FNR      = #FILN
+    CALLNAT 'USR1043N' #CB-LF
+                       #FB-LF
+                       #RB-LF (1)
+                       #SB-LF
+                       #VB-LF
+                       #IB-LF
+                       #RC
+    IF  #RC = 148
+      THEN
+        IF  #DEVICE = 'BATCH'
+          THEN
+            WRITE NOTITLE NOHDR
+                  'FDT:' #DBIN (AD=L SG=F) '- Database not found'
+            STOP
+        END-IF
+        REINPUT 'Database not found' MARK *#DBIN
+    END-IF
+    IF  #RC = 17
+      THEN
+        IF  #FILB = #FILE
+          THEN
+            IF  #DEVICE = 'BATCH'
+              THEN
+                WRITE NOTITLE NOHDR
+                      'FDT:' #FILN (AD=L SG=F) '- File not found'
+                STOP
+            END-IF
+            REINPUT 'File not found' MARK *#FLIN
+          ELSE
+            ESCAPE TOP
+        END-IF
+    END-IF
+    IF  NOT #RC = 0
+             OR = 3
+             OR = 17
+      THEN
+        ADD 3000 TO #RC
+        WRITE NOTITLE NOHDR
+              'FDT:' #FILN (AD=L SG=F)
+              'ADABAS response code:' #RC
+        STOP
+    END-IF
+    /*
+    FOR #I = 1 #NUM
+      ASSIGN #L = #LEN (#I)
+      ASSIGN ## = #DUH (#I)
+      IF  *HARDWARE = 'MAINFRAME'
+        THEN
+          DIVIDE 2 INTO ## GIVING ## REMAINDER #R
+          ASSIGN #U = #FLAG
+          DIVIDE 2 INTO ## GIVING ## REMAINDER #R
+          ASSIGN #S = #FLAG
+          DIVIDE 2 INTO ## GIVING ## REMAINDER #R
+          ASSIGN #P = #FLAG
+          DIVIDE 2 INTO ## GIVING ## REMAINDER #R
+          ASSIGN #E = #FLAG
+          DIVIDE 2 INTO ## GIVING ## REMAINDER #R
+          ASSIGN #N = #FLAG
+          DIVIDE 2 INTO ## GIVING ## REMAINDER #R
+          ASSIGN #M = #FLAG
+          DIVIDE 2 INTO ## GIVING ## REMAINDER #R
+          ASSIGN #F = #FLAG
+          DIVIDE 2 INTO ## GIVING ## REMAINDER #R
+          ASSIGN #D = #FLAG
+        ELSE
+          DIVIDE 2 INTO ## GIVING ## REMAINDER #R
+          ASSIGN #D = #FLAG
+          DIVIDE 2 INTO ## GIVING ## REMAINDER #R
+          ASSIGN #F = #FLAG
+          DIVIDE 2 INTO ## GIVING ## REMAINDER #R
+          ASSIGN #P = #FLAG
+          DIVIDE 2 INTO ## GIVING ## REMAINDER #R
+          ASSIGN #N = #FLAG
+          DIVIDE 2 INTO ## GIVING ## REMAINDER #R
+          ASSIGN #E = #FLAG
+          DIVIDE 2 INTO ## GIVING ## REMAINDER #R
+          ASSIGN #M = #FLAG
+          DIVIDE 2 INTO ## GIVING ## REMAINDER #R
+          ASSIGN #S = #FLAG
+          DIVIDE 2 INTO ## GIVING ## REMAINDER #R
+          ASSIGN #U = #FLAG
+      END-IF
+      /*
+      DISPLAY
+              #LVL (#I)
+              #NAM (#I)
+              #FMT (#I)
+              #L (ZP=F)
+              #D
+              #F
+              #M
+              #N
+              #E
+              #P
+              #S
+              #U
+    END-FOR
+    SKIP 1
+    WRITE 'Fields reported:' #NUM (AD=L)
+    NEWPAGE
+  END-FOR
+END-REPEAT
+*
+*
+WRITE TITLE LEFT
+          *PROGRAM
+      10T 'ADABAS FDT List' (NEI)
+      52T *DAT4U
+          *TIME (AL=5)
+          'Page:' *PAGE-NUMBER (EM=Z,ZZ9)
+    / 10T 'DBID' #DBID
+       2X '/'
+       2X 'File' #FILN
+    /
+END

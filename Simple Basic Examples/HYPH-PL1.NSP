@@ -1,0 +1,17 @@
+0010DEFINE DATA LOCAL
+00201 #MC (I4)         CONST <15>
+00301 #MM (I4)         CONST <12>
+00401 #DAYS (N2/#MM)   INIT <31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31>
+00501 #MONTH (A9/#MM)  INIT <'January', 'February', 'March', 'April', 'May',
+0060                         'June', 'July', 'August', 'September',
+0070                         'October', 'November', 'December'>
+0080*
+00901 #COL (A2/#MC)    INIT <"BK", "BL", "BR", "CY", "GR", "GY", "MA", "OR",
+0100                         "PI", "PU", "RE", "TU", "WH", "YE">
+01101 #COLOR (A9/#MC)  INIT <'Black', 'Blue', 'Brown', 'Cyan', 'Gray',
+0120                         'Green', 'Magenta', 'Orange', 'Pink', 'Purple',
+0130                         'Red', 'Turquoise', 'White', 'Yellow'>
+0140END-DEFINE
+0150DISPLAY #MONTH (*) #DAYS (*)
+0160        #COL (*)   #COLOR (*)
+0170END

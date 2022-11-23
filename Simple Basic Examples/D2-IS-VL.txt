@@ -1,0 +1,17 @@
+DEFINE DATA LOCAL
+1 #ALPHA (A15)     INIT <'04/13/2015'> /* DTFORM = U
+1 #DATE (D)
+END-DEFINE
+REPEAT
+  INPUT #ALPHA (AD=MD)
+  IF  #ALPHA IS (D)
+    THEN
+      ASSIGN #DATE = VAL (#ALPHA)
+      DISPLAY #ALPHA
+              #DATE
+              #DATE (EM=YYYY-MM-DD)
+    ELSE
+      REINPUT 'invalid format or value'
+  END-IF
+END-REPEAT
+END

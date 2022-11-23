@@ -1,0 +1,43 @@
+DEFINE DATA LOCAL
+1 #MC (I4)         CONST <15>
+1 #MM (I4)         CONST <12>
+1 #MTBL (A11/#MM)  INIT <'31' - 'January'
+                        ,'28' - 'February'
+                        ,'31' - 'March'
+                        ,'30' - 'April'
+                        ,'31' - 'May'
+                        ,'30' - 'June'
+                        ,'31' - 'July'
+                        ,'31' - 'August'
+                        ,'30' - 'September'
+                        ,'31' - 'October'
+                        ,'30' - 'November'
+                        ,'31' - 'December'
+                        >
+                   1 REDEFINE #MTBL
+  2 #ENTRY (#MM)
+    3 #DAYS (N2)
+    3 #MONTH (A9)
+1 #CTBL (A11/#MC)  INIT <"BK" - 'Black'
+                        ,"BL" - 'Blue'
+                        ,"BR" - 'Brown'
+                        ,"CY" - 'Cyan'
+                        ,"GR" - 'Gray'
+                        ,"GY" - 'Green'
+                        ,"MA" - 'Magenta'
+                        ,"OR" - 'Orange'
+                        ,"PI" - 'Pink'
+                        ,"PU" - 'Purple'
+                        ,"RE" - 'Red'
+                        ,"TU" - 'Turquoise'
+                        ,"WH" - 'White'
+                        ,"YE" - 'Yellow'
+                        >
+                   1 REDEFINE #CTBL
+  2 #ENTRY (#MC)
+    3 #COL (A2)
+    3 #COLOR (A9)
+END-DEFINE
+DISPLAY #MONTH (*) #DAYS (*)
+        #COL (*)   #COLOR (*)
+END

@@ -1,0 +1,15 @@
+DEFINE DATA LOCAL
+1 EMP    VIEW EMPLOYEES
+  2 DEPT
+  2 NAME
+1 #DP-DEF                                   /* Define a structure
+  2 #DEPT (A6)     INIT <"ADMA01">
+  2 #PERSON (A20)  INIT <"MADSEN">
+                        1 REDEFINE #DP-DEF  /* Define the block
+  2 #DEPT-PERSON (A26)
+END-DEFINE
+FIND EMP WITH DEPT-PERSON = #DEPT-PERSON
+  DISPLAY DEPT
+          NAME
+END-FIND
+END

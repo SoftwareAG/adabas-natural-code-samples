@@ -1,0 +1,13 @@
+0010DEFINE DATA LOCAL
+00201 #FROM (T)        INIT <E'04/05/2015 07:00:00'>
+00301 #THRU (T)        INIT <E'04/07/2015 01:10:01'>
+00401 #HOURS (T)       (HD='hh:mm:ss')
+00501 #D (D)
+00601 #DAYS (I1)       (HD='Days')
+0070END-DEFINE
+0080ASSIGN #HOURS = #THRU - #FROM     /* duration
+0090ASSIGN #D     = #HOURS            /* extract days
+0100ASSIGN #DAYS  = #D                /* D to numeric format
+0110DISPLAY #DAYS
+0120        #HOURS
+0130END

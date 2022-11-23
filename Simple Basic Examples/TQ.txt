@@ -1,0 +1,33 @@
+* TQ
+DEFINE DATA LOCAL
+1 #NAME (A50)
+1 #DQ (A1)
+1 #AP (A1)
+END-DEFINE
+*
+WRITE '1 Name with apostrophe: O''Brien  O"Brien'
+*
+WRITE '2 Searching for "O''Brien"'
+*
+COMPRESS H'22'
+         'O''Brien'
+         H'22'
+    INTO #NAME LEAVING NO SPACE
+WRITE '3 Searching for' #NAME
+*
+OPTIONS TQMARK=OFF
+WRITE '4 Searching for "O''Brien"'
+*
+OPTIONS TQMARK=OFF
+ASSIGN #DQ = '"'
+ASSIGN #AP = ''''
+OPTIONS TQMARK=ON
+WRITE '5    D-quote:' #DQ 5X 'H"22"' H'22'  /* EBCDIC 7F
+    / '  Apostrophe:' #AP 5X 'H"27"' H'27'  /* EBCDIC 7D
+*
+OPTIONS TQMARK=OFF
+CALLNAT 'subpname'
+CALLNAT "SUBPNAME"
+WRITE '6 Text which must be uppercase: IF #A = "Y" or = ''y'''
+OPTIONS TQMARK=ON
+END

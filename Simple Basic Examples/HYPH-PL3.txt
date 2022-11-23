@@ -1,0 +1,20 @@
+DEFINE DATA LOCAL
+1 #M (I4)          CONST <5>
+1 #TBL (A22/#M)    INIT <'00001' - "D" - H'00' - 'Development'
+                        ,'00010' - "U" - H'00' - 'UAT'
+                        ,'00128' - "T" - H'01' - 'Web Test'
+                        ,'00250' - "P" - H'00' - 'Production'
+                        ,'00777' - "S" - H'01' - 'Sandbox'
+                        >
+                   1 REDEFINE #TBL
+  2 #ENTRY (#M)
+    3 #DBID (N5)
+    3 #ENV (A1)
+    3 #DBA-ONLY (L)
+    3 #DESC (A15)
+END-DEFINE
+DISPLAY #DBID (*) (SG=F)
+        #ENV (*)
+        #DBA-ONLY (*)
+        #DESC (*)
+END

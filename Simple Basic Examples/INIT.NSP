@@ -1,0 +1,34 @@
+0010DEFINE DATA LOCAL
+00201 #A (A10)    INIT <'Alpha'>
+00301 #B (B1)     INIT <H'FF'>
+00401 #C (C)      INIT <(AD=I CD=RE)>
+00501 #D (D)      INIT <D'04/13/2015'>
+00601 #F (F4)     INIT <3.14159265E0>
+00701 #I (I4)     INIT <1>
+00801 #L (L)      INIT <TRUE>
+00901 #N (N1)     INIT <2>
+01001 #P (P3.1)   INIT <123.4>
+01101 #U (U10)    INIT <UH'8100820083008400'>
+0120*
+01301 #T (T)      INIT <T'14:10:12'>
+01401 #E (T)      INIT <E'04/13/2015 14:10:12'>
+0150*
+01601 #SD (D)     INIT <*DATX>
+01701 #SL (A8)    INIT <*LIBRARY-ID>
+0180END-DEFINE
+0190*
+0200WRITE
+0210    / '=' #A
+0220    / '=' #B
+0230    / '=' #D #D (CV=#C) #D (EM=MM/DD/YYYY)
+0240    / '=' #F
+0250    / '=' #I
+0260    / '=' #L
+0270    / '=' #N
+0280    / '=' #P
+0290    / '=' #U #U (EM=HHHHHHHHHH)
+0300    / '=' #T (EM=MM/DD/YYYY^HH:II:SS.T)
+0310    / '=' #E (EM=MM/DD/YYYY^HH:II:SS.T)
+0320    / '=' #SD
+0330    / '=' #SL
+0340END
