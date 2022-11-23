@@ -1,3 +1,5 @@
+## Deleting Null Array Occurrences
+
 This posting contains two programs. 
 * The first demonstrates two techniques for eliminating null occurrences from an array. 
 * The second program shows a timing comparison between the two techniques.

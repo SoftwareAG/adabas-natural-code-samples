@@ -1,4 +1,6 @@
-This code sample adds **Case 4** to Steve Robinson's post https://github.com/SoftwareAG/adabas-natural-code-samples/tree/main/Eliminating%20Special%20Characters%20from%20String.
+## Eliminating Characters from String
+
+This code sample adds **Case 4** to Steve Robinson's post [Eliminating Special Characters from String](https://github.com/SoftwareAG/adabas-natural-code-samples/tree/main/Eliminating%20Special%20Characters%20from%20String).
 From the fertile imagination of Paul Macgowan.
 
 **Case 5** added April 11, 2015.    
@@ -16,6 +18,7 @@ So in fairness, "RESET INITIAL #A" was inserted into all of the other loops too,
 In the "empty loop" IGNORE was replaced by "RESET INITIAL #A" (just in case IGNORE consumes any CPU).
 Thanks to Paul Macgowan for this solution.
 
-**Amended April 11, 2015**
+### Amended April 11, 2015
+
 The latest Natral releases allow for a single EXAMINE for multiple strings.  This reduces CPU by another 30%.  See Case 5.
 I eliminated the line numbers from the code to allow for cut & paste.

@@ -1,4 +1,6 @@
-Convert
+## Convert Store Clock to Microseconds to Natural Time
+
+This sample code converts
 
 * Natural time stamp (store clock) value into microseconds;
 * Microseconds into a Natural time (T) value;

@@ -1,3 +1,5 @@
+## Sequential Match
+
 Natural developers automatically think READ/FIND when master and transaction files are involved, but a sequential match may be a better solution, dramatically improving performance.
 
 Verify parent-child and child-parent relationships in a single pass.
@@ -16,7 +18,7 @@ It may be necessary to flatten an Adabas file to a WORK file.
 A Prefetched READ PHYSICAL as an extract, followed by a sort, will perform very well for this.
 
 It is necessary that the two files be read in the same sequence, and that there is a 1-to-1 or 1-to-many relationship; a many-to-many relationship is not supported. 
-In a one-to-many relationship, the master is defined as the 'one' and the transaction file is the 'many'.
+In a one-to-many relationship, the master is defined as the *one* and the transaction file is the *many*.
 
 For testing/validation purposes, the code is ready to RUN, as is, on mainframe or LUW. 
 Follow the embedded instructions for customization for real-world applications. 

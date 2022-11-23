@@ -1,4 +1,4 @@
-Map a Natural Data Area
+## Map a Natural Data Area
 
 Analyse a Natural data area (LDA, PDA or GDA) and build a table of relative field displacements and lengths. Obtained by reading the object's source from FUSER. 
 This table may be displayed to show a map of the data area or used for further processing.
@@ -25,7 +25,7 @@ Then, if you get to a NEXT prompt (by pressing %% say), then executing GDASHOW a
 **NDAFILE:**
 
 If you have a sequential dataset whose record format is defined by an LDA, you can use this utility to display all or some of those records, formatted according to the field definitions. 
-The sample JCL below shows a job to list out (horizontally) 4 fields of the records in 'my.seq.dataset' - Rec-Type, Amount, Cheque-No and Drawee, these being some of the fields in MYLDA. 
+The sample JCL below shows a job to list out (horizontally) 4 fields of the records in *my.seq.dataset* - Rec-Type, Amount, Cheque-No and Drawee, these being some of the fields in MYLDA. 
 The column headings will be Type, Amount, etc. 
 Furthermore, the records being selected only those where Record-Type equals 1010, due to the logical operator in col 53 and the value in cols 54-57. 
 If you specify selections on multiple fields, they'll be ANDed. 

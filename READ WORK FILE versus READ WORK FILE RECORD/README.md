@@ -1,5 +1,7 @@
+## READ WORK FILE versus READ WORK FILE RECORD
+
 This sample explains how Natural typically handles Group Names (and Group Array Names).
-Then, we explain Natural's one departure from the "typical" handling, namely how they are treated when used in conjunction with READ WORK FILE RECORD.
+Then, we explain Natural's one departure from the *typical* handling, namely how they are treated when used in conjunction with READ WORK FILE RECORD.
 
 
 The first program explains what Group Names (and Group Array Names) really are, namely abbreviations.

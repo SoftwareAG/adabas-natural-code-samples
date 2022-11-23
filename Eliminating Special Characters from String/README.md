@@ -1,3 +1,5 @@
+## Eliminating Special Characters from String
+
 This program shows several ways to eliminate Special Characters from a string.
 The performance comparison indicates that what might be a counter intuitive fastest alternative is indeed the best performing of the three alternatives shown.
 
@@ -8,4 +10,5 @@ There was a posting by someone who was looking for a faster way to accomplish th
 I won't ruin the story for you, just take a look at the code whose output is labeled 'Loooong Time'.
  
 The first thing that came to mind was to use SEPARATE with the three special characters as delimiters. This was indeed far faster than the Natbol code.
-However, Natural has an even faster alternative. Yes, I know this may seem counter intuitive, but three EXAMINEs with DELETE options turns out to be far faster than the SEPARATE.
+However, Natural has an even faster alternative. 
+Yes, I know this may seem counter intuitive, but three EXAMINEs with DELETE options turns out to be far faster than the SEPARATE.

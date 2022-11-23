@@ -1,3 +1,5 @@
+## DYNAMIC Variable Basics
+
 This posting will discuss some of the basics associated with DYNAMIC variables.
 In particular, we will look at how \*LENGTH is set, and how REDUCE and EXPAND impact \*LENGTH.
 

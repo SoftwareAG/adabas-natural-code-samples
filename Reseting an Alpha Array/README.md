@@ -1,3 +1,5 @@
+## Reseting an Alpha Array
+
 This program contrasts three ways to set an Alpha Array to null values.
 The timing comparison is quite interesting.
  

@@ -1,3 +1,5 @@
+## Array Processing Tips
+
 It may not be necessary to code an explicit loop, such as FOR or REPEAT, to process an array.
 
 Here are simple methods to

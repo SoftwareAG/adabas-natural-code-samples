@@ -1,3 +1,5 @@
+## Prim Numbers and Random Values
+
 The enclosed samples calculate prim numbers and provide functions for random values.
 
 1. **Function DICE** 

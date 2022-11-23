@@ -1,3 +1,5 @@
+## More on Hyphen - Program Legibility
+
 You know that the hyphen can be used to continue a literal string onto another line.  
 It also can be used to make array initializations more legible.
 

@@ -1,3 +1,5 @@
+## First Day of the Month
+
 This code shows two ways to derive the first day of the month for both alpha and date formatted dates.
 
 The code in this program is heavily commented to describe the procedures.
@@ -6,6 +8,7 @@ Subsequent posts will build on this code to derive the last day of the month pre
 There are two copycode members used; and they are shown below:
  
 **AASETC**
+
 This is structured mode. In Report Mode the END-ENDPAGE would not appear.
 
 ```bash

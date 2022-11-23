@@ -1,6 +1,6 @@
 ## Side by Side Pages via Windowing
 
-In [Side by Side Columns via Windowing](../Side by Side Columns via Windowing) we looked at how to use windowing to display non contiguous columns side by side.
+In [Side by Side Columns via Windowing](https://github.com/SoftwareAG/adabas-natural-code-samples/tree/main/Side%20by%20Side%20Columns%20via%20Windowing) we looked at how to use windowing to display non contiguous columns side by side.
 
 In this sample we will display different pages of the same program (or different programs) side by side in windows.
 
