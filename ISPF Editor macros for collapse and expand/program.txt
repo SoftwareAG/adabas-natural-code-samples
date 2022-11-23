@@ -1,0 +1,24 @@
+                                                        
+
+To collapse the whole source code except subroutine headers:
+Code:
+x all             
+f 'define' w all 
+x 'printer' w all
+x 'work' w all   
+x 'window' w all 
+x 'class' w all   
+x 'end-' all 
+
+
+
+To expand the subroutine the cursor is on:
+Code:
+:t;label .sbeg                     
+f 'END-SUBROUTINE' w;:t             
+label .send                         
+f 'END-DEFINE' w .sbeg .send prev;:t
+label .send                         
+x all                               
+inc .sbeg .send all                 
+top              
