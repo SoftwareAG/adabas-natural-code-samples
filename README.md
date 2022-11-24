@@ -9,6 +9,9 @@ The suggested way to use these code samples is to search for a Natural code samp
 
 Code samples are organized by folders. Inside the folders you can find a readme describing the standard or specific programming pattern and the code sample in text form. 
 
+# Contribute
+If you want to contribute to the project, please refer to the [CONTRIBUTING.md guidelines](https://github.com/SoftwareAG/adabas-natural-code-samples/blob/main/CONTRIBUTING.md).
+
 # Notice
 These tools are provided as-is and without warranty or support. They do not constitute part of the Software AG product suite. Users are free to use, fork and modify them, subject to the license agreement. While Software AG welcomes contributions, we cannot guarantee to include every contribution in the master project.
 __________________
