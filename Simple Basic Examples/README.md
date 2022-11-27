@@ -1,3 +1,4 @@
 ## Simple Basic Examples
 
-This folder contains a lot of simple examples provided by Ralph Zborg.
+As a new Natural programmer, you will find many samples for your own use as first steps.
+This folder was initially created with the help of Mr. Ralph Zborg.
