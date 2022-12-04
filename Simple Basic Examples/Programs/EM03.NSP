@@ -1,0 +1,26 @@
+* >Natural Source Header 000000
+* :Mode S
+* :CP
+* <Natural Source Header
+DEFINE DATA LOCAL
+1 #N (N7.2) INIT <1234.56>
+1 #A (A5) INIT <'QWERT'>
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+DISPLAY 5T #A #N (EM=Z,ZZZ,ZZ9.99) #A
+MOVE 1234567.89 TO #N
+DISPLAY 5T #A #N (EM=Z,ZZZ,ZZ9.99) #A
+END
+
+
+    PAGE #   1                    DATE:    10-06-05
+    PROGRAM: EM03                 LIBRARY: INSIDE
+
+     #A        #N       #A
+    ----- ------------ -----
+
+    QWERT     1,234.56 QWERT
+    QWERT 1,234,567.89 QWERT

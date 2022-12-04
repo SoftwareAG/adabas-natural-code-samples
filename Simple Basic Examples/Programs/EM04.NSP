@@ -1,0 +1,19 @@
+* >Natural Source Header 000000
+* :Mode S
+* :CP
+* <Natural Source Header
+DEFINE DATA LOCAL
+1 #N (N7.2) INIT <1234.56>
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+WRITE 5T 'The number of finished units was'
+      #N (EM=Z,ZZZ,ZZ9.99) 'for the month of February'
+END
+
+    PAGE #   1                    DATE:    10-06-05
+    PROGRAM: EM04                 LIBRARY: INSIDE
+
+    The number of finished units was     1,234.56 for the month of February

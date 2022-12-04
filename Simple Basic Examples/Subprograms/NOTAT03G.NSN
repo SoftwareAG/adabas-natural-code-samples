@@ -1,0 +1,20 @@
+* >Natural Source Header 000000
+* :Mode S
+* :CP
+* <Natural Source Header
+DEFINE DATA PARAMETER
+1 #SALES (N8/1:V)
+1 #AVERAGE (N8.2)
+1 #ARRAY-SIZE (I2)
+LOCAL
+1 #LOOP (I2)
+1 #SUM (N12)
+END-DEFINE
+*
+FOR #LOOP = 1 TO (#ARRAY-SIZE)
+ADD #SALES (#LOOP) TO #SUM
+END-FOR
+*
+COMPUTE #AVERAGE = #SUM / #ARRAY-SIZE
+*
+END

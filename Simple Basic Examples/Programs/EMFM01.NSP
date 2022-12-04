@@ -1,0 +1,10 @@
+* >Natural Source Header 000000
+* :Mode S
+* :CP
+* <Natural Source Header
+
+SET CONTROL 'FM+'         /* activate numeric Edit Mask Free Mode
+RESET N (N7.3)
+move 2 to N
+INPUT N (AD=M EM=Z','ZZZ','ZZZ.999EUR)
+END

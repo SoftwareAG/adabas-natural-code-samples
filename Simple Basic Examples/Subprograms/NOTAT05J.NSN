@@ -1,0 +1,24 @@
+* >Natural Source Header 000000
+* :Mode S
+* :CP
+* <Natural Source Header
+DEFINE DATA PARAMETER
+1 #SALES (N8/3:*)
+1 #AVERAGE (N8.2)
+LOCAL
+1 #LOOP (I2)
+1 #SUM (N12)
+1 #UPPER (I2)
+END-DEFINE
+*
+FOR #LOOP = 1 TO *OCC (#SALES)
+ADD #SALES (#LOOP) TO #SUM
+END-FOR
+*
+COMPUTE #AVERAGE = #SUM / *OCC (#SALES)
+*
+WRITE 5T '*' (25)
+    / 5T 'IN SUBPROGRAM, *LBOUND IS: ' *LBOUND (#SALES)
+    / 5T 'IN SUBPROGRAM, *UBOUND IS: ' *UBOUND (#SALES)
+    / 5T '*' (25)
+END

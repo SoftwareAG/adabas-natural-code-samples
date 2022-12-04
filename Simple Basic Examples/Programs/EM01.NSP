@@ -1,0 +1,19 @@
+* >Natural Source Header 000000
+* :Mode S
+* :CP
+* <Natural Source Header
+DEFINE DATA LOCAL
+1 #N (N7.2) INIT <1234.56>
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+WRITE 5T '12345678901234567890'
+      / 5T #N (EM=Z,ZZZ,ZZ9.99)
+END
+    PAGE #   1                    DATE:    10-06-05
+    PROGRAM: EM01                 LIBRARY: INSIDE
+
+    12345678901234567890
+        1,234.56

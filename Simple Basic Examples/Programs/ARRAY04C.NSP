@@ -1,0 +1,45 @@
+* >Natural Source Header 000000
+* :Mode S
+* :CP
+* <Natural Source Header
+* PROGRAM DEMONSTRATES TWO APPROACHES
+* TO SHIFTING AN ARRAY
+*
+DEFINE DATA LOCAL
+1 #CPU-START (I4)
+1 #CPU-ELAPSED (I4)
+1 #LOOP (I4)
+1 #LOOP2 (I4)
+1 #A (A1/1:24) INIT <'A','B','C','D','E',
+                     'F','G','H','I','J',
+                     'K','L','M','N','O',
+                     'P','Q','R','S','T',
+                     'U','V','W','X'>
+1 REDEFINE #A
+  2 #A-STRING (A24)
+  2 REDEFINE #A-STRING
+    3 #MOVER (A23)
+1 #B (A1/1:24)
+1 REDEFINE #B
+  2 #B-STRING (A24)
+  2 REDEFINE #B-STRING
+    3 FILLER 1X
+    3 #MOVE-TO (A23)
+1 #NEW (A1) INIT <'X'>
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+MOVE #MOVER TO #MOVE-TO
+MOVE #NEW TO #B (1)
+WRITE 5T  #B-STRING 5X '<== ONE MOVE'
+*
+END
+
+
+
+    PAGE #   1                    DATE:    09/12/10
+    PROGRAM: ARRAY04C             LIBRARY: INSIDE
+
+    XABCDEFGHIJKLMNOPQRSTUVW     <== ONE MOVE

@@ -1,0 +1,10 @@
+* >Natural Source Header 000000
+* :Mode S
+* :CP
+* <Natural Source Header
+DEFINE DATA LOCAL
+1 #SALES (A10)
+END-DEFINE
+*
+CALLNAT 'notat03j' #SALES
+END

@@ -1,0 +1,19 @@
+* >Natural Source Header 000000
+* :Mode S
+* :CP
+* <Natural Source Header
+DEFINE DATA PARAMETER
+1 #SALES (N8/1:*)
+1 #AVERAGE (N8.2)
+LOCAL
+1 #LOOP (I2)
+1 #SUM (N12)
+END-DEFINE
+*
+FOR #LOOP = 1 TO *OCC (#SALES)
+ADD #SALES (#LOOP) TO #SUM
+END-FOR
+*
+COMPUTE #AVERAGE = #SUM / *OCC (#SALES)
+*
+END
