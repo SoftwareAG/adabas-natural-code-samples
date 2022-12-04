@@ -1,0 +1,24 @@
+* >Natural Source Header 000000
+* :Mode S
+* :CP
+* <Natural Source Header
+DEFINE DATA LOCAL
+1 #SALES (N8/1:1000000) INIT ALL <1>
+1 #AVERAGE (N8.2)
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+CALLNAT 'NOTAT04A' #SALES (*) #AVERAGE
+*
+END
+
+
+
+    PAGE #   1                    DATE:    10-01-26
+    PROGRAM: NOTAT04A             LIBRARY: INSIDE
+
+    WITH *OCC        4          39
+
+    WITHOUT *OCC        2          23

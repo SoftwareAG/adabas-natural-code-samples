@@ -1,0 +1,29 @@
+* >Natural Source Header 000000
+* :Mode S
+* :CP
+* <Natural Source Header
+DEFINE DATA LOCAL
+1 #SALES (N8/1:12)
+1 #PRODUCT-CODE (A6)
+END-DEFINE
+*
+INPUT (IP=OFF)
+3/10 'ENTER YOUR PRODUCT CODE HERE==>' #PRODUCT-CODE
+//    10T 'MONTHLY SALES' /
+      10T '-------------  ' /
+      12T #SALES (1) 25T 'JANUARY' /
+      12T #SALES (2) 25T 'FEBRUARY' /
+      12T #SALES (3) 25T 'MARCH' /
+      12T #SALES (4) 25T 'APRIL' /
+      12T #SALES (5) 25T 'MAY' /
+      12T #SALES (6) 25T 'JUNE' /
+      12T #SALES (7) 25T 'JULY' /
+      12T #SALES (8) 25T 'AUGUST' /
+      12T #SALES (9) 25T 'SEPTEMBER' /
+      12T #SALES (10) 25T 'OCTOBER' /
+      12T #SALES (11) 25T 'NOVEMBER' /
+      12T #SALES (13) 25T 'DECEMBER' /
+*
+* PROCESS SALES DATA FOR A PRODUCT
+*
+END
