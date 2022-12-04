@@ -1,0 +1,36 @@
+* >Natural Source Header 000000
+* :Mode S
+* :CP
+* <Natural Source Header
+* THIS PROGRAM "CONVERTS" A ONE CHARACTER CODE
+* TO A ONE CHARACTER CLASS
+*
+DEFINE DATA LOCAL
+1 #CODE (A1) INIT <'G'>
+1 #CLASS (A1)
+END-DEFINE
+*
+include aatitler
+include aasetc
+DECIDE ON FIRST VALUE OF #CODE
+VALUE 'B', 'C', 'F', 'J', 'M', 'N'
+      MOVE 'A' TO #CLASS
+VALUE 'A', 'D', 'R', 'T'
+      MOVE 'B' TO #CLASS
+VALUE 'X', 'Y', 'Z'
+      MOVE 'C' TO #CLASS
+VALUE 'E', 'G', 'S', 'V', 'W'
+      MOVE 'D' TO #CLASS
+NONE
+WRITE 'ERROR'
+END-DECIDE
+*
+WRITE 5T 'INPUT WAS:' #CODE 5X 'OUTPUT IS:' #CLASS
+*
+END
+
+
+    PAGE #   1                    DATE:    11/14/10
+    PROGRAM: CODE01               LIBRARY: INSIDE
+
+    INPUT WAS: G     OUTPUT IS: D

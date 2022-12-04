@@ -1,0 +1,41 @@
+* >Natural Source Header 000000
+* :Mode S
+* :CP
+* <Natural Source Header
+* THIS PROGRAM ALSO "CONVERTS" A ONE CHARACTER CODE
+* TO A ONE CHARACTER CLASS
+*
+DEFINE DATA LOCAL
+1 #CODE (A3) INIT <'GGG'>
+1 #DUMMY (18)   /* INIT <'BCFJMNADRTXYZEGSVW'>
+  2 #CODES (A3) INIT <'BBB','CCC','FFF','JJJ','MMM',
+                      'NNN','AAA','DDD','RRR','TTT',
+                      'XXX','YYY','ZZZ','EEE','GGG',
+                      'SSS','VVV','WWW'>
+  2 #ASTERISK (A1) INIT ALL <'*'>
+1 REDEFINE #DUMMY
+  2 #CODE-STRING (A72)
+1 #CLASSES (A20) INIT <'AAAAAABBBBCCCDDDDD'>
+1 REDEFINE #CLASSES
+  2 #VAL (A1/1:20)
+1 #CLASS (A1)
+1 #POS (I4)
+END-DEFINE
+include aatitler
+include aasetc
+*
+EXAMINE #CODE-STRING FOR #CODE GIVING POSITION #POS
+COMPUTE #POS = (( #POS - 1 ) / 4 ) + 1
+*
+MOVE #VAL (#POS) TO #CLASS
+*
+WRITE 5T 'INPUT WAS:' #CODE 5X 'OUTPUT IS:' #CLASS
+*
+END
+
+
+
+    PAGE #   1                    DATE:    11/14/10
+    PROGRAM: CODE04               LIBRARY: INSIDE
+
+    INPUT WAS: GGG     OUTPUT IS: D

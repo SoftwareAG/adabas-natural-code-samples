@@ -1,0 +1,37 @@
+* >Natural Source Header 000000
+* :Mode S
+* :CP
+* <Natural Source Header
+* THIS PROGRAM CONTRASTS A GROUP NAME
+* WITH A REDEFINE WHEN USED AS A SOURCE
+* FOR A COMPRESS
+*
+DEFINE DATA LOCAL
+1 #GROUP
+  2 #A (A3) INIT <'ABC'>
+  2 #B (A3) INIT <'DEF'>
+1 #FIELD (A6) INIT <'ABCDEF'>
+1 REDEFINE #FIELD
+  2 #C (A3)
+  2 #D (A3)
+1 #TARGET1 (A10)
+1 #TARGET2 (A10)
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+MOVE 'ABC' TO #A #B
+*
+WRITE 5T '=' #GROUP
+*
+END
+
+
+
+
+
+    PAGE #   1                    DATE:    08/28/10
+    PROGRAM: GROUP04              LIBRARY: INSIDE
+
+    #GROUP: ABC ABC

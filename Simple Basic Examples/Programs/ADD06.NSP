@@ -1,0 +1,32 @@
+* >Natural Source Header 000000
+* :Mode S
+* :CP
+* <Natural Source Header
+DEFINE DATA LOCAL
+1 #SUM1 (N2.1)
+1 #SUM2 (N2.1)
+1 #ASUM (N2.1)
+1 #BSUM (N2.1)
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+ADD  ROUNDED .3 .3 GIVING #ASUM
+ADD  ROUNDED .3 .4 GIVING #BSUM
+WRITE 5T '=' #ASUM 3X '=' #BSUM / 5T '-' (25)
+ADD  ROUNDED #ASUM #BSUM GIVING #SUM1
+ADD  ROUNDED .3 .3 .3 .4 GIVING #SUM2
+WRITE 5T '=' #SUM1 3X '=' #SUM2
+END
+
+
+
+
+
+    PAGE #   1                    DATE:    10-06-27
+    PROGRAM: ADD06                LIBRARY: INSIDE
+
+    #ASUM:   0.6   #BSUM:   0.7
+    -------------------------
+    #SUM1:   1.3   #SUM2:   1.3

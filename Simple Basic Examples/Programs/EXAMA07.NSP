@@ -1,0 +1,39 @@
+* >Natural Source Header 000000
+* :Mode S
+* :CP
+* <Natural Source Header
+DEFINE DATA LOCAL
+1 #X (A20) INIT <'QWERTEUAOP'>
+1 #VAR (A1/1:5) CONST <'A','B','C','D','E'>
+1 #NUM (I2)
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+WRITE 5T 'SOURCE BEFORE ' #X /
+      5T 'TARGETS       ' #VAR (*) //
+      5T '#NUM          ' #NUM ///
+*
+EXAMINE #X FOR #VAR (*) REPLACE WITH 'Z' GIVING NUMBER #NUM
+*
+WRITE 5T 'TARGET AFTER  ' #X /
+      5T '#NUM AFTER    ' #NUM ///
+*
+END
+
+
+
+
+    PAGE #   1                    DATE:    08/15/10
+    PROGRAM: EXAMA07              LIBRARY: INSIDE
+
+    SOURCE BEFORE  QWERTEUAOP
+    TARGETS        A B C D E
+
+    #NUM                0
+
+
+
+    TARGET AFTER   QWZRTZUZOP
+    #NUM AFTER          3

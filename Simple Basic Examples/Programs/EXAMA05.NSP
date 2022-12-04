@@ -1,0 +1,26 @@
+* >Natural Source Header 000000
+* :Mode S
+* :CP
+* <Natural Source Header
+DEFINE DATA LOCAL
+1 #X (A20) INIT <'QWERTEUIOP'>
+1 #VAR (A1/1:5) CONST <'A','B','C','D','E'>
+1 #NUM (I2)
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+EXAMINE #X FOR #VAR (*) GIVING NUMBER #NUM
+WRITE 5T 'SOURCE ' #X /
+      5T 'TARGETS' #VAR (*) //
+      5T '#NUM   ' #NUM
+END
+
+    PAGE #   1                    DATE:    08/15/10
+    PROGRAM: EXAMA05              LIBRARY: INSIDE
+
+    SOURCE  QWERTEUIOP
+    TARGETS A B C D E
+
+    #NUM         2

@@ -1,0 +1,38 @@
+* >Natural Source Header 000000
+* :Mode S
+* :CP
+* <Natural Source Header
+DEFINE DATA LOCAL
+1 #SOURCE (A8) INIT <'   ABCDE'>
+1 #TARGET (A20)
+END-DEFINE
+*
+INCLUDE AATITLER
+INCLUDE AASETC
+*
+WRITE 2/5 'DATA FOR THIS PROGRAM'
+3/5 '---------------------'
+4/5 '#SOURCE IS:' #SOURCE
+6/5 'STATEMENT IS:'
+7/5 'MOVE EDITED #SOURCE (EM=^STARTX"***"XX"&&&"XX) '
+'TO #TARGET'
+*
+MOVE EDITED #SOURCE (EM=^STARTX'***'XX'&&&'XX) TO #TARGET
+WRITE // 5T '#TARGET IS:' #TARGET
+*
+END
+
+
+    PAGE #   1                    DATE:    10-06-20
+    PROGRAM: EMA07                LIBRARY: INSIDE
+
+
+    DATA FOR THIS PROGRAM
+    ---------------------
+    #SOURCE IS:    ABCDE
+
+    STATEMENT IS:
+    MOVE EDITED #SOURCE (EM=^STARTX'***'XX'&&&'XX)  TO #TARGET
+
+
+    #TARGET IS: START ***  &&&AB

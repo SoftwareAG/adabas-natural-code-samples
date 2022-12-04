@@ -1,0 +1,132 @@
+* >Natural Source Header 000000
+* :Mode S
+* :CP
+* <Natural Source Header
+* THIS PROGRAM COMPARES THE TIMES FOR
+* TWO WAYS TO "CONVERT" A THREE CHARACTER CODE
+* TO A ONE CHARACTER CLASS
+*
+DEFINE DATA LOCAL
+1 #CODE (A3) INIT <'GGG'>
+1 #DUMMY (48)
+  2 #CODES (A3) INIT <'BBB','CCC','FFF','JJJ','MMM',
+                      'NNN','AAA','DDD','RRR','TTT',
+                      'ABC','DEF','GHI','JKL','MNO',
+                      'NN1','AA1','DD1','RR1','TT1',
+                      'NN2','AA2','DD2','RR2','TT2',
+                      'NN3','AA3','DD3','RR3','TT3',
+                      'NN4','AA4','DD4','RR4','TT4',
+                      'NN5','AA5','DD5','RR5','TT5',
+                      'XXX','YYY','ZZZ','EEE','GGG',
+                      'SSS','VVV','WWW'>
+  2 #ASTERISK (A1) INIT ALL <'*'>
+1 REDEFINE #DUMMY
+  2 #CODE-STRING (A192)
+1 #CLASSES (A48) INIT FULL LENGTH <'AAAAAABBBBCCCDDDDD'>
+1 REDEFINE #CLASSES
+  2 #VAL (A1/1:48)
+1 #CLASS (A1)
+1 #POS (I4)
+1 #LOOP (I4)
+1 #CPU-START (I4)
+1 #CPU-ELAPSED (I4)
+END-DEFINE
+*
+include aatitler
+include aasetc
+*********************************
+** FIRST, THE DECIDE
+**
+MOVE *CPU-TIME TO #CPU-START
+SETA. SETTIME
+FOR #LOOP = 1 TO 500000
+DECIDE ON FIRST VALUE OF #CODE
+  VALUE 'BBB', 'CCC', 'FFF', 'JJJ', 'MMM', 'NNN',
+        'ABC','DEF','GHI','JKL','MNO',
+        'NN1', 'NN2', 'NN3', 'NN4', 'NN5',
+        'AA1', 'AA2', 'AA3', 'AA4', 'AA5',
+        'DD1', 'DD2', 'DD3', 'DD4', 'DD5',
+        'NN1', 'NN2', 'NN3', 'NN4', 'NN5',
+        'RR1', 'RR2', 'RR3', 'RR4', 'RR5',
+        'TT1', 'TT2', 'TT3', 'TT4', 'TT5'
+      MOVE 'A' TO #CLASS
+  VALUE 'AAA', 'DDD', 'RRR', 'TTT'
+      MOVE 'B' TO #CLASS
+  VALUE 'XXX', 'YYY', 'ZZZ'
+      MOVE 'C' TO #CLASS
+  VALUE 'EEE', 'GGG', 'SSS', 'VVV', 'WWW'
+      MOVE 'D' TO #CLASS
+  NONE
+  WRITE 'ERROR'
+END-DECIDE
+END-FOR
+COMPUTE #CPU-ELAPSED = *CPU-TIME - #CPU-START
+WRITE 5T 'DECIDE TIMES: ' *TIMD (SETA.) #CPU-ELAPSED
+******** EXAMINE  *************
+MOVE *CPU-TIME TO #CPU-START
+SETB. SETTIME
+FOR #LOOP = 1 TO 500000
+EXAMINE #CODE-STRING FOR #CODE GIVING POSITION #POS
+COMPUTE #POS = (( #POS - 1 ) / 4 ) + 1
+MOVE #VAL (#POS) TO #CLASS
+END-FOR
+*
+COMPUTE #CPU-ELAPSED = *CPU-TIME - #CPU-START
+WRITE 5T 'EXAMINE TIMES: ' *TIMD (SETB.) #CPU-ELAPSED
+******** EXAMINE  ARRAY*************
+MOVE *CPU-TIME TO #CPU-START
+SETE. SETTIME
+FOR #LOOP = 1 TO 500000
+EXAMINE #CODES (*) FOR #CODE GIVING INDEX #POS
+MOVE #VAL (#POS) TO #CLASS
+END-FOR
+*
+COMPUTE #CPU-ELAPSED = *CPU-TIME - #CPU-START
+WRITE 5T 'EXAMINE ARRAY TIMES: ' *TIMD (SETE.) #CPU-ELAPSED
+**************** DECIDE *****************
+MOVE *CPU-TIME TO #CPU-START
+SETC. SETTIME
+FOR #LOOP = 1 TO 500000
+DECIDE ON FIRST VALUE OF #CODE
+  VALUE 'BBB', 'CCC', 'FFF', 'JJJ', 'MMM', 'NNN',
+        'ABC','DEF','GHI','JKL','MNO',
+        'NN1', 'NN2', 'NN3', 'NN4', 'NN5',
+        'AA1', 'AA2', 'AA3', 'AA4', 'AA5',
+        'DD1', 'DD2', 'DD3', 'DD4', 'DD5',
+        'NN1', 'NN2', 'NN3', 'NN4', 'NN5',
+        'RR1', 'RR2', 'RR3', 'RR4', 'RR5',
+        'TT1', 'TT2', 'TT3', 'TT4', 'TT5'
+      MOVE 'A' TO #CLASS
+  VALUE 'AAA', 'DDD', 'RRR', 'TTT'
+      MOVE 'B' TO #CLASS
+  VALUE 'XXX', 'YYY', 'ZZZ'
+      MOVE 'C' TO #CLASS
+  VALUE 'EEE', 'GGG', 'SSS', 'VVV', 'WWW'
+      MOVE 'D' TO #CLASS
+  NONE
+  WRITE 'ERROR'
+END-DECIDE
+END-FOR
+COMPUTE #CPU-ELAPSED = *CPU-TIME - #CPU-START
+WRITE 5T 'DECIDE TIMES: ' *TIMD (SETC.) #CPU-ELAPSED
+********* DUMMY FOR LOOP *********
+MOVE *CPU-TIME TO #CPU-START
+SETD. SETTIME
+FOR #LOOP = 1 TO 500000
+IGNORE
+END-FOR
+COMPUTE #CPU-ELAPSED = *CPU-TIME - #CPU-START
+WRITE 5T 'FOR LOOP TIMES: ' *TIMD (SETD.) #CPU-ELAPSED
+END
+
+
+
+
+    PAGE #   1                    DATE:    12/23/10
+    PROGRAM: CODE07               LIBRARY: INSIDE
+
+    DECIDE TIMES:        42         416
+    EXAMINE TIMES:        27         267
+    EXAMINE ARRAY TIMES:        36         354
+    DECIDE TIMES:        41         389
+    FOR LOOP TIMES:         1          14
