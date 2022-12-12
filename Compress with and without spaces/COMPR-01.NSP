@@ -1,0 +1,37 @@
+* >Natural Source Header 000000
+* :Mode S
+* :CP
+* <Natural Source Header
+* Sample program .. COMPR-01
+* Date ............ 2022-12-12
+* Author .......... Lukas Hundemer
+*
+* The program compresses values into a text whereby the values are
+* sometimes separated by blanks and sometimes not.
+* Normally you need multiple COMPRESS statements for this task, some
+* with the "LEAVING SPACE" option and some with the "LEAVING NO SPACE"
+* option.
+* The program shows how you can compress these value with just one
+* COMPRESS statement.
+*
+* The trick is to define a binary (B1) field containing a blank
+* character. Because the field is defined as binary, the 
+* "COMPRESS LEAVING NO SPACE" is not compressing it.
+*
+* The code works on all platforms.
+*
+DEFINE DATA
+LOCAL
+1 #BLANK  (B1)  INIT <' '>  /* blank character
+1 #LINE   (A72)
+1 #I      (I4)  INIT <5>
+END-DEFINE
+*
+* Expected output:
+*   <programname>: <#I>
+*   with no space in front of the colon and a space after the colon
+*
+COMPRESS *PROGRAM ':' #BLANK #I INTO #LINE LEAVING NO
+*
+WRITE #LINE
+END
