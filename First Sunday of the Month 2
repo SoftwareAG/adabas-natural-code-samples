@@ -1,0 +1,55 @@
+* -------------------------------------------------------------------- *
+* FUNCAO ....: MOSTRA O DIA DO PRIMEIRO DOMINGO DO MES                 *
+* AUTOR .....: RALPH ZBROG                                             *
+* -------------------------------------------------------------------- *
+DEFINE DATA LOCAL                                                       
+1 #DATE         (N6)         1 REDEFINE #DATE                           
+  2 #MMYY       (A6)                                                    
+1 #DATE-A       (A8)                                                    
+1 #FIRST        (D)                                                     
+1 #DAY          (A1)         1 REDEFINE #DAY                            
+  2 #D          (N1)                                                    
+1 #SUNDAY       (D)                                                     
+1 #DATA         (A253/4)     1 REDEFINE #DATA                           
+  2 FILLER      33X                                                     
+  2 #DTFORM     (A1)                                                    
+1 #DATE-ALPHA   (A8)                                                    
+1 REDEFINE #DATE-ALPHA                                                  
+  2 #DIA        (N2)                                                    
+  2 #MES        (N2)                                                    
+  2 #ANO        (N4)   
+1 #DATA1        (A6)                                                    
+END-DEFINE                                                              
+FORMAT KD=OFF                                                           
+* -------------------------------------------------------------------- *
+* CARREGANDO A VARIAVEL DA DATA DE HOJE                                *
+* -------------------------------------------------------------------- *
+  MOVE EDITED *DATX (EM=DDMMYYYY) TO #DATE-ALPHA                        
+  COMPRESS '01' #MES #ANO  INTO #DATA1 LEAVING NO                       
+* -------------------------------------------------------------------- *
+  MOVE EDITED #DATE-ALPHA   TO #FIRST (EM=DDMMYYYY)                     
+  MOVE EDITED #FIRST (EM=O) TO #DAY                                     
+  IF  #DTFORM = 'U'                                                     
+  THEN                                                                  
+  IF  #DAY = '1'                                                        
+  THEN                                                                  
+  ASSIGN #SUNDAY = #FIRST                                               
+  ELSE                                                                  
+  ASSIGN #SUNDAY = #FIRST + 7 - #D + 1                                  
+*     END-IF                                                            
+  ELSE                                                                  
+  IF  #DAY = '7'                                                        
+  THEN                                                                  
+  ASSIGN #SUNDAY = #FIRST                                               
+  ELSE                                                                  
+  ASSIGN #SUNDAY = #FIRST + 7 - #D                                      
+*     END-IF                                                            
+* END-IF                                                                
+* -------------------------------------------------------------------- *
+  WRITE NOTITLE                                                         
+    #FIRST        (EM=DD/MM/YYYY)   /* HOJE                             
+    #SUNDAY       (EM=DD/MM/YYYY)   /* PRIMEIRO DOMINGO DO MêS          
+    'PROXIMO BACKUP MENSAL'                                             
+* END-REPEAT                                                            
+* -------------------------------------------------------------------- *
+END                                                                     
