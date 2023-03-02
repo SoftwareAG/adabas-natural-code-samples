@@ -5,7 +5,15 @@
 ![fork_repository](https://user-images.githubusercontent.com/23717841/203792956-15cfdb36-75c8-49a0-9bd0-d025bee6c95f.png)
 
 2.	Make the necessary changes to the forked repository. 
-3.	Use the Contribute button in the forked repository to open pull request: 
+
+2.1 To create a new sample follow these stpes :
+2.2 Click Add file -> Create a new file
+2.3 Type the folder name and add "/" at the end, this will create a new folder path
+2.4 Write the program name and write tour code in the text area, please also add a short description on the title of the program 
+2.5 At the end please sign off and commit, you may add an optional description 
+2.6 Please repeat this and add an MD file with a description
+
+4.	Use the Contribute button in the forked repository to open pull request: 
 
 ![open_pull_request](https://user-images.githubusercontent.com/23717841/203793171-57bede94-b426-4a49-a3d9-76fddacb8450.png)
  
