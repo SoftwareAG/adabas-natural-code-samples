@@ -6,7 +6,7 @@
 
 2.	Make the necessary changes to the forked repository. 
 
-To create a new sample follow these stpes: 
+To create a new sample follow these steps: 
  1. Click Add file -> Create a new file 
 
  2. Type the folder name and add "/" at the end, this will create a new folder path 
