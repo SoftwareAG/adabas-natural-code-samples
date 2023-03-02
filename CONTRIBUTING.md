@@ -6,12 +6,17 @@
 
 2.	Make the necessary changes to the forked repository. 
 
-4.1 To create a new sample follow these stpes: 
-5.2 Click Add file -> Create a new file 
-6.3 Type the folder name and add "/" at the end, this will create a new folder path 
-7.4 Write the program name and write tour code in the text area, please also add a short description on the title of the program  
-8.5 At the end please sign off and commit, you may add an optional description  
-9.6 Please repeat this and add an MD file with a description 
+To create a new sample follow these stpes: 
+Click Add file -> Create a new file 
+
+Type the folder name and add "/" at the end, this will create a new folder path 
+
+Write the program name and write tour code in the text area, please also add a short description on the title of the program  
+
+At the end please sign off and commit, you may add an optional description
+
+Please repeat this and add an MD file with a description
+
 
 4.	Use the Contribute button in the forked repository to open pull request: 
 
