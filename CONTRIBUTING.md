@@ -8,14 +8,21 @@
 
 To create a new sample follow these steps: 
  1. Click Add file -> Create a new file 
+![add file1](https://user-images.githubusercontent.com/73269539/222408831-819fe6f0-2c19-432f-bb8a-6a07b579258a.png)
 
  2. Type the folder name and add "/" at the end, this will create a new folder path 
+![add file 2](https://user-images.githubusercontent.com/73269539/222408900-de5479a0-6426-4001-ae6f-1c5c0555708a.png)
 
  3. Write the program name and write tour code in the text area, please also add a short description on the title of the program  
+![add file 3](https://user-images.githubusercontent.com/73269539/222408955-fdae2140-dee5-4203-82ee-ebd5b4c390fa.png)
+
+![add file 4](https://user-images.githubusercontent.com/73269539/222409072-e48888e0-59a2-410f-bcf2-d907dc188ef3.png)
 
  4. At the end please sign off and commit, you may add an optional description
+![add file 5](https://user-images.githubusercontent.com/73269539/222409163-b6b228b2-af6f-47da-9992-89c7d9a20d34.png)
 
  5. Please repeat this and add an MD file with a description
+![add file 6](https://user-images.githubusercontent.com/73269539/222409218-12b26c47-75ad-4645-a114-70ec3ea8b120.png)
 
  4.	Use the Contribute button in the forked repository to open pull request: 
 
