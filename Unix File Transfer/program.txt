@@ -1,7 +1,3 @@
-* >Natural Source Header 000000
-* :Mode S
-* :CP
-* <Natural Source Header
 /** Example Program for Upload / Download PC for Linux/Unix
 /**
 /** :author ItsAMeMarcel
