@@ -1,7 +1,7 @@
 # File Transfer for Linux/Unix #
 
 ## General ##
-The example program shows the usage other the following Natural File Transfer functionality:
+The example program shows the usage of the following Natural File Transfer functionality:
 
 * DOWNLOAD PC COMMAND - Send a command to the client
 * DOWNLOAD PC - Client downloads data
