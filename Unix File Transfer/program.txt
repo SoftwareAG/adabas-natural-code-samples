@@ -1,0 +1,49 @@
+/** Example Program for Upload / Download PC for Linux/Unix
+/**
+/** :author ItsAMeMarcel
+DEFINE DATA LOCAL
+1 #HEADLINE (A60) CONST <'Example Program for Up or Download'>
+1 #DESCRIBTION (A60) CONST <'If path is empty a prompt is provided'>
+1 #PATH (A58) INIT FULL LENGTH <' '>
+1 #COMMAND (A80) INIT FULL LENGTH <' '>
+1 #UPCMD (A22) CONST <'SET PCFILE 7 UP DATA'>
+1 #DNCMD (A22) CONST <'SET PCFILE 7 DOWN DATA'>
+1 #TYPE (A1) INIT <'D'>
+1 #MESSAGE (A60) INIT <'HELLO WORLD'>
+1 #I (I4)
+END-DEFINE
+
+SET CONTROL '+'
+DEFINE WORK FILE 7 TYPE 'TRANSFER'
+
+INPUT 'Reason: ' #HEADLINE (AD=O) /
+      'Usage: '#DESCRIBTION (AD=O)//
+      'U (Upload) or D (Download): ' #TYPE (AD=M)/ /
+      'File path: ' #PATH (AD=A)
+
+IF #TYPE EQ 'U' OR #TYPE EQ 'D'
+THEN
+    IF #PATH NE ' '
+    THEN
+        IF #TYPE EQ 'D'
+        THEN
+            COMPRESS #DNCMD #PATH INTO #COMMAND
+        ELSE 
+            COMPRESS #UPCMD #PATH INTO #COMMAND
+        END-IF
+
+        DOWNLOAD PC FILE 7 COMMAND #COMMAND
+    END-IF
+
+    IF #TYPE EQ 'D'
+    THEN
+        DOWNLOAD PC FILE 7 #MESSAGE
+    ELSE
+        UPLOAD PC FILE 7 #MESSAGE
+            PRINT 'READ:' #MESSAGE
+        END-WORK
+    END-IF
+ELSE
+    print "Please use U or D for the process type"
+END-IF
+END
