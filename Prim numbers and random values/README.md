@@ -31,3 +31,7 @@ Calculate prim numbers until a given max value (I4).
 6. **Subprogram DEAL** 
 ([program6](program6.txt))
 Mix numbers randomly like dealing cards.
+
+7. **program7 program7** 
+([program7](program7.txt))
+Calculate prime numbers using Sieve of Eratosthenes
