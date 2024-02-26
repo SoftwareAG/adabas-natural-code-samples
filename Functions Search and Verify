@@ -1,0 +1,1 @@
+PL/1 offers several functions for searching in strings: INDEX(), which resembles the Natural EXAMINE ... POSITION IN ..., and then also SEARCH() and VERIFY().
