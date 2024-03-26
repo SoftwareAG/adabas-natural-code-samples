@@ -1,0 +1,27 @@
+/* OPTIONS MCG=(ON) /* use NOC if possible
+DEFINE DATA LOCAL
+1 #A1 (A) DYNAMIC
+1 #A2 (A) DYNAMIC
+1 #I  (I4)
+END-DEFINE
+*
+WRITE 'VERIFY and SEARCH for (A) DYNAMIC' /
+*
+#A1 := 'Hello everybody'
+#A2 := 'ABCDEFG'
+#I := FAVERIFY(<#A1, #A2>)
+WRITE "VERIFY('Hello everybody', 'ABCDEFG'   ) =" #I
+*
+#A2 := 'ABCDEFGH'
+#I := FAVERIFY(<#A1, #A2>)
+WRITE "VERIFY('Hello everybody', 'ABCDEFGH'  ) =" #I
+*
+#A2 := ' bdelorvyH'
+#I := FAVERIFY(<#A1, #A2>)
+WRITE "VERIFY('Hello everybody', ' bdelorvyH') =" #I
+*
+#A2 := 'lmnop'
+#I := FASEARCH(<#A1, #A2>)
+WRITE "SEARCH('Hello everybody', 'lmnop'     ) =" #I
+*
+END
